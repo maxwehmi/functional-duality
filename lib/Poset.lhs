@@ -21,7 +21,8 @@ most operations presume to have Ord instances, has to do with Set.Set implementa
 https://hackage.haskell.org/package/containers-0.8/docs/Data-Set.html 
 
 Can potentially work around this by transfering to lists, doing the checking on those, and then back,
-some Set.toList trickery, for now leaving it like this, if we need to not assume instances of Ord we can change it
+with some Set.toList trickery, for now leaving it like this, 
+if we need to not assume instances of Ord we can change it
 -}
 
 
@@ -68,16 +69,31 @@ checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 
 
 checkTrans :: Ord a => OrderedSet a -> Bool
-checkTrans = undefined
+checkTrans (OS _ r) = undefined
 
 checkAntiSym :: Ord a => OrderedSet a -> Bool
 checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 
-
 checkPoset :: Ord a => OrderedSet a -> Bool
 checkPoset x = checkRefl x && checkTrans x && checkAntiSym x
 
-closurePS :: OrderedSet a -> OrderedSet a
-closurePS = undefined
+
+
+
+
+closeRefl :: Ord a => OrderedSet a -> OrderedSet a
+closeRefl (OS s r) = OS s (r `Set.union` Set.fromList [(x,x)| x <- Set.toList s])
+
+relcloseTrans :: Relation a -> Relation a
+relcloseTrans r = undefined
+
+closeTrans :: OrderedSet a -> OrderedSet a
+closeTrans (OS s r) = OS s (relcloseTrans r)
+
+
+closurePS :: Ord a => OrderedSet a -> OrderedSet a
+closurePS os
+ | not (checkAntiSym os)  = error "relation isn't anti-symmetric"
+ | otherwise = closeTrans $ closeRefl os
 
 \end{code}
