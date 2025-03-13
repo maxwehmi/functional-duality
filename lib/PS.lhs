@@ -1,11 +1,18 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use infix" #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use infix" #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use infix" #-}
 \section{Priestley Spaces}
 
 \begin{code}
 module PriestleySpaces where
 
-import Data.Set (Set, toList, fromList)
+import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map)
 
 import Poset
+--import qualified Data.IntMap as Data.set
 
 
 data TopoSpace a = TS {
@@ -29,19 +36,15 @@ getTopoSpace p = TS (setPS p) (topologyPS p)
 getOrderedSet :: PriestleySpace a -> OrderedSet a
 getOrderedSet p = OS (setPS p) (relationPS p)
 
-checkPriestley :: PriestleySpace a -> Bool
+checkPriestley :: (Eq a, Ord a) => PriestleySpace a -> Bool
 checkPriestley p = checkTopology (getTopoSpace p) && checkPoset (getOrderedSet p) && checkPSA p 
 -- since we are only working with finite spaces, they are always compact
 
-checkPSA :: PriestleySpace a -> Bool
-checkPSA = undefined
--- i'll write this in the most retarded way possible for now, also, I figured, this alwaysholds in the finite case anyway
---checkPSA (PS space top order ) = all (\ pair -> 
-   -- implies (notElem pair order) (any (\ open -> elem (fst pair) open 
-  --  && notElem (snd pair) open) (clopup top) )) $ allpairs space 
-
-
-
+checkPSA :: (Eq a, Ord a) => PriestleySpace a -> Bool
+-- i'll write this in the most retarded way possible for now, also, I figured, this always holds in the finite case anyway
+checkPSA (PS space top order) = all (\ pair -> 
+ implies (notElem pair order) (any (\ open -> elem (fst pair) open 
+   && notElem (snd pair) open) (clopUp (PS space top order)) )) $ allpairs space 
 
 allpairs :: Set a -> [(a,a)]
 allpairs space = [(x,y) | x <- toList space ,y <- toList space ]
@@ -49,4 +52,23 @@ allpairs space = [(x,y) | x <- toList space ,y <- toList space ]
 implies :: Bool -> Bool -> Bool
 implies x y = not x || y
 --usual implication shorthand 
+
+
+clopUp :: Ord a => PriestleySpace a -> Set (Set a)
+-- In the finite case those are just the upsets, I think it's at least honest to implement a general checker anyway
+clopUp (PS space top ord) = intersection (clopens top ) (upsets top) where 
+        clopens = Data.Set.filter (\ x -> elem (difference space x) top)  
+        upsets = Data.Set.filter (\ y -> y == upClosure y ord)
+
+upClosure :: (Eq a, Ord a) => Set a -> Relation a -> Set a 
+upClosure set1 relation = union (Data.Set.map snd (Data.Set.filter (\ x -> elem (fst x) set1 ) relation)) set1 
+
+
+
+
+
+
+
+
+
 \end{code}
