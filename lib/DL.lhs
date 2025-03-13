@@ -12,6 +12,8 @@ data Lattice a = L {
     join :: a -> a -> a 
     }
 
+    
+
 
 isTop :: Ord a => Lattice a -> a -> Bool
 isTop l x = all (\y -> elem (y, x) (rel k)) (set k)
@@ -51,11 +53,22 @@ checkBoundedness l = top l /= Nothing && bot l /= Nothing
 checkDistributivity :: Lattice a -> Bool
 checkDistributivity = undefined
 
-checkClosedMeetJoin :: Lattice a -> Bool
-checkClosedMeetJoin = undefined
+checkClosedMeetJoin :: Ord a => Lattice a -> Bool
+checkClosedMeetJoin l = all (\x -> elem (f x) k ) j 
+                        &&
+                        all (\x -> elem (g x) k) j
+    where 
+        k = set $ carrier l
+        j = Set.cartesianProduct k k
+        f = uncurry (meet l) 
+        g = uncurry (join l)
 
-checkLattice :: Lattice a -> Bool
-checkLattice = undefined 
+checkBDLattice :: Ord a => Lattice a -> Bool
+checkBDLattice l = checkBoundedness l
+                    &&
+                   checkDistributivity l
+                    &&
+                   checkClosedMeetJoin l  
 
 makeLattice :: OrderedSet a -> Lattice a 
 makeLattice = undefined
