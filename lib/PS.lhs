@@ -9,7 +9,8 @@
 \begin{code}
 module PriestleySpaces where
 
-import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map)
+import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt)
+import Data.Bifunctor (bimap)
 
 import Poset
 --import qualified Data.IntMap as Data.set
@@ -62,6 +63,59 @@ clopUp (PS space top ord) = intersection (clopens top ) (upsets top) where
 
 upClosure :: (Eq a, Ord a) => Set a -> Relation a -> Set a 
 upClosure set1 relation = Data.Set.map snd (Data.Set.filter (\ x -> fst x `elem` set1 ) relation) `union` set1 
+
+
+
+
+
+evaluateMap :: (Ord a, Ord b) => Set (a,b) -> a -> b
+evaluateMap mapping x | size (images mapping x) == 1 = elemAt 0 (images mapping x)
+                      | otherwise = error "Given Relation is not a mapping" 
+
+images :: (Ord a, Ord b) => Set (a,b) -> a -> Set b
+images mapping x = Data.Set.map snd $ Data.Set.filter (\ (y,_) -> x == y) mapping
+
+getPreimage :: Eq b => Set (a,b) -> b -> a
+getPreimage mapping y | size (getPreimages y mapping) == 1 = fst $ elemAt 0 (getPreimages y mapping)
+                      | otherwise = error "Either no or too many preimages"
+
+getPreimages :: Eq b => b -> Set (a,b) -> Set (a,b)
+getPreimages y = Data.Set.filter (\ (_,z) -> z == y)
+
+
+
+checkIso :: (Eq a, Ord a) => PriestleySpace a -> PriestleySpace a -> Set (a,a) -> Bool
+checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping 
+    && checkBijective sb mapping 
+    && checkTopologyMap ta tb mapping 
+    && checkRelationMap ra rb mapping
+
+checkMapping :: Eq a => Set a -> Set (a,b) -> Bool
+checkMapping sa mapping = all (\ x -> size (getMappings x mapping) == 1) sa
+
+getMappings :: Eq a => a -> Set (a,b) -> Set (a,b)
+getMappings x = Data.Set.filter (\ (y,_) -> y == x)
+
+checkBijective :: Eq b => Set b -> Set (a,b) -> Bool
+checkBijective sb mapping = all (\ y -> size (getPreimages y mapping) == 1) sb
+
+checkTopologyMap :: (Eq a, Eq b, Ord a, Ord b) => Set (Set a) -> Set (Set b) -> Set (a,b) -> Bool
+checkTopologyMap ta tb mapping = mapTop mapping ta == tb && premapTop mapping tb == ta
+
+mapTop :: (Ord a, Ord b) => Set (a,b) -> Set (Set a) -> Set (Set b)
+mapTop mapping = Data.Set.map (Data.Set.map (evaluateMap mapping))
+
+premapTop :: (Ord a, Ord b) => Set (a,b) -> Set (Set b) -> Set (Set a)
+premapTop mapping = Data.Set.map (Data.Set.map (getPreimage mapping))
+
+checkRelationMap :: (Eq a, Eq b, Ord a, Ord b) => Relation a -> Relation b -> Set (a,b) -> Bool
+checkRelationMap ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
+
+mapRel :: (Ord a, Ord b) => Set (a,b) -> Relation a -> Relation b
+mapRel mapping = Data.Set.map (Data.Bifunctor.bimap (evaluateMap mapping) (evaluateMap mapping))
+
+premapRel :: (Ord a, Ord b) => Set (a,b) -> Relation b -> Relation a
+premapRel mapping = Data.Set.map (bimap (getPreimage mapping) (getPreimage mapping))
 
 
 
