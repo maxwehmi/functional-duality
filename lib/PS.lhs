@@ -43,7 +43,7 @@ checkPriestley p = checkTopology (getTopoSpace p) && checkPoset (getOrderedSet p
 checkPSA :: (Eq a, Ord a) => PriestleySpace a -> Bool
 -- i'll write this in the most retarded way possible for now, also, I figured, this always holds in the finite case anyway
 checkPSA (PS space top order) = all (\ pair -> 
- implies (notElem pair order) (any (\ open -> elem (fst pair) open 
+ implies (pair `notElem` order) (any (\ open -> elem (fst pair) open 
    && notElem (snd pair) open) (clopUp (PS space top order)) )) $ allpairs space 
 
 allpairs :: Set a -> [(a,a)]
@@ -57,13 +57,11 @@ implies x y = not x || y
 clopUp :: Ord a => PriestleySpace a -> Set (Set a)
 -- In the finite case those are just the upsets, I think it's at least honest to implement a general checker anyway
 clopUp (PS space top ord) = intersection (clopens top ) (upsets top) where 
-        clopens = Data.Set.filter (\ x -> elem (difference space x) top)  
+        clopens = Data.Set.filter (\ x -> difference space x `elem` top)  
         upsets = Data.Set.filter (\ y -> y == upClosure y ord)
 
 upClosure :: (Eq a, Ord a) => Set a -> Relation a -> Set a 
-upClosure set1 relation = union (Data.Set.map snd (Data.Set.filter (\ x -> elem (fst x) set1 ) relation)) set1 
-
-
+upClosure set1 relation = Data.Set.map snd (Data.Set.filter (\ x -> fst x `elem` set1 ) relation) `union` set1 
 
 
 
