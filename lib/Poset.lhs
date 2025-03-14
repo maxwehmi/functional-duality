@@ -31,28 +31,23 @@ But I see everyone else's code also pretty much always assumes Ord.
 -}
 
 
-{-
-leaving this in case i'm saying something stupid, but i realized 
-I can just use the closure for the check condition...
+-- leaving this in case i'm saying something stupid, but i realized I can just use the closure for the check condition...
+checkReflAlt :: Ord a =>  OrderedSet a -> Bool
+checkReflAlt (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 
-checkRefl :: Ord a =>  OrderedSet a -> Bool
-checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
--}
 
 setEq :: Ord a => Set a -> Set a -> Bool
 setEq s1 s2 = Set.toList s1 == Set.toList s2
 
+-- this relies on the fact that "Set.fromList" eliminates duplicates, as Set shouldn't care about them
 relationWellDef :: Ord a => OrderedSet a -> Bool
-relationWellDef (OS s r) = s `setEq` Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r))    
+relationWellDef (OS s r) = s == Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r)) 
 
 checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl os = os == closureRefl os
 
 checkTrans :: Ord a => OrderedSet a -> Bool
 checkTrans os = os == closureTrans os
-
--- TODO write extra check function for closureTrans without using
--- the function, so we can check the function
 
 checkAntiSym :: Ord a => OrderedSet a -> Bool
 checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
