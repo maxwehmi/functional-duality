@@ -48,6 +48,9 @@ checkRefl os = os == closureRefl os
 checkTrans :: Ord a => OrderedSet a -> Bool
 checkTrans os = os == closureTrans os
 
+checkTransAlt :: Ord a => OrderedSet a -> Bool
+checkTransAlt (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y' ]
+
 checkAntiSym :: Ord a => OrderedSet a -> Bool
 checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 
@@ -61,12 +64,12 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 closureRefl :: Ord a => OrderedSet a -> OrderedSet a
 closureRefl (OS s r) = OS s (r `Set.union` Set.fromList [(x,x)| x <- Set.toList s])
 
-transPair ::  Ord a => a -> a -> [(a,a)] -> Bool
-transPair x z tups =  any (\(_,y) -> (x, y) `elem` tups && (y,z) `elem` tups) tups
+transPair ::  Ord a => a -> a -> Relation a -> Bool
+transPair x z r =  any (\(_,y) -> (x, y) `Set.member` r && (y,z) `Set.member` r) r
 
 -- This only adds "one step" transtivity, needs to be recursed till the it becomes idempotent or something like this
 transStep :: Ord a => OrderedSet a -> OrderedSet a
-transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z (Set.toList r)])
+transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z r])
 
 -- current hacky solution
 closureTrans :: Ord a => OrderedSet a -> OrderedSet a
@@ -100,9 +103,11 @@ forceAntiSym (OS s r)
 
 \bold{Proposition}: `forceAntiSymm $ transClosure`, where `forceAntiSym` of a relation $R$, call it $R^{\dagger}$ is defined by: 
 
-$$R^{\dagger} = \begin{cases}
+$$
+R^{\dagger} = \begin{cases}
     R                                                                           & \text{ if } R \text{ is anti-symmetric} \\ 
-    R \setminus \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}  & \text{ otherwise}\end{cases}$$
+    R \setminus \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}  & \text{ otherwise}\end{cases}
+$$
 
 \emph{Proof}:
 Suppose $R$ is any relation. We know the transitive closure  $R^{+}$ transitive. Let $R^{\dagger}$ be the antisymmetric "closure" of $R^{+}$.
