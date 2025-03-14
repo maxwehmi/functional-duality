@@ -18,7 +18,7 @@
 - [x] Write a function which checks if a given Ordered Set forms a lattice, i.e. has meets and joins
 - [x] Write a function which checks if a given Lattice is bounded
 - [x] Write a function which checks if a given Lattice is distributive
-- [ ] Write a function which converts a Poset into a lattice (if it has meets and joins)
+- [x] Write a function which converts a Poset into a lattice (if it has meets and joins)
 
 ## PS: 
 - [ ] Write a function which checks if a given ordered "TopoSpace" is a Priestley Space
