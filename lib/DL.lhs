@@ -71,8 +71,8 @@ checkMeetJoinMakeSense l = and [Just (meet l x y) == findMeet l x y |x <- Set.to
 inLattice :: Ord a => a -> Lattice a -> Bool
 inLattice x l = x `Set.member` set (carrier l)
 
-checkBDLattice :: Ord a => Lattice a -> Bool
-checkBDLattice l = checkBoundedness l
+checkDL :: Ord a => Lattice a -> Bool
+checkDL l =        checkBoundedness l
                     &&
                    checkDistributivity l
                     &&
@@ -109,7 +109,7 @@ lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.
 
 -- test ordered Set
 myos :: OrderedSet Int
-myos = Poset.closurePS $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
+myos = Poset.closurePS $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,3), (1,2), (2,4), (3,4),(4,5)])
 
 mylat1 :: Lattice Int
 mylat1 = L myos (-) (+)
@@ -117,9 +117,9 @@ mylat1 = L myos (-) (+)
 mylat :: Lattice Int
 mylat = L myos (\x y -> fromJust $ findMeet mylat1 x y) (\x y -> fromJust $ findJoin mylat1 x y)
 
-fromJust :: Maybe Int -> Int
+fromJust :: Maybe a -> a
 fromJust (Just x) = x
-fromJust Nothing = 0
+fromJust Nothing = error "Sorry, but your poset is not closed under meet and joins"
 
 -- uses meet & join function inside lattice, for arb meets & joins
 -- only works on finite lattices.
@@ -136,7 +136,9 @@ arbMeet = undefined
 checkLattice :: Ord a => Lattice a -> Bool
 checkLattice l = checkMeetJoinMakeSense l && checkClosedMeetJoin l
 
-makeLattice :: OrderedSet a -> Lattice a 
-makeLattice = undefined
+-- I expect that the poset is already closed under meets and joins
+makeLattice :: Ord a => OrderedSet a -> Lattice a 
+makeLattice os = L os (\x y -> fromJust $ findMeet preLattice x y) (\x y -> fromJust $ findJoin preLattice x y)
+                where preLattice = L os const const -- give it two mock functions
 
 \end{code}
