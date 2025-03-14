@@ -64,12 +64,12 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 closureRefl :: Ord a => OrderedSet a -> OrderedSet a
 closureRefl (OS s r) = OS s (r `Set.union` Set.fromList [(x,x)| x <- Set.toList s])
 
-transPair ::  Ord a => a -> a -> Relation a -> Bool
-transPair x z r =  any (\(_,y) -> (x, y) `Set.member` r && (y,z) `Set.member` r) r
+transPair ::  Ord a => a -> a -> OrderedSet a -> Bool
+transPair x z (OS s r)=  any (\y -> (x, y) `Set.member` r && (y,z) `Set.member` r) s
 
 -- This only adds "one step" transtivity, needs to be recursed till the it becomes idempotent or something like this
 transStep :: Ord a => OrderedSet a -> OrderedSet a
-transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z r])
+transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z (OS s r)])
 
 -- current hacky solution
 closureTrans :: Ord a => OrderedSet a -> OrderedSet a
