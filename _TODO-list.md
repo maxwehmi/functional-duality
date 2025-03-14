@@ -1,6 +1,6 @@
 # General:
 - [ ] Write comments / documentation
-- Figure out how to use type constructors
+- [] Figure out how to use type constructors
   - make a type for posets which only works if the ordered set is actually reflexive, transitive and anti-symmetric
   - make a type for distributive bounded lattices which only works if the order is actually a distributive bounded lattice
   - make a type for Priestley Space which only works if the space is actually a topological space and satisfies the PSA
