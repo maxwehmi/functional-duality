@@ -1,3 +1,4 @@
+<!--- To check of an item, add fill in the box with "x", like so [x]  :)--->
 # General:
 - [ ] Write comments / documentation
 - [ ] Figure out how to use type constructors
@@ -10,16 +11,17 @@
 - [ ] Write a function which checks if a given Ordered Set is a Poset, i.e. reflexive, transitive and anti-symmetric
 - [ ] Write a function makes a Ordered Set into a Poset by taking the reflexive transitive closure (and throws an
     error if the Relation is not anti-symmetric)
+
 ## DL: 
 - [ ] Write a function which checks if a given Ordered Set forms a lattice, i.e. has meets and joins
 - [ ] Write a function which checks if a given Lattice is bounded
 - [ ] Write a function which checks if a given Lattice is distributive
 - [ ] Write a function which converts a Poset into a lattice (if it has meets and joins)
+
 ## PS: 
 - [ ] Write a function which checks if a given ordered "TopoSpace" is a Priestley Space
 - [ ] Write a function which checks if a given ordered topological spaces satisfies the Priestley Seperation axiom
 - [ ] Write a function which checks if a "TopoSpace" is actually a topological space 
-
 
 
 # Later:
