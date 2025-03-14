@@ -63,6 +63,13 @@ checkClosedMeetJoin l = all (\x -> elem (pairMeet x) lSet ) j -- x is arb. pair 
         pairMeet = uncurry (meet l) 
         pairJoin = uncurry (join l)
 
+checkMeetJoinMakeSense :: Lattice a -> Bool
+checkMeetJoinMakeSense l = and [(meet l) x y == () |x `inLattice` l, y `inLattice` l]
+
+-- checks whether an element is in the underlying set of the lattice
+inLattice :: a -> Lattice a -> Bool
+inLattice x l = x `Set.Member` (set carrier l)
+
 checkBDLattice :: Ord a => Lattice a -> Bool
 checkBDLattice l = checkBoundedness l
                     &&
@@ -104,7 +111,7 @@ myos :: OrderedSet Int
 myos = Poset.closurePS $ OS (Set.fromList [0,1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
 
 mylat :: Lattice Int
-mylat = L myos (findMeet myos) (findJoin myos)
+mylat = L myos (-) (+)
 
 -- uses meet & join function inside lattice, for arb meets & joins
 -- only works on finite lattices.
@@ -116,9 +123,6 @@ arbJoin :: Lattice a -> a -> a -> a
                                        --     (c, a2) `Set.member` (rel carrier l)] -- all elements above both a1 and a2
 arbJoin = undefined
 arbMeet = undefined
-
-fromJust :: Maybe a -> a
-fromJust = undefined
 
 checkLattice :: Lattice a -> Bool
 checkLattice = undefined 
