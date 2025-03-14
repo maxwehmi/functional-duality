@@ -95,13 +95,18 @@ forceRelation (OS s r)
  | checkRelationWellDef (OS s r) = OS s r
  | otherwise = OS s ( r `Set.difference` Set.fromList ([(x,y) | x <- Set.toList $ unsharedElements s (tuplesUnfold r), y <- Set.toList s] ++ [(x,y) | y <- Set.toList $ unsharedElements s (tuplesUnfold r), x <- Set.toList s]  )  )
 
-forceAntiSym = undefined
+forceAntiSym :: Ord a => OrderedSet a -> OrderedSet a
+forceAntiSym (OS s r)
+ | checkAntiSym (OS s r) = OS s r
+ | otherwise = forceRelation $ OS s (r `Set.difference` Set.fromList [(x,y)| x <- Set.toList s, y <- Set.toList s, x/= y && (y,x) `Set.member` r && (x,y) `Set.member` r])
+
+
 
 forcePS :: Ord a => OrderedSet a -> OrderedSet a
 forcePS = closurePS . forceAntiSym . forceRelation
 
 
 myOS :: OrderedSet Integer
-myOS = OS (Set.fromList [1..4]) (Set.fromList [(1,4), (4,5)])
+myOS = OS (Set.fromList [1..4]) (Set.fromList [(1,4), (4,5), (5,4),(4,1),(2,1),(2,2),(3,3),(3,1),(1,1),(4,4)])
 
 \end{code}
