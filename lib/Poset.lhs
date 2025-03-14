@@ -1,5 +1,15 @@
-{-# HLINT ignore "Eta reduce" #-}
 \section{Partially ordered sets}
+
+
+Note that most operations presume to have `Ord` instances. This has to do with Set.Set implementation.
+
+"Most operations require that e be an instance of the Ord class."  
+https://hackage.haskell.org/package/containers-0.8/docs/Data-Set.html 
+
+We can potentially work around this by transfering to lists, doing the checking on those, and then back, with some Set.toList trickery, for now leaving it like this, if we need to avoid assuming instances of Ord we can change it.
+
+But I see everyone else's code also pretty much always assumes Ord.
+
 
 \begin{code}
 module Poset where
@@ -14,23 +24,7 @@ data OrderedSet a = OS {set :: Set.Set a, rel :: Relation a}
 -- I have changed the Relation a from "newtype ... Set .." to "type ... Set.Set .." as Relation a is a type synonim and it was giving me problems with the typechecking in other files. 
 
 -- I have changed the data type of OrderedSet a, in order to have functions to retreive the underlying set and the underlying relation of the OrderedSet.
-
-
-{-
-most operations presume to have Ord instances, has to do with Set.Set implementation.
-
-"Most operations require that e be an instance of the Ord class."  
-https://hackage.haskell.org/package/containers-0.8/docs/Data-Set.html 
-
-Can potentially work around this by transfering to lists, doing the checking on those, and then back,
-with some Set.toList trickery, for now leaving it like this, 
-if we need to avoid assuming instances of Ord we can change it
-
-But I see everyone else's code also pretty much always assumes Ord.
--}
-
-
-
+-- Giacomo
 
 tuplesUnfold :: Ord a => Relation a -> Set.Set a
 tuplesUnfold r = Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r))
@@ -83,14 +77,12 @@ closureTrans  currentSet =
             else closureTrans recursedSet
 
 -- transitive closure can break anti-symmetry, so case was added
-closurePS :: Ord a => OrderedSet a -> OrderedSet a
-closurePS os
+closurePoSet :: Ord a => OrderedSet a -> OrderedSet a
+closurePoSet os
  | not (checkRelationWellDef os) = error "relation isn't well-defined"
  | not (checkAntiSym os)  = error "relation isn't anti-symmetric"
  | not (checkAntiSym $ closureTrans os) = error "relation looses anti-symmetry when transitively closed"
  | otherwise = closureTrans $ closureRefl os
-
-
 
 -- this maybe could've been done more simply, but idk it seems to work like this
 forceRelation :: Ord a => OrderedSet a -> OrderedSet a
@@ -103,16 +95,45 @@ forceAntiSym (OS s r)
  | checkAntiSym (OS s r) = OS s r
  | otherwise = OS s (r `Set.difference` Set.fromList [(x,y)| x <- Set.toList s, y <- Set.toList s, x/= y && (y,x) `Set.member` r && (x,y) `Set.member` r])
 
+\end{code}
 
-forcePS :: Ord a => OrderedSet a -> OrderedSet a
-forcePS currentSet = 
-    let recursedSet = forceAntiSym $ closureTrans currentSet
-        in if recursedSet == currentSet 
-            then closureRefl currentSet 
-            else forcePS recursedSet
 
----------------------------------------------------------------------------------------------------------------------------------------------------------
+\bold{Proposition}: `forceAntiSymm $ transClosure`, where `forceAntiSym` of a relation $R$, call it $R^{\dagger}$ is defined by: 
 
+$$R^{\dagger} = \begin{cases}
+    R                                                                           & \text{ if } R \text{ is anti-symmetric} \\ 
+    R \setminus \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}  & \text{ otherwise}\end{cases}$$
+
+\emph{Proof}:
+Suppose $R$ is any relation. We know the transitive closure  $R^{+}$ transitive. Let $R^{\dagger}$ be the antisymmetric "closure" of $R^{+}$.
+
+Suppose $xR^{\dagger}y$ and $yR^{\dagger}z$. Since $R^{\dagger}$ is generated only by removing points from $R^{+}$, we must've also have $xR^{+}y , yR^{+}z$. So by transitivity $xR^{+}z$.
+
+If $x=y$ we're quickly done, since then $xR^{\dagger}z$. Likewise if $y=z$. So suppose they aren't equal to each other.
+
+Now suppose for contradiction $x \cancel{R^{\dagger}} z$. Again by how $R^{\dagger}$ was defined, we must've had $zR^{+}x$. (If we didn't, then $(x,z) \notin \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, and so we'd have $(x,z) \in R^{+} \setminus \dots$).
+
+But then by transitivity of $R^{+}$ we'd have $yR^{+}x$. But then $(x,y) \in \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, so by definition $(x,y) \notin R^{\dagger}$, i.e. $x\cancel{R^{\dagger}} y$, contradicting our assumption.
+
+
+
+\begin{code}
+
+forcePoSet :: Ord a => OrderedSet a -> OrderedSet a
+forcePoSet os = closureRefl $  forceAntiSym $ closureTrans os
+
+-- forcePoSet :: Ord a => OrderedSet a -> OrderedSet a
+-- forcePoSet currentSet = 
+--     let recursedSet = forceAntiSym $ closureTrans currentSet
+--         in if recursedSet == currentSet 
+--             then closureRefl currentSet 
+--             else forcePoSet recursedSet
+
+\end{code}
+
+Here's some GPT-generated test sets
+
+\begin{code}
 os6 :: OrderedSet Integer
 os6 = OS (Set.fromList [1, 2, 3]) 
          (Set.fromList [(1,1), (2,2), (3,3), (1,2), (2,3), (1,3)])
@@ -176,5 +197,8 @@ myOS = OS (Set.fromList [1..4]) (Set.fromList [(1,4), (4,5), (5,4),(4,1),(2,1),(
 
 emptyRelOS :: OrderedSet Integer
 emptyRelOS = OS (Set.fromList[1..4]) (Set.fromList [])
+
+myCircle :: OrderedSet Integer
+myCircle = OS (Set.fromList [1,2,3]) (Set.fromList [(1,2),(2,3),(3,1)])
 
 \end{code}
