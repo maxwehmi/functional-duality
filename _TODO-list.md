@@ -11,7 +11,10 @@
 - [x] Write a function which checks if a given Ordered Set is a Poset, i.e. reflexive, transitive and anti-symmetric
 - [x] Write a function makes a Ordered Set into a Poset by taking the reflexive transitive closure (and throws an
     error if the Relation is not anti-symmetric)
-  - [ ] alternative function that forces anti-symmetery. Current idea is to, for any symmetric pair, take out both.
+- [ ] wirte alternative function that forces anti-symmetery. Current idea is to, for any symmetric pair, take out both.
+  this is needed for when we generate arbitrary instances
+  - [ ] write an extra check function for closureTrans without using the closure itself, so we can independently check the functioning
+  - [ ] potentially, different solution for transitivity, less hacky
 
 ## DL: 
 - [ ] Write a function which checks if a given Ordered Set forms a lattice, i.e. has meets and joins
@@ -23,6 +26,7 @@
 - [ ] Write a function which checks if a given ordered "TopoSpace" is a Priestley Space
 - [x] Write a function which checks if a given ordered topological spaces satisfies the Priestley Seperation axiom
 - [ ] Write a function which checks if a "TopoSpace" is actually a topological space 
+- potentially: prove `mapTop mapping ta == tb` to be put in the report
 
 
 # Later:
@@ -38,3 +42,4 @@
 - [ ] Generate minimal Priestley Space from a given Set
 - [ ] Dualize morphisms between DL/PS to PS/DL
 - [ ] calculate subdirectly irreducible subalgebras of a given algebra
+- [ ] pretty Show intsances(?)

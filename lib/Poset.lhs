@@ -45,8 +45,7 @@ checkRefl os = os == closureRefl os
 checkTrans :: Ord a => OrderedSet a -> Bool
 checkTrans os = os == closureTrans os
 
--- TODO write extra check function for closureTrans without using
--- the function, so we can check the function
+
 
 checkAntiSym :: Ord a => OrderedSet a -> Bool
 checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
