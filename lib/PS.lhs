@@ -9,10 +9,12 @@
 \begin{code}
 module PriestleySpaces where
 
-import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt)
+import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, isProperSubsetOf)
+
 import Data.Bifunctor (bimap)
 
 import Poset
+
 --import qualified Data.IntMap as Data.set
 
 
@@ -64,10 +66,20 @@ clopUp (PS space top ord) = intersection (clopens top ) (upsets top) where
 upClosure :: (Eq a, Ord a) => Set a -> Relation a -> Set a 
 upClosure set1 relation = Data.Set.map snd (Data.Set.filter (\ x -> fst x `elem` set1 ) relation) `union` set1 
 
+inclusionOrder :: Ord a => Set (Set a) -> Relation (Set a)
+-- Constructs (maybe) an order out of the clopen upsets of a given PS
+inclusionOrder x = fromList [ (z ,y) |  z <- toList x, y <- toList x, isSubsetOf z y ]
+--This may give problems if we convert too many times from spaces to the clopup Dual, we could Use Data.Set.Monad and have a monad instance to avoid nesting sets
+--into sets multiple times 
 
+{-
+This goes commented since for whatever reason there VsCode won't allow me to import the DL file
 
-
-
+clopMap :: PriestleySpace a -> Lattice a 
+clopMap = if {checkBDLattice $ makeLattice $ (\ x -> (\ y -> OS y inclusionOrder y) clopUp x) == True} 
+        then {makeLattice $ (\ x -> (\ y -> OS y (inclusionOrder y)) clopUp x) }
+    |   else {error "104!"}
+ -}
 evaluateMap :: (Ord a, Ord b) => Set (a,b) -> a -> b
 evaluateMap mapping x | size (images mapping x) == 1 = elemAt 0 (images mapping x)
                       | otherwise = error "Given Relation is not a mapping" 
