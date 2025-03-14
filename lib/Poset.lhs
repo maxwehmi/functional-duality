@@ -5,6 +5,7 @@
 module Poset where
 
 import qualified Data.Set as Set
+import Data.Set.Internal
 
 type Relation a = Set.Set (a,a)
 
@@ -38,7 +39,12 @@ checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 -}
 
--- TODO check whether eq also checks eq on relation of poset
+setEq :: Ord a => Set a -> Set a -> Bool
+setEq s1 s2 = Set.toList s1 == Set.toList s2
+
+relationWellDef :: Ord a => OrderedSet a -> Bool
+relationWellDef (OS s r) = s `setEq` Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r))    
+
 checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl os = os == closureRefl os
 
