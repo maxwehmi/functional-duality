@@ -7,9 +7,9 @@
 \section{Priestley Spaces}
 
 \begin{code}
-module PriestleySpaces where
+module Priestley where
 
-import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, member, empty, cartesianProduct, isProperSubsetOf)
+import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, member, empty, cartesianProduct)
 
 import Data.Bifunctor (bimap)
 
@@ -38,8 +38,8 @@ checkTopology (TS space top) = member space top && member empty top && unionClos
 
 fixTopology :: Ord a => TopoSpace a -> TopoSpace a
 --makes the input space into a topological space
-fixTopology (TS space top) = (TS space fixedTop ) where 
-    fixedTop  = union (fromList [space, empty]) (unionClosure $ intersectionClosure top) 
+fixTopology (TS space top) = TS space fixedTop  where 
+    fixedTop  = fromList [space, empty] `union` unionClosure (intersectionClosure top)
 
 unionStep :: (Ord a) => Set (Set a) -> Set (Set a)
 unionStep x = Data.Set.map (uncurry union) (cartesianProduct x x)

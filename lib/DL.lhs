@@ -1,11 +1,11 @@
 \section{Disributive Lattices}
 
 \begin{code}
-module DistributiveLattices where
+module DL where
 
 import Poset
 import qualified Data.Set as Set 
-import Data.Bits (Bits(xor))
+import qualified Data.Maybe as M
 
 data Lattice a = L {
     carrier :: OrderedSet a,
@@ -16,7 +16,7 @@ data Lattice a = L {
     
 
 isTop :: Ord a => Lattice a -> a -> Bool
-isTop l x = all (\y -> elem (y, x) (rel k)) (set k)
+isTop l x = all (\y -> (y, x) `elem` rel k) (set k)
     where
      k = carrier l
 
@@ -26,7 +26,7 @@ top :: Ord a =>Lattice a -> Maybe a
 top l = Set.lookupMax (Set.filter (isTop l) (set $ carrier l))
 
 isBot :: Ord a => Lattice a -> a -> Bool
-isBot l x = all (\y -> elem (x,y) (rel k)) (set k)
+isBot l x = all (\y -> (x,y) `elem` rel k) (set k)
     where
      k = carrier l
 
@@ -38,7 +38,7 @@ bot l = Set.lookupMin (Set.filter (isBot l) (set $ carrier l))
 
 
 checkBoundedness :: Ord a => Lattice a -> Bool
-checkBoundedness l = top l /= Nothing && bot l /= Nothing 
+checkBoundedness l = M.isJust (top l) && M.isJust (bot l)
 
 -- TODO TEST THIS! -- xx Es
 checkDistributivity :: Eq a => Lattice a -> Bool
@@ -55,9 +55,9 @@ checkDistributivity (L (OS s _) m v) = and
 -- function now checks whether join and meet under function are in lattice
 -- should still check whether coincides with actual meet and join in lattice
 checkClosedMeetJoin :: Ord a => Lattice a -> Bool
-checkClosedMeetJoin l = all (\x -> elem (pairMeet x) lSet ) j -- x is arb. pair in l
+checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair in l
                         &&
-                        all (\x -> elem (pairJoin x) lSet) j
+                        all (\x -> pairJoin x `elem` lSet) j
     where 
         lSet = set $ carrier l
         j = Set.cartesianProduct lSet lSet -- sets of pairs
@@ -100,12 +100,12 @@ findLeast os s = Set.lookupMax $ Set.filter (\x -> all (\y -> (x, y) `Set.member
 
 -- set of elements above a1 and a2
 upperBounds :: Ord a => OrderedSet a -> a -> a -> Set.Set a
-upperBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (a1, c) `Set.member` (rel os) && 
-                                                           (a2, c) `Set.member` (rel os)]
+upperBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (a1, c) `Set.member` rel os && 
+                                                           (a2, c) `Set.member` rel os]
 
 lowerBounds :: Ord a => OrderedSet a -> a -> a -> Set.Set a
-lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.member` (rel os) && 
-                                                           (c, a2) `Set.member` (rel os)]
+lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.member` rel os && 
+                                                           (c, a2) `Set.member` rel os]
 
 -- test ordered Set
 myos :: OrderedSet Int
