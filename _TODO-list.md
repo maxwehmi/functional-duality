@@ -11,10 +11,8 @@
 - [x] Write a function which checks if a given Ordered Set is a Poset, i.e. reflexive, transitive and anti-symmetric
 - [x] Write a function makes a Ordered Set into a Poset by taking the reflexive transitive closure (and throws an
     error if the Relation is not anti-symmetric)
-- [ ] wirte alternative function that forces anti-symmetery. Current idea is to, for any symmetric pair, take out both.
-  this is needed for when we generate arbitrary instances
-  - [ ] write an extra check function for closureTrans without using the closure itself, so we can independently check the functioning
-  - [ ] potentially, different solution for transitivity, less hacky
+  - [ ] alternative function that forces anti-symmetery. Current idea is to, for any symmetric pair, take out both.
+- [ ] write a check whether to the check the relation does not contain any elements not in the underlying set of our poset.
 
 ## DL: 
 - [ ] Write a function which checks if a given Ordered Set forms a lattice, i.e. has meets and joins

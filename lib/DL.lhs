@@ -78,25 +78,47 @@ findJoin :: Lattice a -> a -> a -> Maybe a
 -- needs top to be a maybe function
 -- findMeet (L (OS set rel) _ _) x y  = findGreatest (OS upperBounds (filter (\(v,w) -> v ) rel))
                     -- where upperBounds = filter (\z -> (z, x) `Set.member` rel && (z, y) `Set.member` rel) (Set.toList set)
+-- findMeet l x y = findGreatest (lowerBounds (carrier l) x y)
+-- findJoin l x y = findLeast (upperBounds (carrier l) x y)
 findMeet = undefined
 findJoin = undefined
 
-findGreatest :: Ord a => OrderedSet a -> Maybe a
-findGreatest (OS set rel) = if all (\x -> (x, greatest) `Set.member` rel) (Set.toList set) then Just greatest else Nothing
-                    where greatest = foldr (\new old -> (if (old, new) `Set.member` rel then new else old)) (head $ Set.toList set) set
+
+-- For some ordered set (X, <=), find the greatest element of some subset S of X
+findGreatest :: Ord a => OrderedSet a -> Set.Set a -> Maybe a
+-- findGreatest (OS s r) s = if all (\x -> (x, greatest) `Set.member` r) (Set.toList s) then Just greatest else Nothing
+                    -- where greatest = foldr (\new old -> (if (old, new) `Set.member` r then new else old)) (head $ Set.toList s) s
+findGreatest os s = Set.lookupMax $ Set.filter (\x -> all (\y -> (y, x) `Set.member` rel os) s) s
+
+findLeast :: Ord a => OrderedSet a -> Maybe a
+findLeast = undefined
+
+-- set of elements above a1 and a2
+upperBounds :: Ord a => OrderedSet a -> a -> a -> Set.Set a
+upperBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (a1, c) `Set.member` (rel os), 
+                                                           (a2, c) `Set.member` (rel os)]
+
+lowerBounds :: Ord a => OrderedSet a -> a -> a -> Set.Set a
+lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.member` (rel os), 
+                                                           (c, a2) `Set.member` (rel os)]
 
 -- test ordered Set
 myos :: OrderedSet Int
-myos = OS (Set.fromList [1,2]) (Set.fromList [(1,1), (1,2), (2,2)])
+myos = Poset.closurePS $ OS (Set.fromList [0,1,2,3,4, 5]) (Set.fromList [(1,2), (2,3), (1,3),(3,4),(4,5)])
 
 -- uses meet & join function inside lattice, for arb meets & joins
 -- only works on finite lattices.
--- think about whether we can do this by folding???
+-- Boundedness of l is required for this function
 arbMeet :: Lattice a -> a -> a -> a
 arbJoin :: Lattice a -> a -> a -> a
--- arbJoin l a1 a2  = rfold (\x y -> meet l $ )
+--arbJoin l a1 a2  = rfold (\x y -> meet l $ x y) (fromJust $ top l) upperBs
+                   -- where upperBs = [c | c <- (set carrier l), (c, a1) `Set.member` (rel carrier l), 
+                                       --     (c, a2) `Set.member` (rel carrier l)] -- all elements above both a1 and a2
 arbJoin = undefined
 arbMeet = undefined
+
+fromJust :: Maybe a -> a
+fromJust = undefined
 
 checkLattice :: Lattice a -> Bool
 checkLattice = undefined 
