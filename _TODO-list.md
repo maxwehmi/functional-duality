@@ -12,7 +12,7 @@
 - [x] Write a function makes a Ordered Set into a Poset by taking the reflexive transitive closure (and throws an
     error if the Relation is not anti-symmetric)
   - [ ] alternative function that forces anti-symmetery. Current idea is to, for any symmetric pair, take out both.
-- [ ] write a check whether to the check the relation does not contain any elements not in the underlying set of our poset.
+- [x] write a check whether to the check the relation does not contain any elements not in the underlying set of our poset.
 
 ## DL: 
 - [ ] Write a function which checks if a given Ordered Set forms a lattice, i.e. has meets and joins
