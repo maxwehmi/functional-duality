@@ -20,6 +20,8 @@ isTop l x = all (\y -> elem (y, x) (rel k)) (set k)
     where
      k = carrier l
 
+-- when lattice is a poset, this should return a singleton with the top,
+-- or empty set with no top, so nothing
 top :: Ord a =>Lattice a -> Maybe a
 top l = Set.lookupMax (Set.filter (isTop l) (set $ carrier l))
 
@@ -53,25 +55,27 @@ checkBoundedness l = top l /= Nothing && bot l /= Nothing
 checkDistributivity :: Lattice a -> Bool
 checkDistributivity = undefined
 
+-- function now checks whether join and meet under function are in lattice
+-- should still check whether coincides with actual meet and join in lattice
 checkClosedMeetJoin :: Ord a => Lattice a -> Bool
-checkClosedMeetJoin l = all (\x -> elem (f x) k ) j 
+checkClosedMeetJoin l = all (\x -> elem (pairMeet x) lSet ) j -- x is arb. pair in l
                         &&
-                        all (\x -> elem (g x) k) j
+                        all (\x -> elem (pairJoin x) lSet) j
     where 
-        k = set $ carrier l
-        j = Set.cartesianProduct k k
-        f = uncurry (meet l) 
-        g = uncurry (join l)
+        lSet = set $ carrier l
+        j = Set.cartesianProduct lSet lSet -- sets of pairs
+        pairMeet = uncurry (meet l) 
+        pairJoin = uncurry (join l)
 
 checkBDLattice :: Ord a => Lattice a -> Bool
 checkBDLattice l = checkBoundedness l
                     &&
                    checkDistributivity l
                     &&
-                   checkClosedMeetJoin l  
+                   checkClosedMeetJoin l 
 
 makeLattice :: OrderedSet a -> Lattice a 
-makeLattice = undefined
+makeLattice = undefined  
 
 
 

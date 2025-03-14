@@ -38,12 +38,15 @@ checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 -}
 
-
+-- TODO check whether eq also checks eq on relation of poset
 checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl os = os == closureRefl os
 
 checkTrans :: Ord a => OrderedSet a -> Bool
 checkTrans os = os == closureTrans os
+
+-- TODO write extra check function for closureTrans without using
+-- the function, so we can check the function
 
 checkAntiSym :: Ord a => OrderedSet a -> Bool
 checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
@@ -67,7 +70,7 @@ transPair x z tups =  any (\(_,y) -> (x, y) `elem` tups && (y,z) `elem` tups) tu
 transStep :: Ord a => OrderedSet a -> OrderedSet a
 transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z (Set.toList r)])
 
--- current hakcy solution
+-- current hacky solution
 closureTrans :: Ord a => OrderedSet a -> OrderedSet a
 closureTrans  currentSet = 
         let recursedSet = transStep currentSet

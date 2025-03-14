@@ -47,10 +47,10 @@ checkPSA :: (Eq a, Ord a) => PriestleySpace a -> Bool
 -- i'll write this in the most retarded way possible for now, also, I figured, this always holds in the finite case anyway
 checkPSA (PS space top order) = all (\ pair -> 
  implies (pair `notElem` order) (any (\ open -> elem (fst pair) open 
-   && notElem (snd pair) open) (clopUp (PS space top order)) )) $ allpairs space 
+   && notElem (snd pair) open) (clopUp (PS space top order)) )) $ allPairs space 
 
-allpairs :: Set a -> [(a,a)]
-allpairs space = [(x,y) | x <- toList space ,y <- toList space ]
+allPairs :: Set a -> [(a,a)]
+allPairs space = [(x,y) | x <- toList space ,y <- toList space ]
 -- extracts the set of all orderedpairs form the carrier set (could also be done differently)
 implies :: Bool -> Bool -> Bool
 implies x y = not x || y
@@ -63,6 +63,7 @@ clopUp (PS space top ord) = intersection (clopens top ) (upsets top) where
         clopens = Data.Set.filter (\ x -> difference space x `elem` top)  
         upsets = Data.Set.filter (\ y -> y == upClosure y ord)
 
+-- takes upset
 upClosure :: (Eq a, Ord a) => Set a -> Relation a -> Set a 
 upClosure set1 relation = Data.Set.map snd (Data.Set.filter (\ x -> fst x `elem` set1 ) relation) `union` set1 
 
@@ -76,7 +77,7 @@ inclusionOrder x = fromList [ (z ,y) |  z <- toList x, y <- toList x, isSubsetOf
 This goes commented since for whatever reason there VsCode won't allow me to import the DL file
 
 clopMap :: PriestleySpace a -> Lattice a 
-clopMap = if {checkBDLattice $ makeLattice $ (\ x -> (\ y -> OS y inclusionOrder y) clopUp x) == True} 
+clopMap = if {checkDBLattice $ makeLattice $ (\ x -> (\ y -> OS y inclusionOrder y) clopUp x) == True} 
         then {makeLattice $ (\ x -> (\ y -> OS y (inclusionOrder y)) clopUp x) }
     |   else {error "104!"}
  -}
@@ -84,6 +85,8 @@ evaluateMap :: (Ord a, Ord b) => Set (a,b) -> a -> b
 evaluateMap mapping x | size (images mapping x) == 1 = elemAt 0 (images mapping x)
                       | otherwise = error "Given Relation is not a mapping" 
 
+-- given a possible function, we get the the image of some singleton a
+-- should be one to be a function
 images :: (Ord a, Ord b) => Set (a,b) -> a -> Set b
 images mapping x = Data.Set.map snd $ Data.Set.filter (\ (y,_) -> x == y) mapping
 
@@ -91,6 +94,7 @@ getPreimage :: Eq b => Set (a,b) -> b -> a
 getPreimage mapping y | size (getPreimages y mapping) == 1 = fst $ elemAt 0 (getPreimages y mapping)
                       | otherwise = error "Either no or too many preimages"
 
+-- gets preimages for b
 getPreimages :: Eq b => b -> Set (a,b) -> Set (a,b)
 getPreimages y = Data.Set.filter (\ (_,z) -> z == y)
 
@@ -99,9 +103,10 @@ getPreimages y = Data.Set.filter (\ (_,z) -> z == y)
 checkIso :: (Eq a, Ord a) => PriestleySpace a -> PriestleySpace a -> Set (a,a) -> Bool
 checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping 
     && checkBijective sb mapping 
-    && checkTopologyMap ta tb mapping 
+    && checkTopologyMap ta tb mapping -- homeomporphism on PS
     && checkRelationMap ra rb mapping
 
+-- checks whether this is a function (unique output)
 checkMapping :: Eq a => Set a -> Set (a,b) -> Bool
 checkMapping sa mapping = all (\ x -> size (getMappings x mapping) == 1) sa
 
@@ -111,8 +116,11 @@ getMappings x = Data.Set.filter (\ (y,_) -> y == x)
 checkBijective :: Eq b => Set b -> Set (a,b) -> Bool
 checkBijective sb mapping = all (\ y -> size (getPreimages y mapping) == 1) sb
 
+-- checks open and continuous (under condition mapping is bijective)
 checkTopologyMap :: (Eq a, Eq b, Ord a, Ord b) => Set (Set a) -> Set (Set b) -> Set (a,b) -> Bool
-checkTopologyMap ta tb mapping = mapTop mapping ta == tb && premapTop mapping tb == ta
+checkTopologyMap ta tb mapping = 
+    mapTop mapping ta == tb -- proof this? in our report
+    && premapTop mapping tb == ta
 
 mapTop :: (Ord a, Ord b) => Set (a,b) -> Set (Set a) -> Set (Set b)
 mapTop mapping = Data.Set.map (Data.Set.map (evaluateMap mapping))
