@@ -34,9 +34,12 @@ But I see everyone else's code also pretty much always assumes Ord.
 checkReflAlt :: Ord a =>  OrderedSet a -> Bool
 checkReflAlt (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 
+tuplesUnfold :: Ord a => Relation a -> Set.Set a
+tuplesUnfold r = Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r))
+
 -- this relies on the fact that "Set.fromList" eliminates duplicates, as Set shouldn't care about them
-relationWellDef :: Ord a => OrderedSet a -> Bool
-relationWellDef (OS s r) = Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r)) `Set.isSubsetOf` s
+checkrelationWellDef :: Ord a => OrderedSet a -> Bool
+checkrelationWellDef (OS s r) = tuplesUnfold r `Set.isSubsetOf` s
 
 checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl os = os == closureRefl os
@@ -50,7 +53,7 @@ checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 
 
 checkPoset :: Ord a => OrderedSet a -> Bool
-checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && relationWellDef x
+checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkrelationWellDef x
 
 
 
@@ -77,8 +80,22 @@ closureTrans  currentSet =
 
 closurePS :: Ord a => OrderedSet a -> OrderedSet a
 closurePS os
- | not (relationWellDef os) = error "relation isn't well-defined"
+ | not (checkrelationWellDef os) = error "relation isn't well-defined"
  | not (checkAntiSym os)  = error "relation isn't anti-symmetric"
  | otherwise = closureTrans $ closureRefl os
+
+
+unsharedElements :: Ord a => Set.Set a -> Set.Set a -> Set.Set a
+unsharedElements x y = (x `Set.union` y) `Set.difference`  (x `Set.intersection` y)
+
+forceRelation :: Ord a => OrderedSet a -> OrderedSet a
+forceRelation (OS s r) 
+ | checkrelationWellDef (OS s r) = OS s r
+ | otherwise = OS s ( r `Set.difference` Set.fromList [(x,y) | x <- Set.toList $ unsharedElements s (tuplesUnfold r), y <- Set.toList s]  )
+
+forceAntiSym = undefined
+
+forcePS :: Ord a => OrderedSet a -> OrderedSet a
+forcePS = closurePS . forceAntiSym . forceRelation
 
 \end{code}
