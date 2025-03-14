@@ -5,6 +5,7 @@ module DistributiveLattices where
 
 import Poset
 import qualified Data.Set as Set 
+import Data.Bits (Bits(xor))
 
 data Lattice a = L {
     carrier :: OrderedSet a,
@@ -63,12 +64,12 @@ checkClosedMeetJoin l = all (\x -> elem (pairMeet x) lSet ) j -- x is arb. pair 
         pairMeet = uncurry (meet l) 
         pairJoin = uncurry (join l)
 
-checkMeetJoinMakeSense :: Lattice a -> Bool
-checkMeetJoinMakeSense l = and [(meet l) x y == () |x `inLattice` l, y `inLattice` l]
+checkMeetJoinMakeSense :: Ord a => Lattice a -> Bool
+checkMeetJoinMakeSense l = and [Just (meet l x y) == findMeet l x y |x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))]
 
 -- checks whether an element is in the underlying set of the lattice
-inLattice :: a -> Lattice a -> Bool
-inLattice x l = x `Set.Member` (set carrier l)
+inLattice :: Ord a => a -> Lattice a -> Bool
+inLattice x l = x `Set.member` set (carrier l)
 
 checkBDLattice :: Ord a => Lattice a -> Bool
 checkBDLattice l = checkBoundedness l
@@ -108,10 +109,17 @@ lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.
 
 -- test ordered Set
 myos :: OrderedSet Int
-myos = Poset.closurePS $ OS (Set.fromList [0,1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
+myos = Poset.closurePS $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
+
+mylat1 :: Lattice Int
+mylat1 = L myos (-) (+)
 
 mylat :: Lattice Int
-mylat = L myos (-) (+)
+mylat = L myos (\x y -> fromJust $ findMeet mylat1 x y) (\x y -> fromJust $ findJoin mylat1 x y)
+
+fromJust :: Maybe Int -> Int
+fromJust (Just x) = x
+fromJust Nothing = 0
 
 -- uses meet & join function inside lattice, for arb meets & joins
 -- only works on finite lattices.
