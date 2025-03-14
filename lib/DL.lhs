@@ -72,17 +72,14 @@ checkBDLattice l = checkBoundedness l
 
 -- Helper functions for checkClosedMeetJoin
 -- finds meet & join in lattice, independant of 
-findMeet :: Lattice a -> a -> a -> Maybe a
-findJoin :: Lattice a -> a -> a -> Maybe a
+findMeet :: Ord a => Lattice a -> a -> a -> Maybe a
+findJoin :: Ord a => Lattice a -> a -> a -> Maybe a
 -- find all lower bounds, and take the maximum
 -- needs top to be a maybe function
 -- findMeet (L (OS set rel) _ _) x y  = findGreatest (OS upperBounds (filter (\(v,w) -> v ) rel))
                     -- where upperBounds = filter (\z -> (z, x) `Set.member` rel && (z, y) `Set.member` rel) (Set.toList set)
--- findMeet l x y = findGreatest (lowerBounds (carrier l) x y)
--- findJoin l x y = findLeast (upperBounds (carrier l) x y)
-findMeet = undefined
-findJoin = undefined
-
+findMeet l x y = findGreatest (carrier l) (lowerBounds (carrier l) x y)
+findJoin l x y = findLeast (carrier l) (upperBounds (carrier l) x y)
 
 -- For some ordered set (X, <=), find the greatest element of some subset S of X
 findGreatest :: Ord a => OrderedSet a -> Set.Set a -> Maybe a
@@ -90,21 +87,24 @@ findGreatest :: Ord a => OrderedSet a -> Set.Set a -> Maybe a
                     -- where greatest = foldr (\new old -> (if (old, new) `Set.member` r then new else old)) (head $ Set.toList s) s
 findGreatest os s = Set.lookupMax $ Set.filter (\x -> all (\y -> (y, x) `Set.member` rel os) s) s
 
-findLeast :: Ord a => OrderedSet a -> Maybe a
-findLeast = undefined
+findLeast :: Ord a => OrderedSet a -> Set.Set a -> Maybe a
+findLeast os s = Set.lookupMax $ Set.filter (\x -> all (\y -> (x, y) `Set.member` rel os) s) s
 
 -- set of elements above a1 and a2
 upperBounds :: Ord a => OrderedSet a -> a -> a -> Set.Set a
-upperBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (a1, c) `Set.member` (rel os), 
+upperBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (a1, c) `Set.member` (rel os) && 
                                                            (a2, c) `Set.member` (rel os)]
 
 lowerBounds :: Ord a => OrderedSet a -> a -> a -> Set.Set a
-lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.member` (rel os), 
+lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.member` (rel os) && 
                                                            (c, a2) `Set.member` (rel os)]
 
 -- test ordered Set
 myos :: OrderedSet Int
-myos = Poset.closurePS $ OS (Set.fromList [0,1,2,3,4, 5]) (Set.fromList [(1,2), (2,3), (1,3),(3,4),(4,5)])
+myos = Poset.closurePS $ OS (Set.fromList [0,1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
+
+mylat :: Lattice Int
+mylat = L myos (findMeet myos) (findJoin myos)
 
 -- uses meet & join function inside lattice, for arb meets & joins
 -- only works on finite lattices.
