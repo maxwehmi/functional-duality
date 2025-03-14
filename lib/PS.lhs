@@ -9,7 +9,7 @@
 \begin{code}
 module PriestleySpaces where
 
-import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, isProperSubsetOf)
+import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, member, empty, cartesianProduct, isProperSubsetOf)
 
 import Data.Bifunctor (bimap)
 
@@ -29,9 +29,41 @@ data PriestleySpace a = PS {
     relationPS :: Relation a
 }
 
-checkTopology :: TopoSpace a -> Bool
-checkTopology = undefined
--- use library from other topology project
+checkTopology :: Ord a => TopoSpace a -> Bool
+--Checks topology condition, really assumes the input is finite
+checkTopology (TS space top) = member space top && member empty top && unionClosure top == top && intersectionClosure top == top 
+   -- all (\ y -> all (\ x -> member (union x y) top ) top) top &&
+   -- all (\ y -> all (\ x -> member (intersection x y) top ) top) top 
+
+
+fixTopology :: Ord a => TopoSpace a -> TopoSpace a
+--makes the input space into a topological space
+fixTopology (TS space top) = (TS space fixedTop ) where 
+    fixedTop  = union (fromList [space, empty]) (unionClosure $ intersectionClosure top) 
+
+unionStep :: (Ord a) => Set (Set a) -> Set (Set a)
+unionStep x = Data.Set.map (uncurry union) (cartesianProduct x x)
+
+
+intersectionStep :: (Ord a) => Set (Set a) -> Set (Set a)
+intersectionStep x = Data.Set.map (uncurry intersection) (cartesianProduct x x)
+
+unionClosure :: (Eq a, Ord a) => Set (Set a) -> Set (Set a)
+unionClosure y = do 
+                let cycle1 = unionStep y
+                if y == cycle1 
+                then y
+                else unionStep cycle1 
+
+
+
+intersectionClosure :: (Eq a, Ord a) => Set (Set a) -> Set (Set a)
+intersectionClosure z = do 
+                let cycle1 = intersectionStep z
+                if z == cycle1 
+                then z
+                else intersectionStep cycle1 
+
 
 getTopoSpace :: PriestleySpace a -> TopoSpace a
 getTopoSpace p = TS (setPS p) (topologyPS p)
