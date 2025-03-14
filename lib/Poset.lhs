@@ -5,7 +5,6 @@
 module Poset where
 
 import qualified Data.Set as Set
-import Data.Set.Internal
 
 type Relation a = Set.Set (a,a)
 
@@ -35,10 +34,6 @@ But I see everyone else's code also pretty much always assumes Ord.
 checkReflAlt :: Ord a =>  OrderedSet a -> Bool
 checkReflAlt (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 
-
-setEq :: Ord a => Set a -> Set a -> Bool
-setEq s1 s2 = Set.toList s1 == Set.toList s2
-
 -- this relies on the fact that "Set.fromList" eliminates duplicates, as Set shouldn't care about them
 relationWellDef :: Ord a => OrderedSet a -> Bool
 relationWellDef (OS s r) = Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r)) `Set.isSubsetOf` s
@@ -55,7 +50,7 @@ checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 
 
 checkPoset :: Ord a => OrderedSet a -> Bool
-checkPoset x = checkRefl x && checkTrans x && checkAntiSym x
+checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && relationWellDef x
 
 
 
@@ -82,6 +77,7 @@ closureTrans  currentSet =
 
 closurePS :: Ord a => OrderedSet a -> OrderedSet a
 closurePS os
+ | not (relationWellDef os) = error "relation isn't well-defined"
  | not (checkAntiSym os)  = error "relation isn't anti-symmetric"
  | otherwise = closureTrans $ closureRefl os
 
