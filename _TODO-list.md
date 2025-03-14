@@ -15,7 +15,7 @@
 - [x] write a check whether to the check the relation does not contain any elements not in the underlying set of our poset.
 
 ## DL: 
-- [ ] Write a function which checks if a given Ordered Set forms a lattice, i.e. has meets and joins
+- [x] Write a function which checks if a given Ordered Set forms a lattice, i.e. has meets and joins
 - [x] Write a function which checks if a given Lattice is bounded
 - [x] Write a function which checks if a given Lattice is distributive
 - [ ] Write a function which converts a Poset into a lattice (if it has meets and joins)

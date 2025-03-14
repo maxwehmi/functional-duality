@@ -76,7 +76,7 @@ checkBDLattice l = checkBoundedness l
                     &&
                    checkDistributivity l
                     &&
-                   checkClosedMeetJoin l 
+                   checkLattice l 
 
 -- Helper functions for checkClosedMeetJoin
 -- finds meet & join in lattice, independant of 
@@ -132,8 +132,9 @@ arbJoin :: Lattice a -> a -> a -> a
 arbJoin = undefined
 arbMeet = undefined
 
-checkLattice :: Lattice a -> Bool
-checkLattice = undefined 
+-- check whether actual meet & join align with functions, check whether closed under meet and join
+checkLattice :: Ord a => Lattice a -> Bool
+checkLattice l = checkMeetJoinMakeSense l && checkClosedMeetJoin l
 
 makeLattice :: OrderedSet a -> Lattice a 
 makeLattice = undefined
