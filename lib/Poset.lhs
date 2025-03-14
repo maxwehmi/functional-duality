@@ -38,8 +38,8 @@ tuplesUnfold :: Ord a => Relation a -> Set.Set a
 tuplesUnfold r = Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r))
 
 -- this relies on the fact that "Set.fromList" eliminates duplicates, as Set shouldn't care about them
-checkrelationWellDef :: Ord a => OrderedSet a -> Bool
-checkrelationWellDef (OS s r) = tuplesUnfold r `Set.isSubsetOf` s
+checkRelationWellDef :: Ord a => OrderedSet a -> Bool
+checkRelationWellDef (OS s r) = tuplesUnfold r `Set.isSubsetOf` s
 
 checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl os = os == closureRefl os
@@ -53,7 +53,7 @@ checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 
 
 checkPoset :: Ord a => OrderedSet a -> Bool
-checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkrelationWellDef x
+checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWellDef x
 
 
 
@@ -80,7 +80,7 @@ closureTrans  currentSet =
 
 closurePS :: Ord a => OrderedSet a -> OrderedSet a
 closurePS os
- | not (checkrelationWellDef os) = error "relation isn't well-defined"
+ | not (checkRelationWellDef os) = error "relation isn't well-defined"
  | not (checkAntiSym os)  = error "relation isn't anti-symmetric"
  | otherwise = closureTrans $ closureRefl os
 
@@ -88,14 +88,20 @@ closurePS os
 unsharedElements :: Ord a => Set.Set a -> Set.Set a -> Set.Set a
 unsharedElements x y = (x `Set.union` y) `Set.difference`  (x `Set.intersection` y)
 
+
+-- this maybe could've been done more simply, but idk it seems to work like this
 forceRelation :: Ord a => OrderedSet a -> OrderedSet a
 forceRelation (OS s r) 
- | checkrelationWellDef (OS s r) = OS s r
- | otherwise = OS s ( r `Set.difference` Set.fromList [(x,y) | x <- Set.toList $ unsharedElements s (tuplesUnfold r), y <- Set.toList s]  )
+ | checkRelationWellDef (OS s r) = OS s r
+ | otherwise = OS s ( r `Set.difference` Set.fromList ([(x,y) | x <- Set.toList $ unsharedElements s (tuplesUnfold r), y <- Set.toList s] ++ [(x,y) | y <- Set.toList $ unsharedElements s (tuplesUnfold r), x <- Set.toList s]  )  )
 
 forceAntiSym = undefined
 
 forcePS :: Ord a => OrderedSet a -> OrderedSet a
 forcePS = closurePS . forceAntiSym . forceRelation
+
+
+myOS :: OrderedSet Integer
+myOS = OS (Set.fromList [1..4]) (Set.fromList [(1,4), (4,5)])
 
 \end{code}
