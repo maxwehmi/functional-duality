@@ -41,7 +41,7 @@ setEq s1 s2 = Set.toList s1 == Set.toList s2
 
 -- this relies on the fact that "Set.fromList" eliminates duplicates, as Set shouldn't care about them
 relationWellDef :: Ord a => OrderedSet a -> Bool
-relationWellDef (OS s r) = s == Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r)) 
+relationWellDef (OS s r) = Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r)) `Set.isSubsetOf` s
 
 checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl os = os == closureRefl os
