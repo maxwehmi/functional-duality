@@ -14,18 +14,20 @@ import Data.Set (Set, toList, fromList, intersection, union, difference, filter,
 import Data.Bifunctor (bimap)
 
 import Poset
+import Mapping
 
 --import qualified Data.IntMap as Data.set
 
+type Topology a = Set (Set a)
 
 data TopoSpace a = TS {
     setTS :: Set a,
-    topologyTS :: Set (Set a)
+    topologyTS :: Topology a
 }
 
 data PriestleySpace a = PS {
     setPS :: Set a,
-    topologyPS :: Set (Set a),
+    topologyPS :: Topology a,
     relationPS :: Relation a
 }
 
@@ -41,14 +43,14 @@ fixTopology :: Ord a => TopoSpace a -> TopoSpace a
 fixTopology (TS space top) = TS space fixedTop  where 
     fixedTop  = fromList [space, empty] `union` unionClosure (intersectionClosure top)
 
-unionStep :: (Ord a) => Set (Set a) -> Set (Set a)
+unionStep :: (Ord a) => Topology a -> Topology a
 unionStep x = Data.Set.map (uncurry union) (cartesianProduct x x)
 
 
-intersectionStep :: (Ord a) => Set (Set a) -> Set (Set a)
+intersectionStep :: (Ord a) => Topology a -> Topology a
 intersectionStep x = Data.Set.map (uncurry intersection) (cartesianProduct x x)
 
-unionClosure :: (Eq a, Ord a) => Set (Set a) -> Set (Set a)
+unionClosure :: (Eq a, Ord a) => Topology a -> Topology a
 unionClosure y = do 
                 let cycle1 = unionStep y
                 if y == cycle1 
@@ -57,7 +59,7 @@ unionClosure y = do
 
 
 
-intersectionClosure :: (Eq a, Ord a) => Set (Set a) -> Set (Set a)
+intersectionClosure :: (Eq a, Ord a) => Topology a -> Topology a
 intersectionClosure z = do 
                 let cycle1 = intersectionStep z
                 if z == cycle1 
@@ -89,7 +91,7 @@ implies x y = not x || y
 --usual implication shorthand 
 
 
-clopUp :: Ord a => PriestleySpace a -> Set (Set a)
+clopUp :: Ord a => PriestleySpace a -> Topology a
 -- In the finite case those are just the upsets, I think it's at least honest to implement a general checker anyway
 clopUp (PS space top ord) = intersection (clopens top ) (upsets top) where 
         clopens = Data.Set.filter (\ x -> difference space x `elem` top)  
@@ -99,7 +101,7 @@ clopUp (PS space top ord) = intersection (clopens top ) (upsets top) where
 upClosure :: (Eq a, Ord a) => Set a -> Relation a -> Set a 
 upClosure set1 relation = Data.Set.map snd (Data.Set.filter (\ x -> fst x `elem` set1 ) relation) `union` set1 
 
-inclusionOrder :: Ord a => Set (Set a) -> Relation (Set a)
+inclusionOrder :: Ord a => Topology a -> Relation (Set a)
 -- Constructs (maybe) an order out of the clopen upsets of a given PS
 inclusionOrder x = fromList [ (z ,y) |  z <- toList x, y <- toList x, isSubsetOf z y ]
 --This may give problems if we convert too many times from spaces to the clopup Dual, we could Use Data.Set.Monad and have a monad instance to avoid nesting sets
@@ -113,60 +115,52 @@ clopMap = if {checkDBLattice $ makeLattice $ (\ x -> (\ y -> OS y inclusionOrder
         then {makeLattice $ (\ x -> (\ y -> OS y (inclusionOrder y)) clopUp x) }
     |   else {error "104!"}
  -}
-evaluateMap :: (Ord a, Ord b) => Set (a,b) -> a -> b
-evaluateMap mapping x | size (images mapping x) == 1 = elemAt 0 (images mapping x)
-                      | otherwise = error "Given Relation is not a mapping" 
+\end{code}
 
--- given a possible function, we get the the image of some singleton a
--- should be one to be a function
-images :: (Ord a, Ord b) => Set (a,b) -> a -> Set b
-images mapping x = Data.Set.map snd $ Data.Set.filter (\ (y,_) -> x == y) mapping
+When working with Priestley Space, we want to be able to check if two given ones are "similar enough", i.e. isomorphic. This will become important when we want to confirm that a Priestley Space is isomorphic to the dual of its dual. \\
+To check isomorphism, we have to be given two Priestley Spaces and a map between them. The map is an isomorphism, if it is actually a map, bijective, a homoemorphism on the topological spaces and an order isomorphism on the relations. If the map is an isomorphism, the spaces are isomorphic. 
 
-getPreimage :: Eq b => Set (a,b) -> b -> a
-getPreimage mapping y | size (getPreimages y mapping) == 1 = fst $ elemAt 0 (getPreimages y mapping)
-                      | otherwise = error "Either no or too many preimages"
-
--- gets preimages for b
-getPreimages :: Eq b => b -> Set (a,b) -> Set (a,b)
-getPreimages y = Data.Set.filter (\ (_,z) -> z == y)
-
-
-
-checkIso :: (Eq a, Ord a) => PriestleySpace a -> PriestleySpace a -> Set (a,a) -> Bool
+\begin{code}
+checkIso :: (Eq a, Ord a) => PriestleySpace a -> PriestleySpace a -> Map a a -> Bool
 checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping 
     && checkBijective sb mapping 
-    && checkTopologyMap ta tb mapping -- homeomporphism on PS
-    && checkRelationMap ra rb mapping
+    && checkHomoemorphism ta tb mapping
+    && checkOrderIso ra rb mapping
+\end{code}
 
--- checks whether this is a function (unique output)
-checkMapping :: Eq a => Set a -> Set (a,b) -> Bool
-checkMapping sa mapping = all (\ x -> size (getMappings x mapping) == 1) sa
+Assuming bijectivity (by laziness of \&\&), to check that the given map is a homeomorphism, we have to check that it is an open and continuous map, i.e. it maps opens to opens and the preimages of opens are also open. This means that applying the map to an open set in the topology of the domain should yield an element of the topology of the codomain, so applying it to the set of opens of the domain (its topology) should yield a subset of the opens of the codomain (its topology). Similarly, we check that the preimage of the topology of the codomain is a subset of the topology of the domain.
 
-getMappings :: Eq a => a -> Set (a,b) -> Set (a,b)
-getMappings x = Data.Set.filter (\ (y,_) -> y == x)
+\begin{code}
+checkHomoemorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
+checkHomoemorphism ta tb mapping = 
+    mapTop mapping ta `isSubsetOf` tb
+    && premapTop mapping tb `isSubsetOf` ta
+\end{code}
 
-checkBijective :: Eq b => Set b -> Set (a,b) -> Bool
-checkBijective sb mapping = all (\ y -> size (getPreimages y mapping) == 1) sb
+To apply the map to every open and thus every element of every open, we have to nest \verb:Data.Set.map: twice. Again, we deal similarly with the preimages.
 
--- checks open and continuous (under condition mapping is bijective)
-checkTopologyMap :: (Eq a, Eq b, Ord a, Ord b) => Set (Set a) -> Set (Set b) -> Set (a,b) -> Bool
-checkTopologyMap ta tb mapping = 
-    mapTop mapping ta == tb -- proof this? in our report
-    && premapTop mapping tb == ta
+\begin{code}
+mapTop :: (Ord a, Ord b) => Map a b -> Topology a -> Topology b
+mapTop mapping = Data.Set.map (Data.Set.map (getImage mapping))
 
-mapTop :: (Ord a, Ord b) => Set (a,b) -> Set (Set a) -> Set (Set b)
-mapTop mapping = Data.Set.map (Data.Set.map (evaluateMap mapping))
-
-premapTop :: (Ord a, Ord b) => Set (a,b) -> Set (Set b) -> Set (Set a)
+premapTop :: (Ord a, Ord b) => Map a b -> Topology b -> Topology a
 premapTop mapping = Data.Set.map (Data.Set.map (getPreimage mapping))
+\end{code}
 
-checkRelationMap :: (Eq a, Eq b, Ord a, Ord b) => Relation a -> Relation b -> Set (a,b) -> Bool
-checkRelationMap ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
+Lastly, it remains the check that the map is an order isomorphism, which means that two elements $x,y$ of the domain satisfy $x\leq y$ in the domain iff $f(x)\leq f(y)$ in the codomain (here $f$ is the map). This means that applying the map component wise to every pair of the relation in the domain should yield the relation of the codomain and vice versa. 
 
-mapRel :: (Ord a, Ord b) => Set (a,b) -> Relation a -> Relation b
-mapRel mapping = Data.Set.map (Data.Bifunctor.bimap (evaluateMap mapping) (evaluateMap mapping))
+\begin{code}
+checkOrderIso :: (Ord a, Ord b) => Relation a -> Relation b -> Map a b -> Bool
+checkOrderIso ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
+\end{code}
 
-premapRel :: (Ord a, Ord b) => Set (a,b) -> Relation b -> Relation a
+Similar to above, we have to nest \verb:Data.Set.map: with \verb:Data.Bifunctor.bimap: to apply the map to both components of all pairs in the relation.
+
+\begin{code}
+mapRel :: (Ord a, Ord b) => Map a b -> Relation a -> Relation b
+mapRel mapping = Data.Set.map (Data.Bifunctor.bimap (getImage mapping) (getImage mapping))
+
+premapRel :: (Ord a, Ord b) => Map a b -> Relation b -> Relation a
 premapRel mapping = Data.Set.map (bimap (getPreimage mapping) (getPreimage mapping))
 
 
