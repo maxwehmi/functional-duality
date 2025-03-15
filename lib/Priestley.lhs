@@ -14,6 +14,7 @@ import Data.Set (Set, toList, fromList, intersection, union, difference, filter,
 import Data.Bifunctor (bimap)
 
 import Poset
+import Mapping
 
 --import qualified Data.IntMap as Data.set
 
@@ -113,60 +114,34 @@ clopMap = if {checkDBLattice $ makeLattice $ (\ x -> (\ y -> OS y inclusionOrder
         then {makeLattice $ (\ x -> (\ y -> OS y (inclusionOrder y)) clopUp x) }
     |   else {error "104!"}
  -}
-evaluateMap :: (Ord a, Ord b) => Set (a,b) -> a -> b
-evaluateMap mapping x | size (images mapping x) == 1 = elemAt 0 (images mapping x)
-                      | otherwise = error "Given Relation is not a mapping" 
-
--- given a possible function, we get the the image of some singleton a
--- should be one to be a function
-images :: (Ord a, Ord b) => Set (a,b) -> a -> Set b
-images mapping x = Data.Set.map snd $ Data.Set.filter (\ (y,_) -> x == y) mapping
-
-getPreimage :: Eq b => Set (a,b) -> b -> a
-getPreimage mapping y | size (getPreimages y mapping) == 1 = fst $ elemAt 0 (getPreimages y mapping)
-                      | otherwise = error "Either no or too many preimages"
-
--- gets preimages for b
-getPreimages :: Eq b => b -> Set (a,b) -> Set (a,b)
-getPreimages y = Data.Set.filter (\ (_,z) -> z == y)
 
 
 
-checkIso :: (Eq a, Ord a) => PriestleySpace a -> PriestleySpace a -> Set (a,a) -> Bool
+checkIso :: (Eq a, Ord a) => PriestleySpace a -> PriestleySpace a -> Map a a -> Bool
 checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping 
     && checkBijective sb mapping 
-    && checkTopologyMap ta tb mapping -- homeomporphism on PS
-    && checkRelationMap ra rb mapping
-
--- checks whether this is a function (unique output)
-checkMapping :: Eq a => Set a -> Set (a,b) -> Bool
-checkMapping sa mapping = all (\ x -> size (getMappings x mapping) == 1) sa
-
-getMappings :: Eq a => a -> Set (a,b) -> Set (a,b)
-getMappings x = Data.Set.filter (\ (y,_) -> y == x)
-
-checkBijective :: Eq b => Set b -> Set (a,b) -> Bool
-checkBijective sb mapping = all (\ y -> size (getPreimages y mapping) == 1) sb
+    && checkHomoemorphism ta tb mapping -- homeomporphism on PS
+    && checkOrderIso ra rb mapping
 
 -- checks open and continuous (under condition mapping is bijective)
-checkTopologyMap :: (Eq a, Eq b, Ord a, Ord b) => Set (Set a) -> Set (Set b) -> Set (a,b) -> Bool
-checkTopologyMap ta tb mapping = 
+checkHomoemorphism :: (Ord a, Ord b) => Set (Set a) -> Set (Set b) -> Map a b -> Bool
+checkHomoemorphism ta tb mapping = 
     mapTop mapping ta == tb -- proof this? in our report
     && premapTop mapping tb == ta
 
-mapTop :: (Ord a, Ord b) => Set (a,b) -> Set (Set a) -> Set (Set b)
-mapTop mapping = Data.Set.map (Data.Set.map (evaluateMap mapping))
+mapTop :: (Ord a, Ord b) => Map a b -> Set (Set a) -> Set (Set b)
+mapTop mapping = Data.Set.map (Data.Set.map (getImage mapping))
 
-premapTop :: (Ord a, Ord b) => Set (a,b) -> Set (Set b) -> Set (Set a)
+premapTop :: (Ord a, Ord b) => Map a b -> Set (Set b) -> Set (Set a)
 premapTop mapping = Data.Set.map (Data.Set.map (getPreimage mapping))
 
-checkRelationMap :: (Eq a, Eq b, Ord a, Ord b) => Relation a -> Relation b -> Set (a,b) -> Bool
-checkRelationMap ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
+checkOrderIso :: (Ord a, Ord b) => Relation a -> Relation b -> Map a b -> Bool
+checkOrderIso ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
 
-mapRel :: (Ord a, Ord b) => Set (a,b) -> Relation a -> Relation b
-mapRel mapping = Data.Set.map (Data.Bifunctor.bimap (evaluateMap mapping) (evaluateMap mapping))
+mapRel :: (Ord a, Ord b) => Map a b -> Relation a -> Relation b
+mapRel mapping = Data.Set.map (Data.Bifunctor.bimap (getImage mapping) (getImage mapping))
 
-premapRel :: (Ord a, Ord b) => Set (a,b) -> Relation b -> Relation a
+premapRel :: (Ord a, Ord b) => Map a b -> Relation b -> Relation a
 premapRel mapping = Data.Set.map (bimap (getPreimage mapping) (getPreimage mapping))
 
 
