@@ -18,15 +18,16 @@ import Mapping
 
 --import qualified Data.IntMap as Data.set
 
+type Topology a = Set (Set a)
 
 data TopoSpace a = TS {
     setTS :: Set a,
-    topologyTS :: Set (Set a)
+    topologyTS :: Topology a
 }
 
 data PriestleySpace a = PS {
     setPS :: Set a,
-    topologyPS :: Set (Set a),
+    topologyPS :: Topology a,
     relationPS :: Relation a
 }
 
@@ -42,14 +43,14 @@ fixTopology :: Ord a => TopoSpace a -> TopoSpace a
 fixTopology (TS space top) = TS space fixedTop  where 
     fixedTop  = fromList [space, empty] `union` unionClosure (intersectionClosure top)
 
-unionStep :: (Ord a) => Set (Set a) -> Set (Set a)
+unionStep :: (Ord a) => Topology a -> Topology a
 unionStep x = Data.Set.map (uncurry union) (cartesianProduct x x)
 
 
-intersectionStep :: (Ord a) => Set (Set a) -> Set (Set a)
+intersectionStep :: (Ord a) => Topology a -> Topology a
 intersectionStep x = Data.Set.map (uncurry intersection) (cartesianProduct x x)
 
-unionClosure :: (Eq a, Ord a) => Set (Set a) -> Set (Set a)
+unionClosure :: (Eq a, Ord a) => Topology a -> Topology a
 unionClosure y = do 
                 let cycle1 = unionStep y
                 if y == cycle1 
@@ -58,7 +59,7 @@ unionClosure y = do
 
 
 
-intersectionClosure :: (Eq a, Ord a) => Set (Set a) -> Set (Set a)
+intersectionClosure :: (Eq a, Ord a) => Topology a -> Topology a
 intersectionClosure z = do 
                 let cycle1 = intersectionStep z
                 if z == cycle1 
@@ -90,7 +91,7 @@ implies x y = not x || y
 --usual implication shorthand 
 
 
-clopUp :: Ord a => PriestleySpace a -> Set (Set a)
+clopUp :: Ord a => PriestleySpace a -> Topology a
 -- In the finite case those are just the upsets, I think it's at least honest to implement a general checker anyway
 clopUp (PS space top ord) = intersection (clopens top ) (upsets top) where 
         clopens = Data.Set.filter (\ x -> difference space x `elem` top)  
@@ -100,7 +101,7 @@ clopUp (PS space top ord) = intersection (clopens top ) (upsets top) where
 upClosure :: (Eq a, Ord a) => Set a -> Relation a -> Set a 
 upClosure set1 relation = Data.Set.map snd (Data.Set.filter (\ x -> fst x `elem` set1 ) relation) `union` set1 
 
-inclusionOrder :: Ord a => Set (Set a) -> Relation (Set a)
+inclusionOrder :: Ord a => Topology a -> Relation (Set a)
 -- Constructs (maybe) an order out of the clopen upsets of a given PS
 inclusionOrder x = fromList [ (z ,y) |  z <- toList x, y <- toList x, isSubsetOf z y ]
 --This may give problems if we convert too many times from spaces to the clopup Dual, we could Use Data.Set.Monad and have a monad instance to avoid nesting sets
@@ -130,7 +131,7 @@ checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping
 Assuming bijectivity (by laziness of \&\&), to check that the given map is a homeomorphism, we have to check that it is an open and continuous map, i.e. it maps opens to opens and the preimages of opens are also open. This means that applying the map to an open set in the topology of the domain should yield an element of the topology of the codomain, so applying it to the set of opens of the domain (its topology) should yield a subset of the opens of the codomain (its topology). Similarly, we check that the preimage of the topology of the codomain is a subset of the topology of the domain.
 
 \begin{code}
-checkHomoemorphism :: (Ord a, Ord b) => Set (Set a) -> Set (Set b) -> Map a b -> Bool
+checkHomoemorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
 checkHomoemorphism ta tb mapping = 
     mapTop mapping ta `isSubsetOf` tb
     && premapTop mapping tb `isSubsetOf` ta
@@ -139,10 +140,10 @@ checkHomoemorphism ta tb mapping =
 To apply the map to every open and thus every element of every open, we have to nest \verb:Data.Set.map: twice. Again, we deal similarly with the preimages.
 
 \begin{code}
-mapTop :: (Ord a, Ord b) => Map a b -> Set (Set a) -> Set (Set b)
+mapTop :: (Ord a, Ord b) => Map a b -> Topology a -> Topology b
 mapTop mapping = Data.Set.map (Data.Set.map (getImage mapping))
 
-premapTop :: (Ord a, Ord b) => Map a b -> Set (Set b) -> Set (Set a)
+premapTop :: (Ord a, Ord b) => Map a b -> Topology b -> Topology a
 premapTop mapping = Data.Set.map (Data.Set.map (getPreimage mapping))
 \end{code}
 
