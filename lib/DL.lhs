@@ -109,7 +109,11 @@ lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.
 
 -- test ordered Set
 myos :: OrderedSet Int
-myos = Poset.closurePS $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,3), (1,2), (2,4), (3,4),(4,5)])
+-- <<<<<<< Poset-anti-symm-force
+myos = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
+--    =======
+-- myos = Poset.closurePS $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,3), (1,2), (2,4), (3,4),(4,5)])
+-- >>>>>>> main
 
 mylat1 :: Lattice Int
 mylat1 = L myos (-) (+)
