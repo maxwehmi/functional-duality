@@ -114,30 +114,48 @@ clopMap = if {checkDBLattice $ makeLattice $ (\ x -> (\ y -> OS y inclusionOrder
         then {makeLattice $ (\ x -> (\ y -> OS y (inclusionOrder y)) clopUp x) }
     |   else {error "104!"}
  -}
+\end{code}
 
+When working with Priestley Space, we want to be able to check if two given ones are "similar enough", i.e. isomorphic. This will become important when we want to confirm that a Priestley Space is isomorphic to the dual of its dual. \\
+To check isomorphism, we have to be given two Priestley Spaces and a map between them. The map is an isomorphism, if it is actually a map, bijective, a homoemorphism on the topological spaces and an order isomorphism on the relations. If the map is an isomorphism, the spaces are isomorphic. 
 
-
+\begin{code}
 checkIso :: (Eq a, Ord a) => PriestleySpace a -> PriestleySpace a -> Map a a -> Bool
 checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping 
     && checkBijective sb mapping 
-    && checkHomoemorphism ta tb mapping -- homeomporphism on PS
+    && checkHomoemorphism ta tb mapping
     && checkOrderIso ra rb mapping
+\end{code}
 
--- checks open and continuous (under condition mapping is bijective)
+Assuming bijectivity (by laziness of \&\&), to check that the given map is a homeomorphism, we have to check that it is an open and continuous map, i.e. it maps opens to opens and the preimages of opens are also open. This means that applying the map to an open set in the topology of the domain should yield an element of the topology of the codomain, so applying it to the set of opens of the domain (its topology) should yield a subset of the opens of the codomain (its topology). Similarly, we check that the preimage of the topology of the codomain is a subset of the topology of the domain.
+
+\begin{code}
 checkHomoemorphism :: (Ord a, Ord b) => Set (Set a) -> Set (Set b) -> Map a b -> Bool
 checkHomoemorphism ta tb mapping = 
-    mapTop mapping ta == tb -- proof this? in our report
-    && premapTop mapping tb == ta
+    mapTop mapping ta `isSubsetOf` tb
+    && premapTop mapping tb `isSubsetOf` ta
+\end{code}
 
+To apply the map to every open and thus every element of every open, we have to nest \verb:Data.Set.map: twice. Again, we deal similarly with the preimages.
+
+\begin{code}
 mapTop :: (Ord a, Ord b) => Map a b -> Set (Set a) -> Set (Set b)
 mapTop mapping = Data.Set.map (Data.Set.map (getImage mapping))
 
 premapTop :: (Ord a, Ord b) => Map a b -> Set (Set b) -> Set (Set a)
 premapTop mapping = Data.Set.map (Data.Set.map (getPreimage mapping))
+\end{code}
 
+Lastly, it remains the check that the map is an order isomorphism, which means that two elements $x,y$ of the domain satisfy $x\leq y$ in the domain iff $f(x)\leq f(y)$ in the codomain (here $f$ is the map). This means that applying the map component wise to every pair of the relation in the domain should yield the relation of the codomain and vice versa. 
+
+\begin{code}
 checkOrderIso :: (Ord a, Ord b) => Relation a -> Relation b -> Map a b -> Bool
 checkOrderIso ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
+\end{code}
 
+Similar to above, we have to nest \verb:Data.Set.map: with \verb:Data.Bifunctor.bimap: to apply the map to both components of all pairs in the relation.
+
+\begin{code}
 mapRel :: (Ord a, Ord b) => Map a b -> Relation a -> Relation b
 mapRel mapping = Data.Set.map (Data.Bifunctor.bimap (getImage mapping) (getImage mapping))
 

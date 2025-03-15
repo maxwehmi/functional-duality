@@ -33,8 +33,10 @@
 - [ ] Write a translation function from a PS to a DL 
 - [ ] Write arbitrary instances for DL
 - [ ] Write arbitrary instances for PS
-- [ ] Write a function which checks for two given DL if there is an isomorphism between them (or should the iso be given?)
-- [ ] Write a function which checks for two given PS if there is an isomorphism between them (or should the iso be given?)
+- [ ] Write a function which checks for two given DL if there is an isomorphism between them 
+  - [ ] Write a function that checks if a given map is an isomorphism between two DL
+- [ ] Write a function which checks for two given PS if there is an isomorphism between them 
+  - [x] Write a function that checks if a given map is an isomorphism between two PS
 
 ## Possible Extensions:
 - [ ] Generate minimal Priestley Space from a given Set
