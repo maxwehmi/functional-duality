@@ -1,3 +1,4 @@
+
 \section{Partially ordered sets}
 
 
@@ -116,10 +117,10 @@ Suppose $xR^{\dagger}y$ and $yR^{\dagger}z$. Since $R^{\dagger}$ is generated on
 
 If $x=y$ we're quickly done, since then $xR^{\dagger}z$. Likewise if $y=z$. So suppose they aren't equal to each other.
 
-Now suppose for contradiction %$x \cancel{R^{\dagger}} z$. Latex does not know \cancel, I dont know what this should mean
-Again by how $R^{\dagger}$ was defined, we must've had $zR^{+}x$. (If we didn't, then $(x,z) \notin \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, and so we'd have $(x,z) \in R^{+} \setminus \dots$).
+Now suppose for contradiction $x \cancel{R^{\dagger}} z$. Latex does not know \cancel, I dont know what this should mean
+Again by how $R^{\dagger}$ was defined, we must've had $zR^{+}x$. (If we didn't, then $(x,z) \notin \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, and so we'd have $(x,z) \in R^{+} \setminus \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$).
 
-But then by transitivity of $R^{+}$ we'd have $yR^{+}x$. But then $(x,y) \in \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, so by definition $(x,y) \notin R^{\dagger}$, i.e. % see above: $x\cancel{R^{\dagger}} y$, contradicting our assumption.
+But then by transitivity of $R^{+}$ we'd have $yR^{+}x$. But then $(x,y) \in \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, so by definition $(x,y) \notin R^{\dagger}$, i.e. see above: $x\cancel{R^{\dagger}} y$, contradicting our assumption.
 
 
 
