@@ -12,7 +12,7 @@ module Priestley where
 import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, member, empty, cartesianProduct)
 
 import Data.Bifunctor (bimap)
-
+import DL 
 import Poset
 
 --import qualified Data.IntMap as Data.set
@@ -105,14 +105,14 @@ inclusionOrder x = fromList [ (z ,y) |  z <- toList x, y <- toList x, isSubsetOf
 --This may give problems if we convert too many times from spaces to the clopup Dual, we could Use Data.Set.Monad and have a monad instance to avoid nesting sets
 --into sets multiple times 
 
-{-
-This goes commented since for whatever reason there VsCode won't allow me to import the DL file
+
+--This goes commented since for whatever reason there VsCode won't allow me to import the DL file
 
 clopMap :: PriestleySpace a -> Lattice a 
 clopMap = if {checkDBLattice $ makeLattice $ (\ x -> (\ y -> OS y inclusionOrder y) clopUp x) == True} 
         then {makeLattice $ (\ x -> (\ y -> OS y (inclusionOrder y)) clopUp x) }
     |   else {error "104!"}
- -}
+
 evaluateMap :: (Ord a, Ord b) => Set (a,b) -> a -> b
 evaluateMap mapping x | size (images mapping x) == 1 = elemAt 0 (images mapping x)
                       | otherwise = error "Given Relation is not a mapping" 
