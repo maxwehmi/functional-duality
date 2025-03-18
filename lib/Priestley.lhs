@@ -145,7 +145,7 @@ In particular, we want to be able to decide whether two spaces are isomorphic. t
 We also present the first step towards implementing the algebra duality: keeping things brief, the set of Clopen Upset of a Priestley space 
 is going to form a distributive lattice under the order induced by set-theoretic inclusion. \newline 
 To this extent, we implement a function to extract an order based on set-theoretic inclusion between sets, which we canlater apply to the Clopen Upsets of our topology.\newline 
-Next, we construct a lattice using the Clopen Upsets of our topological space and endowing this set with the desired inclusion-order. We make use of functions from the \enquote{DL} section to both construct the lattice and check it is distributive.
+Next, we construct a lattice using the Clopen Upsets of our topological space and endowing this set with the desired inclusion-order. We make use of functions from the "DL" section to both construct the lattice and check it is distributive.
 \begin{code}
 
 inclusionOrder :: Ord a => Topology a -> Relation (Set a)
