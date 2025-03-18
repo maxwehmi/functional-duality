@@ -155,34 +155,18 @@ lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.
 
 -- test ordered Set
 myos :: OrderedSet Int
--- <<<<<<< Poset-anti-symm-force
 myos = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
---    =======
--- myos = Poset.closurePS $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,3), (1,2), (2,4), (3,4),(4,5)])
--- >>>>>>> main
 
+-- not well-defined lattice
 mylat1 :: Lattice Int
 mylat1 = L myos (-) (+)
 
 mylat :: Lattice Int
-mylat = L myos (\x y -> fromJust $ findMeet mylat1 x y) (\x y -> fromJust $ findJoin mylat1 x y)
-
-
+mylat = L makeLattice myos
 
 fromJust :: Maybe a -> a
 fromJust (Just x) = x
 fromJust Nothing = error "Sorry, but your poset is not closed under meet and joins"
-
--- uses meet & join function inside lattice, for arb meets & joins
--- only works on finite lattices.
--- Boundedness of l is required for this function
-arbMeet :: Lattice a -> a -> a -> a
-arbJoin :: Lattice a -> a -> a -> a
---arbJoin l a1 a2  = rfold (\x y -> meet l $ x y) (fromJust $ top l) upperBs
-                   -- where upperBs = [c | c <- (set carrier l), (c, a1) `Set.member` (rel carrier l), 
-                                       --     (c, a2) `Set.member` (rel carrier l)] -- all elements above both a1 and a2
-arbJoin = undefined
-arbMeet = undefined
 
 -- check whether actual meet & join align with functions, check whether closed under meet and join
 checkLattice :: Ord a => Lattice a -> Bool
