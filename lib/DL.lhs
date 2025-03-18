@@ -189,6 +189,7 @@ checkLattice :: Ord a => Lattice a -> Bool
 checkLattice l = checkMeetJoinMakeSense l && checkClosedMeetJoin l
 
 -- I expect that the poset is already closed under meets and joins
+-- if ordered set is not already closed under meet and join, the lattice it makes won't be either
 makeLattice :: Ord a => OrderedSet a -> Lattice a 
 makeLattice os = L os (\x y -> fromJust $ findMeet preLattice x y) (\x y -> fromJust $ findJoin preLattice x y)
                 where preLattice = L os const const -- give it two mock functions
