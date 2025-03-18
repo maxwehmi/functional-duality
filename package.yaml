@@ -2,7 +2,7 @@ name: functional-duality-report
 version: 0.1.0.0
 synopsis: A Haskell implementation of translations between Distributive Lattices and Priestley Spaces
 description: See report.pdf
-maintainer: Max Wehmeier <maxwehmi@gmail.com>
+maintainer: Max Wehmeier <maxwehmi@gmail.com>, Giacomo de Antonellis <giacomobrdeantonellis@gmail.com>, Estel Koole <estelkoole@gmail.com>, Edoardo Menorello <edoardo.menorelllo@gmail.com>, Marco de Mayda <marcodemayda@gmail.com>
 category: Logic
 
 ghc-options: -Wall
