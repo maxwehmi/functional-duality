@@ -1,4 +1,6 @@
-\section{Disributive Lattices}
+\section{Distributive Lattices}
+
+
 
 \begin{code}
 module DL where
@@ -7,13 +9,59 @@ import Poset
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
 
+
+
+\end{code}
+
+This section is dedicated to Distributive Lattices. A lattice is a poset $P$ such that for every $a,b \in P$ the greatest lower bound of $\{a,b\}$ (the meet of $a,b: a \wedge b$) is in $P$ and least upper bound of $\{a,b\}$ (the join of $a,b: a \vee b$) is in $P$. 
+
+On top of this, a distributive lattice is a lattice whose meet and join satisfiy the two distributive laws: if $(L,\wedge, \vee)$ is a lattice, then: 
+\begin{enumerate}
+
+ \item $\forall a,b,c in L,    a \wedge (b \vee c) =  (a \wedge b) \vee (a \wedge c)$ 
+
+ \item $\forall a,b,c in L,    a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
+
+
+\end{enumerate}
+
+We define the data type of lattices in the following manner:
+
+
+
+\begin{code}
 data Lattice a = L {
     carrier :: OrderedSet a,
     meet :: a -> a -> a,
     join :: a -> a -> a 
     }
 
-    
+\end{code}
+
+Not every object of type lattice is an actual lattice in the mathematical sense: in particular three conditions have to be met for an object "l" of type "Lattice a", to be an actual lattice.
+
+
+
+\begin{itemize}
+
+ \item Since we are working with finite structures, each lattice is a bound lattice.Therefore given an object l of type Lattice a, the first thing to check is whether the object "carrier l" has a maximal and a least element.
+
+ \item The object "meet l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their greatest lower bound.
+
+
+ \item The object "join l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their least upper bound.
+
+
+
+
+\end{itemize}
+
+
+The aim of the following functions is to ensure that the objects of type "Lattice a" behave as desired.
+
+
+
+\begin{code}
 
 isTop :: Ord a => Lattice a -> a -> Bool
 isTop l x = all (\y -> (y, x) `elem` rel k) (set k)
@@ -109,38 +157,26 @@ lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.
 
 -- test ordered Set
 myos :: OrderedSet Int
--- <<<<<<< Poset-anti-symm-force
 myos = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
---    =======
--- myos = Poset.closurePS $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,3), (1,2), (2,4), (3,4),(4,5)])
--- >>>>>>> main
 
+-- not well-defined lattice
 mylat1 :: Lattice Int
 mylat1 = L myos (-) (+)
 
 mylat :: Lattice Int
-mylat = L myos (\x y -> fromJust $ findMeet mylat1 x y) (\x y -> fromJust $ findJoin mylat1 x y)
+mylat = makeLattice myos
 
 fromJust :: Maybe a -> a
 fromJust (Just x) = x
 fromJust Nothing = error "Sorry, but your poset is not closed under meet and joins"
-
--- uses meet & join function inside lattice, for arb meets & joins
--- only works on finite lattices.
--- Boundedness of l is required for this function
-arbMeet :: Lattice a -> a -> a -> a
-arbJoin :: Lattice a -> a -> a -> a
---arbJoin l a1 a2  = rfold (\x y -> meet l $ x y) (fromJust $ top l) upperBs
-                   -- where upperBs = [c | c <- (set carrier l), (c, a1) `Set.member` (rel carrier l), 
-                                       --     (c, a2) `Set.member` (rel carrier l)] -- all elements above both a1 and a2
-arbJoin = undefined
-arbMeet = undefined
+ 
 
 -- check whether actual meet & join align with functions, check whether closed under meet and join
 checkLattice :: Ord a => Lattice a -> Bool
 checkLattice l = checkMeetJoinMakeSense l && checkClosedMeetJoin l
 
 -- I expect that the poset is already closed under meets and joins
+-- if ordered set is not already closed under meet and join, the lattice it makes won't be either
 makeLattice :: Ord a => OrderedSet a -> Lattice a 
 makeLattice os = L os (\x y -> fromJust $ findMeet preLattice x y) (\x y -> fromJust $ findJoin preLattice x y)
                 where preLattice = L os const const -- give it two mock functions
