@@ -232,14 +232,14 @@ Pros:
 
 Cons: 
 \begin{itemize}
-\item This does change the carrier set (yes, haskell's texttt{Data.Set} does not implement a meta-notion of named elements referring to the same objects. When we define a set trough a list, which is what we always do, the elements are presumed to be distinct. This is showcased by the fact that a set has a defifinite cardinality. This wouldn't be possible without such an asumption, since then [a,b,c,d] could be of card 4, but might aswell be card 1, depending on how equality turns out.)
+\item This does change the carrier set.
 
-\item doing it after taking the transitive closure (which we want to i think) often results in a huge collapse, and makes the resulting set very small. Because any loop in the initial Ord set will all collapse to one point after the forcing anti-symm(alternative) to its transitive closure. 
+\item doing it after taking the transitive closure often results in a huge collapse, and makes the resulting set very small. Because any loop in the initial Ord set will all collapse to one point after the forcing anti-symm(alternative) to its transitive closure. 
 \end{itemize}
 
-To obtain it from a set wrt to a relation, we compute the quotientSet wrt to anti-symmetry: remove from s the bigger x that appears in a symmetric pair. This is a cheeky trick to select one of the two elements, based on the fact that we have \texttt{Ord a}. Without that I think it would be a real pain. So for any symmetric pair, we keep the smallest element in that pair as our cluster rapresentative.
+%To obtain it from a set wrt to a relation, we compute the quotientSet wrt to anti-symmetry: remove from s the bigger x that appears in a symmetric pair. This is a cheeky trick to select one of the two elements, based on the fact that we have \texttt{Ord a}. Without that I think it would be a real pain. So for any symmetric pair, we keep the smallest element in that pair as our cluster rapresentative. 
 
-Then we just let such quotient set be the new carrier set, and force the relation to be well-defined, just as sanity check.
+%Then we just let such quotient set be the new carrier set, and force the relation to be well-defined, just as sanity check.
 
 \begin{code}
 quotientAntiSym :: Ord a => Set.Set a -> Relation a -> Set.Set a
@@ -250,10 +250,6 @@ forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
 
 \end{code}
 
-The proof that this preserves transitivity is to do, but it seems fairly straightforward
-
-
-(there would also be a third way that David came up with when I chatted with him abou this, whose advantage is that it does not reduce either sets nor edges by much, so we might get more consistently interesting posets from arbitrary ordsets. But its more contrived and complicated, I'll think over it better before putting it in)
 
 
 \paragraph{forcePoset}
@@ -271,7 +267,7 @@ forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
 
 \end{code}
 
-Here's some GPT-generated test sets to play around with.
+
 
 \begin{code}
 os6 :: OrderedSet Integer
