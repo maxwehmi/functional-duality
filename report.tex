@@ -1,15 +1,16 @@
 \documentclass[12pt,a4paper]{article}
 \input{latexmacros.tex}
 
-\title{My Report}
-\author{Me}
+\title{A Haskell implementation of translations between Distributive Lattices and Priestley Spaces}
+\author{Giacomo de Antonelllis, Estel Koole, Marco de Mayda, Edoardo Menorello, Max Wehmeier}
 \date{\today}
-\hypersetup{pdfauthor={Me}, pdftitle={My Report}}
+\hypersetup{pdfauthor={Giacomo de Antonelllis, Estel Koole, Marco de Mayda, Edoardo Menorello, Max Wehmeier}, pdftitle={A Haskell implementation of translations between Distributive Lattices and Priestley Spaces}}
 
 \begin{document}
 
 \maketitle
 
+% I am leaving this in, so we remember that we still have to write them
 \begin{abstract}
 We give a toy example of a report in \emph{literate programming} style.
 The main advantage of this is that source code and documentation can
@@ -26,10 +27,15 @@ We use the listings package to typeset Haskell source code nicely.
 % We include one file for each section. The ones containing code should
 % be called something.lhs and also mentioned in the .cabal file.
 
-\input{Howto.tex}
+\input{lib/Mapping.lhs}
 
-\input{lib/Basics.lhs}
+\input{lib/Poset.lhs}
 
+\input{lib/Priestley.lhs}
+
+\input{lib/DL.lhs}
+
+% I am leaving these in, so we remember that we still have to write them
 \input{exec/Main.lhs}
 
 \input{test/simpletests.lhs}

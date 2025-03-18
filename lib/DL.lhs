@@ -1,5 +1,7 @@
 \section{Distributive Lattices}
 
+
+
 \begin{code}
 module DL where
 

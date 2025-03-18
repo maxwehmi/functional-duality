@@ -1,13 +1,13 @@
 cradle:
   stack:
     - path: "./lib"
-      component: "report:lib"
+      component: "functional-duality-report:lib"
 
     - path: "./exec/Main.lhs"
-      component: "report:exe:myprogram"
+      component: "functional-duality-report:exe:functional-duality"
 
     - path: "./exec/Paths_report.hs"
-      component: "report:exe:myprogram"
+      component: "functional-duality-report:exe:functional-duality"
 
     - path: "./test"
-      component: "report:test:simpletests"
+      component: "functional-duality-report:test:simpletests"
