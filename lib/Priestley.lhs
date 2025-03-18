@@ -110,10 +110,11 @@ inclusionOrder x = fromList [ (z ,y) |  z <- toList x, y <- toList x, isSubsetOf
 
 --This goes commented since for whatever reason there VsCode won't allow me to import the DL file
 
-clopMap :: PriestleySpace a -> Lattice a 
-clopMap = if {checkDL $ makeLattice $ (\ x -> (\ y -> OS y inclusionOrder y) clopUp x) == True} 
-        then {makeLattice $ (\ x -> (\ y -> OS y (inclusionOrder y)) clopUp x) }
-    |   else {error "104!"}
+clopMap :: Ord a => PriestleySpace a -> Lattice (Set a)
+clopMap  ps = do 
+              let result = makeLattice $  OS (clopUp ps) (inclusionOrder (clopUp ps)) 
+              if checkDL result then result else error "104!"
+
 \end{code}
 
 When working with Priestley Space, we want to be able to check if two given ones are "similar enough", i.e. isomorphic. This will become important when we want to confirm that a Priestley Space is isomorphic to the dual of its dual. \\
