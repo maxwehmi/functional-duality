@@ -60,7 +60,7 @@ checkRelationWellDef (OS s r) = tuplesUnfold r `Set.isSubsetOf` s
 \end{code}
 
 
-Checking for relations conditions are fairly self-explanatory and readable. If reflexive and transitive closure have been defined correctly, then it's a matter of checking closure is idempotent. But, I'm also including alternative checks, as a sanity test that doesn't rely on closures being correctly defined. Anti-symmetry is clear.
+Checking for relations conditions is fairly self-explanatory and readable. If reflexive and transitive closure have been defined correctly, then it's a matter of checking closure is idempotent. But, I'm also including alternative checks, as a sanity test that doesn't rely on closures being correctly defined. Anti-symmetry is clear.
 
 With the 3 properties checks, checking PoSets is quick (I additionally include checking the relation is well defined).
 
@@ -110,7 +110,7 @@ transStep :: Ord a => OrderedSet a -> OrderedSet a
 transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z (OS s r)])
 \end{code}
 
-Since this only adds "one-step" transtivity, we need to recurse the process until it is idempotent, i.e. the relation is fully transitive. Then we have obtained our transitive closure. This might be a bit hacky, perhaps there is a more straighforward way, similar to reflexive closure, but again it did not come to me.
+%Since this only adds "one-step" transtivity, we need to recurse the process until it is idempotent, i.e. the relation is fully transitive. Then we have obtained our transitive closure. This might be a bit hacky, perhaps there is a more straighforward way, similar to reflexive closure, but again it did not come to me.
 
 \begin{code}
 closureTrans :: Ord a => OrderedSet a -> OrderedSet a
@@ -170,11 +170,6 @@ Pros:
 \item it does not modify the carrier set (eg \texttt{Set.size}, the cardinality, will remain the same after the procedure).
 \end{itemize}
 
-Cons: 
-\begin{itemize}
-\item doesn't preserve logical properties. 
-\item we should test that this does tend torawrds very trivial posets when applied after transitive closure.
-\end{itemize}
 
 
 
@@ -191,7 +186,7 @@ forceAntiSym (OS s r)
 
 \subparagraph{Transitive preserving}
 
-We want to make sure that forcing anti-symmetry (removing the edges way) does not make us loose an existing property of the relations. It is fairly obvious that it does not remove reflexivity given $x \neq y$ is a condition (and anyways I apply reflexivity \emph{after} forcing anti-symmetry when forcing PoSets).
+We want to make sure that forcing anti-symmetry (removing the edges way) does not make us loose an existing property of the relations. It is fairly obvious that it does not remove reflexivity given $x \neq y$ is a condition (and anyways we apply reflexivity \emph{after} forcing anti-symmetry when forcing PoSets).
 
 But it is not obvious we don't lose transitivity, so here's a sketch of the proof.
 
