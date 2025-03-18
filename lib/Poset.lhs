@@ -3,7 +3,7 @@
 
 
 
-This section is devoted to the construction of posets. A poset $(P,\leq)$ is a structure such that $P$ is a set and $\leq$ is a partial order, that is $<$ is reflexive, transitive and antissimetric.
+This section is devoted to the construction of posets. A poset $(P,\leq)$ is a structure such that $P$ is a set and $\leq$ is a partial order, that is $\leq$ is reflexive, transitive and antissimetric.
 
 We import the standard library for sets, Data.Set, in order to be able to work with sets and we start by defining the OrderedSet data type for sets equipped with a relation.
 
