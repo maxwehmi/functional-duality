@@ -53,7 +53,7 @@ unsharedElements x y = (x `Set.union` y) `Set.difference`  (x `Set.intersection`
 
 \subsection{Checks}
 
-We might want to check if the relation over an ordered set is well-defined, in the sense that the "domain" and "co-domain" of the relation are a subset of the carrier set. Yes, the implementation currently does accept cases of non-well defined
+We might want to check if the relation over an ordered set is well-defined, in the sense that the "domain" and "co-domain" of the relation are a subset of the carrier set. Yes, the implementation of OrdSet does accept cases that are non-well defined in this sense.
 
 Using \texttt{tuplesUnfold} this is easy to do. (Though note I rely on the fact that \texttt{Set.fromList} eliminates duplicates, as \texttt{Set} shouldn't care about them, sets being extensional and all. But might want to double check it actually does so).
 
@@ -129,7 +129,7 @@ With these two "uncontroversial closures", we can make certain OrdSets into PoSe
 \begin{itemize}
 \item the relation is well defined (though perhaps forcing the relation to be well defined, see later function, would work actually, so we might rid of this case).
 \item the relation is anti-symmetric
-\item the transitive closure does not break anti-symmetry (this can happen, cosider the set $\{1,2,3\}$ with $1R2, 2R3, 3R1$. Anti-symmetry is lost when closing transitively)
+\item the transitive closure does not break anti-symmetry (this can happen, cosider the set $\{a,b,c\}$ with $aRb, bRc, cRa$. Anti-symmetry is lost when closing transitively)
 \end{itemize}
 
 \begin{code}
@@ -142,7 +142,10 @@ closurePoSet os
  | otherwise = closureTrans $ closureRefl os
 \end{code}
 
-If a given set does not have a well-defined relation, we might want to force it to be. We take the set, and remove from it the set of unshared elements. We defined a helping functions for this. So we generate this set from the list of tuples whose first element is a member of unsharedElements between the carrier set and the unfoldedTuples of R, conjoined with the same list but for the second element, i.e. the list of objects in the relation that are unshared with the carrier set.
+
+\subsection{Forcings}
+
+If a given set does not have a well-defined relation, we might want to force it to be. We take the set, and remove from it the set of unshared elements. We defined a helping functions for this. So we generate this set from the list of tuples whose first element is a member of unsharedElements between the carrier set and the unfoldedTuples of the relation, conjoined with the same list but for the second element, i.e. the list of objects in the relation that are unshared with the carrier set.
 
 \begin{code}
 -- this maybe could've been done more simply, but idk it seems to work like this
@@ -155,21 +158,12 @@ forceRelation (OS s r)
                                                         [(x,y) | (x,y) <- Set.toList r, y `Set.member` unsharedElements s (tuplesUnfold r)]
                                                        )
                     )
-
-
-mySet :: Set.Set Integer
-mySet = Set.fromList [1]
-myRel :: Set.Set (Integer, Integer)
-myRel = Set.fromList [(1,1),(2,2),(3,3)]
-
-intendedSet :: [(Integer, Integer)]
-intendedSet = [(x,y) | x <- Set.toList $ unsharedElements mySet (tuplesUnfold myRel), y <- Set.toList mySet]  ++ [(x,y) | y <- Set.toList $ unsharedElements mySet (tuplesUnfold myRel), x <- Set.toList mySet]
 \end{code}
 
 
-Even though there's no canonical anti-symmetric closure, we might nonetheless want to force anti-symmetry on an OrdSet.
+Even though there's no canonical anti-symmetric closure, we might nonetheless want to force anti-symmetry on an \texttt{OrdSet}.
 
-There are two ways, we have to see which we find more adequate, both have kind of pluses and minuses %Discuss and add to them!!!!!.
+There are two ways, we have to see which we find more adequate, both have kind of pluses and minuses % Discuss and add to them!!!!!.
 
 \paragraph{\texttt{forceAntiSym}}
 Given an OrdSet, we take away all the symmetric \emph{edges}.  So we take the relation and takeaway the set of symmetric tuples.
@@ -187,24 +181,24 @@ Cons:
 
 
 
-% (there would also be a third way, but its more complicated, I'll think over it better before putting it in)
-
+ 
 \begin{code}
 forceAntiSym :: Ord a => OrderedSet a -> OrderedSet a
 forceAntiSym (OS s r)
  | checkAntiSym (OS s r) = OS s r
- | otherwise = OS s (r `Set.difference` 
-    Set.fromList [(x,y)| x <- Set.toList s, y <- Set.toList s, x/= y && (y,x) `Set.member` r && (x,y) `Set.member` r])
+ | otherwise = OS s (r `Set.difference` Set.fromList [(x,y)| x <- Set.toList s, 
+                                                            y <- Set.toList s, 
+                                                            x/= y && (y,x) `Set.member` r && (x,y) `Set.member` r]
+                    )
 \end{code}
 
 \subparagraph{Transitive preserving}
-
 
 We want to make sure that forcing anti-symmetry (removing the edges way) does not make us loose an existing property of the relations. It is fairly obvious that it does not remove reflexivity given $x \neq y$ is a condition (and anyways I apply reflexivity \emph{after} forcing anti-symmetry when forcing PoSets).
 
 But it is not obvious we don't lose transitivity, so here's a sketch of the proof.
 
-\bold{Proposition}: texttt{forceAntiSymm \$ transClosure}, where forceAntiSym of a relation $R$, call it $R^{\dagger}$ defined by: 
+\bold{Proposition}: texttt{forceAntiSym \$ transClosure}, where \texttt{forceAntiSym} of a relation $R$, call it $R^{\dagger}$ defined by: 
 
 $$
 R^{\dagger} = \begin{cases}
@@ -212,7 +206,7 @@ R^{\dagger} = \begin{cases}
     R \setminus \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}  & \text{ otherwise}\end{cases}
 $$
 
-Is transitive.
+(which should mirror what the Haskell definition is doing) Is transitive.
 
 % NOTE: I Added the package for cancel in latexmarcos.tex, but in case it doesn't work still, for the record, \cancel is meant to function like \not, just prettier when you do it on big things like R^\dagger. Modify with that, or just using \neg if needed.
 
@@ -245,7 +239,7 @@ Cons:
 \item doing it after taking the transitive closure (which we want to i think) often results in a huge collapse, and makes the resulting set very small. Because any loop in the initial Ord set will all collapse to one point after the forcing anti-symm(alternative) to its transitive closure. 
 \end{itemize}
 
-To obtain it from a set wrt to a relation, we compute the quotientSet wrt to anti-symmetry: remove from s the bigger x that appears in a symmetric pair. This is a cheeky trick to select one of the two elements, based on the fact that we have \texttt{Ord a}. Without that I think it would be a real pain.
+To obtain it from a set wrt to a relation, we compute the quotientSet wrt to anti-symmetry: remove from s the bigger x that appears in a symmetric pair. This is a cheeky trick to select one of the two elements, based on the fact that we have \texttt{Ord a}. Without that I think it would be a real pain. So for any symmetric pair, we keep the smallest element in that pair as our cluster rapresentative.
 
 Then we just let such quotient set be the new carrier set, and force the relation to be well-defined, just as sanity check.
 
@@ -253,15 +247,15 @@ Then we just let such quotient set be the new carrier set, and force the relatio
 quotientAntiSym :: Ord a => Set.Set a -> Relation a -> Set.Set a
 quotientAntiSym s r = s `Set.difference` Set.fromList [x| (x,y) <- Set.toList r, (y,x) `Set.member` r, x /= y, y < x] 
 
--- (s `Set.difference` tuplesUnfold (Set.filter (\(x,y) -> (y,x) `Set.member` r && x/= y) r) ) `Set.union` Set.map fst (fst  (Set.partition _ _))
-
--- (s `Set.difference` Set.fromList [x| x <- Set.toList unfoldedTuples Set.partition r]) `Set.union` (fst $ Set.partition _ _)
-
 forceAntiSymAlt :: Ord a => OrderedSet a -> OrderedSet a
 forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
 
-
 \end{code}
+
+The proof that this preserves transitivity is to do, but it seems fairly straightforward
+
+
+(there would also be a third way that David came up with when I chatted with him abou this, whose advantage is that it does not reduce either sets nor edges by much, so we might get more consistently interesting posets from arbitrary ordsets. But its more contrived and complicated, I'll think over it better before putting it in)
 
 
 \paragraph{forcePoset}
@@ -276,7 +270,6 @@ forcePoSet  = closureRefl .  forceAntiSym .  closureTrans . forceRelation
 -- forceRleation is reduntant here since it is inside forceAntiSymAlt
 forcePosetAlt :: Ord a => OrderedSet a -> OrderedSet a
 forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
-
 
 \end{code}
 
