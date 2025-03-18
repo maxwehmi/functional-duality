@@ -16,16 +16,18 @@ import Mapping
 
 We introduce the main data types of this section. \newline 
 In the definition of the types, we keep it as close as possible to their mathematical counterparts: 
-\begin{enumerate}[label=\roman *)]
+
+\begin{enumerate}
+
 \item a Topological Space is a set \textit{X} endowed with a collection of subsets of \textit{X} $\tau$. \newline 
 In particular it is required that $X,\emptyset$ are elements of $\tau$, and $\tau$ is closed under finitary intersections and arbitrary unions. \newline 
 Notice that, since we are working with finite cases, finitary and arbitrary unions (and intersections) coincide.
 \item a Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set. Moreover, it satisfies the following Priestley Separation Axiom:
-$$ \text{PSA:} x\not \leq y \rightarrow \exists C\subseteq X (C=\uparrow C \& C \in \tau \& (X\setminus C)\in \tau \& x\in C & y\notin C) $$
+$$ \text{PSA:} x\not \leq y \rightarrow \exists C\subseteq X (C=\uparrow C \& C \in \tau \& (X\setminus C)\in \tau \& x\in C \& y\notin C) $$
 Intuitively, for any $x,\,y$ that are not related by $\leq$, there exists a upwards-closed set in the topology that separates them. Moreover, the complement of such set should also be in the topology.\newline 
 Elements of $\tau$ such that their complement in $X$
- also is in the topology are called \enquote{Clopen Sets}.
-  \end{enumerate}
+ also is in the topology are called "Clopen Sets".
+\end{enumerate}
 \begin{code}
 type Topology a = Set (Set a)
 
@@ -46,7 +48,7 @@ data PriestleySpace a = PS {
 
 
 \subsection{Set-theoretic preliminaries}
-In order to deal effectively with topological spaces, we first define some Set-theoretic preliminary notions. In addition to the standard functions drawn from \enquote{Data.set} library
+In order to deal effectively with topological spaces, we first define some Set-theoretic preliminary notions. In addition to the standard functions drawn from "Data.set" library
 we define new functions to compute the closure of a given set under arbitrary unions and intersections. \newline 
 In both cases, we first define functions to perform a one-step intersection (resp. union) of a set with itself, and then iterate the function until the resulting set 
 is identical to its own one-step intersection (resp. union) closure. 
@@ -100,19 +102,21 @@ getOrderedSet p = OS (setPS p) (relationPS p)
 
 Next, we define a function to check whether a given Space really is a Priestley space. \newline 
 We make use of some secondary helper functions:
-\begin{enumerate}[label=\roman *)]
-\item the implementation for \enquote{implies} is routine,
-\item the \enquote{allPairs} function extracts the totality of order pairs,
+
+\begin{enumerate}
+\item the implementation for "implies" is routine,
+\item the "allPairs" function extracts the totality of order pairs,
+
 from the carrier set $X$ (this is required for the antecedent of the PSA axiom above),
-\item the \enquote{clopUpset} function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
+\item the "clopUpset" function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
 Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
  implies $y\in S$.  \newline
- This function makes use of the \enquote{upClosure} function, which computes the upwards-closure of any given set with respect to the given order.
+ This function makes use of the "upClosure" function, which computes the upwards-closure of any given set with respect to the given order.
  
 
 
 \end{enumerate}
-The output of those is then fed to the \enquote{checkPSA} function, which then ensures the validity of the Priestley separation axiom for all points in $X$ not related by $\leq$.
+The output of those is then fed to the "checkPSA" function, which then ensures the validity of the Priestley separation axiom for all points in $X$ not related by $\leq$.
 
 \begin{code}
 checkPriestley :: (Eq a, Ord a) => PriestleySpace a -> Bool
@@ -144,7 +148,7 @@ In particular, we want to be able to decide whether two spaces are isomorphic. t
 We also present the first step towards implementing the algebra duality: keeping things brief, the set of Clopen Upset of a Priestley space 
 is going to form a distributive lattice under the order induced by set-theoretic inclusion. \newline 
 To this extent, we implement a function to extract an order based on set-theoretic inclusion between sets, which we canlater apply to the Clopen Upsets of our topology.\newline 
-Next, we construct a lattice using the Clopen Upsets of our topological space and endowing this set with the desired inclusion-order. We make use of functions from the \enquote{DL} section to both construct the lattice and check it is distributive.
+Next, we construct a lattice using the Clopen Upsets of our topological space and endowing this set with the desired inclusion-order. We make use of functions from the "DL" section to both construct the lattice and check it is distributive.
 \begin{code}
 
 inclusionOrder :: Ord a => Topology a -> Relation (Set a)
