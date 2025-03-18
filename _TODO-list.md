@@ -26,8 +26,18 @@
 - [ ] Write a function which checks if a "TopoSpace" is actually a topological space 
 - potentially: prove `mapTop mapping ta == tb` to be put in the report
 
+## Report:
+- [ ] Add everybody to package.yaml
+- [ ] Write abstract
+- [ ] Write Main
+- [ ] Write Conclusion
 
 # Later:
+- [ ] Write test cases
+  - [ ] for Poset
+  - [ ] for Mappings
+  - [ ] for DL
+  - [ ] for Priestley
 - [ ] Write a function to pretty print posets
 - [ ] Write a translation function from a DL to a PS
 - [ ] Write a translation function from a PS to a DL 
