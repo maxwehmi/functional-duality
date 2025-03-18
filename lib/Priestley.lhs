@@ -110,7 +110,7 @@ Recall that a subset $S$ of an ordered set is upward-closed if and only if whene
  implies $y\in S$.  \newline
  This function makes us of the \enquote{upClosure} function, which computes the upwards-closure of any given set with respect to the given order.
  
-\item 
+
 
 \end{enumerate}
 The output of those is then fed to the \enquote{checkPSA} function, which then ensures the validity of the Priestley separation axiom for all points in $X$ not related by $\leq$.
