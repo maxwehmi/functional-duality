@@ -11,14 +11,14 @@ import qualified Data.Maybe as M
 
 \end{code}
 
-This section is dedicated to Distributive Lattices. A lattice is a poset $P$ such that for every $a,b \in P$ the greatest lower bound of $\{a,b\}$ (the meet of $a,b: a \wedge b$) is in $P$ and least upper bound of $\{a,b\}$ (the join of $a,b: a \lor b$) is in $P$. 
+This section is dedicated to Distributive Lattices. A lattice is a poset $P$ such that for every $a,b \in P$ the greatest lower bound of $\{a,b\}$ (the meet of $a,b: a \wedge b$) is in $P$ and least upper bound of $\{a,b\}$ (the join of $a,b: a \vee b$) is in $P$. 
 
-On top of this, a distributive lattice is a lattice whose meet and join satisfiy the two distributive laws: if $(L,\wedge, \lor)$ is a lattice, then: 
+On top of this, a distributive lattice is a lattice whose meet and join satisfiy the two distributive laws: if $(L,\wedge, \vee)$ is a lattice, then: 
 \begin{enumerate}
 
-$\forall a,b,c in L,    a \wedge (b \lor c) =  (a \wedge b) \lor (a \wedge c)$ 
+\item $\forall a,b,c in L,    a \wedge (b \vee c) =  (a \wedge b) \vee (a \wedge c)$ 
 
-$\forall a,b,c in L,    a \lor (b \wedge c) = (a \lor b) \wedge (a \lor c)$
+\item $\forall a,b,c in L,    a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
 
 
 \end{enumerate}
@@ -42,12 +42,12 @@ Not every object of type lattice is an actual lattice in the mathematical sense:
 
 \begin{itemize}
 
-Since we are working with finite structures, each lattice is a bound lattice.Therefore given an object l of type Lattice a, the first thing to check is whether the object "carrier l" has a maximal and a least element.
+\item Since we are working with finite structures, each lattice is a bound lattice.Therefore given an object l of type Lattice a, the first thing to check is whether the object "carrier l" has a maximal and a least element.
 
-The object "meet l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their greatest lower bound.
+\item The object "meet l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their greatest lower bound.
 
 
-The object "join l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their least upper bound.
+\item The object "join l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their least upper bound.
 
 
 
@@ -167,6 +167,7 @@ mylat = L makeLattice myos
 fromJust :: Maybe a -> a
 fromJust (Just x) = x
 fromJust Nothing = error "Sorry, but your poset is not closed under meet and joins"
+ 
 
 -- check whether actual meet & join align with functions, check whether closed under meet and join
 checkLattice :: Ord a => Lattice a -> Bool
