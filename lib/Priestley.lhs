@@ -22,7 +22,7 @@ In the definition of the types, we keep it as close as possible to their mathema
 In particular it is required that $X,\emptyset$ are elements of $\tau$, and $\tau$ is closed under finitary intersections and arbitrary unions. \newline 
 Notice that, since we are working with finite cases, finitary and arbitrary unions (and intersections) coincide.
 \item a Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set. Moreover, it satisfies the following Priestley Separation Axiom:
-$$ \text{PSA:} x\not \leq y \rightarrow \exists C\subseteq X (C=\uparrow C \& C \in \tau \& (X\setminus C)\in \tau \& x\in C \& y\notin C) $$
+$$ \text{PSA:} x\not \leq y \rightarrow \exists C\subseteq X ((C=\uparrow C) \& (C \in \tau) \& ((X\setminus C)\in \tau) \& (x\in C) \& (y\notin C)) $$
 Intuitively, for any $x,\,y$ that are not related by $\leq$, there exists a upwards-closed set in the topology that separates them. Moreover, the complement of such set should also be in the topology.\newline 
 Elements of $\tau$ such that their complement in $X$
  also is in the topology are called "Clopen Sets".

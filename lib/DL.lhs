@@ -117,8 +117,6 @@ be a lattice. For two arbirtray elements $a,b \in L$, we want that (meet a b) $\
 
 \begin{code}
 
--- maybe use this function but do it to ordered sets instead of lattices?
--- rewrite with more intuitive variable names?
 checkClosedMeetJoin :: Ord a => Lattice a -> Bool
 checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair in l
                         &&
