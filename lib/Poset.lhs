@@ -2,19 +2,20 @@
 \section{Partially ordered sets}
 
 
-Note that most operations presume to have `Ord` instances. This has to do with Set.Set implementation.
 
-"Most operations require that e be an instance of the Ord class."  
-https://hackage.haskell.org/package/containers-0.8/docs/Data-Set.html 
+This section is devoted to the construction of posets. A poset $(P,\leq)$ is a structure such that $P$ is a set and $\leq$ is a partial order, that is $\leq$ is reflexive, transitive and antissimetric.
 
-We can potentially work around this by transfering to lists, doing the checking on those, and then back, with some Set.toList trickery, for now leaving it like this, if we need to avoid assuming instances of Ord we can change it.
+We import the standard library for sets, Data.Set, in order to be able to work with sets and we start by defining the OrderedSet data type for sets equipped with a relation.
 
-But I see everyone else's code also pretty much always assumes Ord.
-
-After meeting, we decided for the time being, we're fine assuming instances of Ord.
+An object (P, R) of type OrderedSet a, is not necessarily a partially ordered set, therefore we need some helper functions in order to transform R in to a partial order.
 
 
-Note from Giacomo
+
+
+
+
+
+
 
 \begin{quote}
 I have changed the Relation a from "newtype ... Set .." to "type ... Set.Set .." as Relation a is a type synonim and it was giving me problems with the typechecking in other files. 
