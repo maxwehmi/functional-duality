@@ -1,4 +1,3 @@
-
 \begin{code}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use infix" #-}
@@ -17,7 +16,7 @@ import Mapping
 
 We introduce the main data types of this section. \newline 
 In the definition of the types, we keep it as close as possible to their mathematical counterparts: 
-\begin{enumerate}[label=\ roman *)]
+\begin{enumerate}[label=\roman *)]
 \item a Topological Space is a set \textit{X} endowed with a collection of subsets of \textit{X} $\tau$. \newline 
 In particular it is required that $X,\emptyset$ are elements of $\tau$, and $\tau$ is closed under finitary intersections and arbitrary unions. \newline 
 Notice that, since we are working with finite cases, finitary and arbitrary unions (and intersections) coincide.
@@ -101,7 +100,7 @@ getOrderedSet p = OS (setPS p) (relationPS p)
 
 Next, we define a function to check whether a given Space really is a Priestley space. \newline 
 We make use of some secondary helper functions:
-\begin{enumerate}[label=\ roman *)]
+\begin{enumerate}[label=\roman *)]
 \item the implementation for \enquote{implies} is routine,
 \item the \enquote{allPairs} function extracts the totality of order pairs,
 from the carrier set $X$ (this is required for the antecedent of the PSA axiom above),
