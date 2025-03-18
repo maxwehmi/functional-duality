@@ -108,7 +108,7 @@ from the carrier set $X$ (this is required for the antecedent of the PSA axiom a
 \item the \enquote{clopUpset} function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
 Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
  implies $y\in S$.  \newline
- This function makes us of the \enquote{upClosure} function, which computes the upwards-closure of any given set with respect to the given order.
+ This function makes use of the \enquote{upClosure} function, which computes the upwards-closure of any given set with respect to the given order.
  
 
 
