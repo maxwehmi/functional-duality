@@ -17,11 +17,6 @@ An object (P, R) of type OrderedSet a, is not necessarily a partially ordered se
 
 
 
-\begin{quote}
-I have changed the Relation a from "newtype ... Set .." to "type ... Set.Set .." as Relation a is a type synonim and it was giving me problems with the typechecking in other files. 
-
-I have changed the data type of OrderedSet a, in order to have functions to retreive the underlying set and the underlying relation of the OrderedSet.      
-\end{quote}
 
 
 \begin{code}
