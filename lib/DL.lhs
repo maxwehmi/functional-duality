@@ -18,9 +18,9 @@ This section is dedicated to Distributive Lattices. A lattice is a poset $P$ suc
 On top of this, a distributive lattice is a lattice whose meet and join satisfiy the two distributive laws: if $(L,\wedge, \vee)$ is a lattice, then: 
 \begin{enumerate}
 
- \item $\forall a,b,c in L,    a \wedge (b \vee c) =  (a \wedge b) \vee (a \wedge c)$ 
+ \item $\forall a,b,c \in L,    a \wedge (b \vee c) =  (a \wedge b) \vee (a \wedge c)$ 
 
- \item $\forall a,b,c in L,    a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
+ \item $\forall a,b,c \in L,    a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
 
 
 \end{enumerate}
