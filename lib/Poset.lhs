@@ -2,14 +2,19 @@
 \section{Partially ordered sets}
 
 
-Note that most operations presume to have `Ord` instances. This has to do with Set.Set implementation.
 
-"Most operations require that e be an instance of the Ord class."  
-https://hackage.haskell.org/package/containers-0.8/docs/Data-Set.html 
+This section is devoted to the construction of posets. A poset $(P,\leq)$ is a structure such that $P$ is a set and $\leq$ is a partial order, that is $<$ is reflexive, transitive and antissimetric.
 
-We can potentially work around this by transfering to lists, doing the checking on those, and then back, with some Set.toList trickery, for now leaving it like this, if we need to avoid assuming instances of Ord we can change it.
+We import the standard library for sets, Data.Set, in order to be able to work with sets and we start by defining the OrderedSet data type for sets equipped with a relation.
 
-But I see everyone else's code also pretty much always assumes Ord.
+An object (P, R) of type OrderedSet a, is not necessarily a partially ordered set, therefore we need some helper functions in order to transform R in to a partial order.
+
+
+
+
+
+
+
 
 
 \begin{code}
@@ -22,10 +27,6 @@ type Relation a = Set.Set (a,a)
 data OrderedSet a = OS {set :: Set.Set a, rel :: Relation a} 
     deriving (Eq, Ord,Show)
 
--- I have changed the Relation a from "newtype ... Set .." to "type ... Set.Set .." as Relation a is a type synonim and it was giving me problems with the typechecking in other files. 
-
--- I have changed the data type of OrderedSet a, in order to have functions to retreive the underlying set and the underlying relation of the OrderedSet.
--- Giacomo
 
 tuplesUnfold :: Ord a => Relation a -> Set.Set a
 tuplesUnfold r = Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd (Set.toList r))
