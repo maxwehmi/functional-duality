@@ -1,5 +1,7 @@
 \section{Distributive Lattices}
 
+
+
 \begin{code}
 module DL where
 
@@ -162,7 +164,7 @@ mylat1 :: Lattice Int
 mylat1 = L myos (-) (+)
 
 mylat :: Lattice Int
-mylat = L makeLattice myos
+mylat = makeLattice myos
 
 fromJust :: Maybe a -> a
 fromJust (Just x) = x

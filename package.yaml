@@ -1,8 +1,8 @@
-name: report
+name: functional-duality-report
 version: 0.1.0.0
-synopsis: My Haskell project
+synopsis: A Haskell implementation of translations between Distributive Lattices and Priestley Spaces
 description: See report.pdf
-maintainer: My Name <my.email@example.com>
+maintainer: Max Wehmeier <maxwehmi@gmail.com>, Giacomo de Antonellis <giacomobrdeantonellis@gmail.com>, Estel Koole <estelkoole@gmail.com>, Edoardo Menorello <edoardo.menorelllo@gmail.com>, Marco de Mayda <marcodemayda@gmail.com>
 category: Logic
 
 ghc-options: -Wall
@@ -22,17 +22,17 @@ library:
   source-dirs: lib
 
 executables:
-  myprogram:
+  duality:
     main: Main.lhs
     source-dirs: exec
     dependencies:
-      - report
+      - functional-duality-report
 
 tests:
   simpletests:
     main: simpletests.lhs
     source-dirs: test
     dependencies:
-      - report
+      - functional-duality-report
       - QuickCheck
       - hspec
