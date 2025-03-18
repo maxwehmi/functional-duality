@@ -154,15 +154,50 @@ forceRelation (OS s r)
 \end{code}
 
 
+Even though there's no canonical anti-symmetric closure, we might nonetheless want to force anti-symmetry on an OrdSet.
+
+There are two ways, we have to see which we find more adequate, both have kind of pluses and minuses %Discuss and add to them!!!!!.
+
+For now, I implement only one: given an OrdSet, we take away all the symmetric \emph{edges}.  So we take the relation and takeaway the set of symmetric tuples.
+
+Pros: 
+\begin{itemize}
+\item it does not modify the carrier set (eg \texttt{Set.size}, the cardinality, will remain the same after the procedure).
+\end{itemize}
+
+Cons: 
+\begin{itemize}
+\item doesn't preserve logical properties. 
+\item we should test that this does tend torawrds very trivial posets when applied after transitive closure.
+\end{itemize}
+
+The alternative way, is to quotient the set on the symmetric points, i.e. merge the \emph{vertex} that see each other into a cluster. 
+
+Pros:
+\begin{itemize}
+\item This does preserve logical properties
+\end{itemize}
+
+Cons: 
+\begin{itemize}
+\item This does change the carrier set (yes, haskell's texttt{Data.Set} does not implement a meta-notion of named elements referring to the same objects. When we define a set trough a list, which is what we always do, the elements are presumed to be distinct. This is showcased by the fact that a set has a defifinite cardinality. This wouldn't be possible without such an asumption, since then [a,b,c,d] could be of card 4, but might aswell be card 1, depending on how equality turns out.)
+\end{itemize}
+
+% (there would also be a third way, but its more complicated, I'll think over it better before putting it in)
+
 \begin{code}
 forceAntiSym :: Ord a => OrderedSet a -> OrderedSet a
 forceAntiSym (OS s r)
  | checkAntiSym (OS s r) = OS s r
  | otherwise = OS s (r `Set.difference` Set.fromList [(x,y)| x <- Set.toList s, y <- Set.toList s, x/= y && (y,x) `Set.member` r && (x,y) `Set.member` r])
 
+forceAntiSymAlt :: OrderedSet a -> OrderedSet a
+forceAntiSymAlt (OS s r) = undefined
+
 \end{code}
 
-We want to make sure that forcing anti-symmetry does not make us loose any of the previous relations. It is fairly obvious that it does not remove reflexivity given $x \neq y$ is a condition (and anyways I apply reflexivity \emph{after} forcing anti-symmetry when forcing PoSets).
+\paragraph{Transitive preserving}
+We want to make sure that forcing anti-symmetry (removing the edges way) does not make us loose any of the previous relations. It is fairly obvious that it does not remove reflexivity given $x \neq y$ is a condition (and anyways I apply reflexivity \emph{after} forcing anti-symmetry when forcing PoSets).
 
 But it is not obvious we don't lose transitivity, so here's a sketch of the proof.
 
@@ -190,17 +225,15 @@ Now suppose for contradiction $x \cancel{R^{\dagger}} z$. Again by how $R^{\dagg
 But then by transitivity of $R^{+}$ we'd have $yR^{+}x$. But then $(x,y) \in \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, so by definition $(x,y) \notin R^{\dagger}$, i.e. $x\cancel{R^{\dagger}} y$, contradicting our assumption that $xR^{\dagger}y$.
 
 
+
+\paragraph{forcePoset}
+
+Then in light of this, it suffices to take the transitive closure first, then the anti-symmetric, to force a PoSet.
+
 \begin{code}
 
 forcePoSet :: Ord a => OrderedSet a -> OrderedSet a
-forcePoSet os = closureRefl $  forceAntiSym $ closureTrans os
-
--- forcePoSet :: Ord a => OrderedSet a -> OrderedSet a
--- forcePoSet currentSet = 
---     let recursedSet = forceAntiSym $ closureTrans currentSet
---         in if recursedSet == currentSet 
---             then closureRefl currentSet 
---             else forcePoSet recursedSet
+forcePoSet os = closureRefl $  forceAntiSym $ closureTrans $ forceRelation os
 
 \end{code}
 
