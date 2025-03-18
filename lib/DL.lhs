@@ -18,9 +18,9 @@ This section is dedicated to Distributive Lattices. A lattice is a poset $P$ suc
 On top of this, a distributive lattice is a lattice whose meet and join satisfiy the two distributive laws: if $(L,\wedge, \vee)$ is a lattice, then: 
 \begin{enumerate}
 
-\item $\forall a,b,c in L,    a \wedge (b \vee c) =  (a \wedge b) \vee (a \wedge c)$ 
+ \item $\forall a,b,c in L,    a \wedge (b \vee c) =  (a \wedge b) \vee (a \wedge c)$ 
 
-\item $\forall a,b,c in L,    a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
+ \item $\forall a,b,c in L,    a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
 
 
 \end{enumerate}
@@ -44,12 +44,12 @@ Not every object of type lattice is an actual lattice in the mathematical sense:
 
 \begin{itemize}
 
-\item Since we are working with finite structures, each lattice is a bound lattice.Therefore given an object l of type Lattice a, the first thing to check is whether the object "carrier l" has a maximal and a least element.
+ \item Since we are working with finite structures, each lattice is a bound lattice.Therefore given an object l of type Lattice a, the first thing to check is whether the object "carrier l" has a maximal and a least element.
 
-\item The object "meet l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their greatest lower bound.
+ \item The object "meet l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their greatest lower bound.
 
 
-\item The object "join l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their least upper bound.
+ \item The object "join l" has to be defined on every two elements of the underlying set of "carrier l" and for every such two elements it has to return their least upper bound.
 
 
 
