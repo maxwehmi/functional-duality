@@ -26,7 +26,7 @@ $$ \text{PSA:} x\not \leq y \rightarrow \exists C\subseteq X (C=\uparrow C \& C 
 Intuitively, for any $x,\,y$ that are not related by $\leq$, there exists a upwards-closed set in the topology that separates them. Moreover, the complement of such set should also be in the topology.\newline 
 Elements of $\tau$ such that their complement in $X$
  also is in the topology are called \enquote{Clopen Sets}.
-  \end{enumerate}
+\end{enumerate}
 \begin{code}
 type Topology a = Set (Set a)
 
