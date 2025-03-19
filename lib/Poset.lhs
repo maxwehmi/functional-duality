@@ -23,6 +23,7 @@ An object (P, R) of type OrderedSet a, is not necessarily a partially ordered se
 module Poset where
 
 import qualified Data.Set as Set
+import Test.QuickCheck
 
 type Relation a = Set.Set (a,a)
 
@@ -238,7 +239,7 @@ Cons:
 
 \begin{code}
 quotientAntiSym :: Ord a => Set.Set a -> Relation a -> Set.Set a
-quotientAntiSym s r = s `Set.difference` Set.fromList [x| (x,y) <- Set.toList r, (y,x) `Set.member` r, x /= y, y < x] 
+quotientAntiSym s r = s `Set.difference` Set.fromList [x | (x,y) <- Set.toList r, (y,x) `Set.member` r, x /= y, y < x] 
 
 forceAntiSymAlt :: Ord a => OrderedSet a -> OrderedSet a
 forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
@@ -262,7 +263,17 @@ forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
 
 \end{code}
 
+To use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. It is called an arbitrary ordered set, but in fact it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
 
+\begin{code}
+instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
+    arbitrary = sized randomOS where
+        randomOS :: (Arbitrary a, Ord a) => Int -> Gen (OrderedSet a)
+        randomOS n = do
+            s <- Set.fromList <$> vector n
+            r <- Set.fromList <$> sublistOf (Set.toList $ Set.cartesianProduct s s)
+            return $ forcePoSet $ OS s r
+\end{code}
 
 \begin{code}
 os6 :: OrderedSet Integer
