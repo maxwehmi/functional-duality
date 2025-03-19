@@ -217,10 +217,12 @@ instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
     arbitrary = sized randomPS where
         randomPS :: (Arbitrary a, Ord a) => Int -> Gen (PriestleySpace a)
         randomPS n = do
-            s <- fromList <$> vector n
-            r <- fromList <$> sublistOf (toList $ cartesianProduct s s)
+            os <- resize n arbitrary
+            let s = set os
             t <- fromList <$> sublistOf (toList $ powerSet s)
-            return $ fixPS $ PS s (topologyTS $ fixTopology $ TS s t) (rel $ forcePoSet $ OS s r)
+            let t' = topologyTS $ fixTopology $ TS s t
+            let r' = rel $ forcePoSet $ OS s (rel os)
+            return $ fixPS $ PS s t' r'
 
 fixPS :: Ord a => PriestleySpace a -> PriestleySpace a
 fixPS (PS s t r) = PS s (topologyTS $ fixTopology $ TS s (topologyPS $ fixPSA $ PS s t r)) r
