@@ -6,8 +6,10 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use infix" #-}
 module Priestley where
-import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, member, empty, cartesianProduct)
+import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, member, empty, cartesianProduct, toList, fromList, powerSet, singleton)
 import Data.Bifunctor (bimap)
+import Test.QuickCheck
+
 import DL 
 import Poset
 import Mapping
@@ -206,11 +208,27 @@ mapRel mapping = Data.Set.map (Data.Bifunctor.bimap (getImage mapping) (getImage
 
 premapRel :: (Ord a, Ord b) => Map a b -> Relation b -> Relation a
 premapRel mapping = Data.Set.map (bimap (getPreimage mapping) (getPreimage mapping))
+\end{code}
 
+To be able to use QuickCheck, we also have to write an Arbitrary instace for PriestleySpaces:
 
+\begin{code}
+instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
+    arbitrary = sized randomPS where
+        randomPS :: (Arbitrary a, Ord a) => Int -> Gen (PriestleySpace a)
+        randomPS n = do
+            s <- fromList <$> vector n
+            r <- fromList <$> sublistOf (toList $ cartesianProduct s s)
+            t <- fromList <$> sublistOf (toList $ powerSet s)
+            return $ fixPS $ PS s (topologyTS $ fixTopology $ TS s t) (rel $ forcePoSet $ OS s r)
 
+fixPS :: Ord a => PriestleySpace a -> PriestleySpace a
+fixPS (PS s t r) = PS s (topologyTS $ fixTopology $ TS s (topologyPS $ fixPSA $ PS s t r)) r
 
+fixPSA :: Ord a => PriestleySpace a -> PriestleySpace a
+fixPSA (PS s t r) = PS s (t `union` getMissingUpsets s r) r 
 
-
-
+getMissingUpsets :: Ord a => Set a -> Relation a -> Topology a
+getMissingUpsets s r = Data.Set.map (\ x -> upClosure (singleton x) r) firsts `union` Data.Set.map (\ x -> s `difference` upClosure (singleton x) r) firsts where
+    firsts = Data.Set.map fst $ cartesianProduct s s `difference` r
 \end{code}
