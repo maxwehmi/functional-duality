@@ -262,10 +262,10 @@ fixTopBottom :: Ord a => OrderedSet a -> OrderedSet a
 fixTopBottom o = collapseTops $ collapseBottoms o
 
 collapseTops :: Ord a => OrderedSet a -> OrderedSet a
-collapseTops (OS s r) = collapseElements (Set.filter (\ x -> all (\ (y,z) -> not (y == x) || (z == x)) r) s) (OS s r)
+collapseTops (OS s r) = collapseElements (Set.filter (\ x -> all (\ (y,z) -> y /= x || (z == x)) r) s) (OS s r)
 
 collapseBottoms :: Ord a => OrderedSet a -> OrderedSet a
-collapseBottoms (OS s r) = collapseElements (Set.filter (\ x -> all (\ (y,z) -> not (z == x) || (y == x)) r) s) (OS s r)
+collapseBottoms (OS s r) = collapseElements (Set.filter (\ x -> all (\ (y,z) -> z /= x || (y == x)) r) s) (OS s r)
 
 collapseElements :: Ord a => Set.Set a -> OrderedSet a -> OrderedSet a
 collapseElements s (OS s' r) = cleanUp $ OS new_s new_r where

@@ -83,7 +83,10 @@ It is assumed that the input is finite. In case the input does not respect the c
 
 \begin{code}
 checkTopology :: Ord a => TopoSpace a -> Bool
-checkTopology (TS space top) = member space top && member empty top && unionClosure top == top && intersectionClosure top == top 
+checkTopology (TS space top) = member space top 
+    && member empty top 
+    && all (\u -> all (\v -> (u `union` v) `elem` top) top) top
+    && all (\u -> all (\v -> (u `intersection` v) `elem` top) top) top
 \end{code}
 
 \begin{code}

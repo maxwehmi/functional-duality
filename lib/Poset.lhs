@@ -66,17 +66,17 @@ Checking for relations conditions is fairly self-explanatory and readable. If re
 With the 3 properties checks, checking PoSets is quick (I additionally include checking the relation is well defined).
 
 \begin{code}
-checkRefl :: Ord a =>  OrderedSet a -> Bool
-checkRefl os = os == closureRefl os
-
-checkTrans :: Ord a => OrderedSet a -> Bool
-checkTrans os = os == closureTrans os
+checkReflAlt :: Ord a =>  OrderedSet a -> Bool
+checkReflAlt os = os == closureRefl os
 
 checkTransAlt :: Ord a => OrderedSet a -> Bool
-checkTransAlt (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
+checkTransAlt os = os == closureTrans os
 
-checkReflAlt :: Ord a =>  OrderedSet a -> Bool
-checkReflAlt (OS s r) = all (\x ->  (x, x) `Set.member` r) s
+checkTrans :: Ord a => OrderedSet a -> Bool
+checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
+
+checkRefl :: Ord a =>  OrderedSet a -> Bool
+checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 
 checkAntiSym :: Ord a => OrderedSet a -> Bool
 checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
