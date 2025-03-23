@@ -37,12 +37,14 @@ data TopoSpace a = TS {
     setTS :: Set a,
     topologyTS :: Topology a
 }
+    deriving (Eq, Ord,Show)
 
 data PriestleySpace a = PS {
     setPS :: Set a,
     topologyPS :: Topology a,
     relationPS :: Relation a
 }
+    deriving (Eq, Ord,Show)
 
 \end{code}
 

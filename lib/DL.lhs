@@ -39,6 +39,9 @@ data Lattice a = L {
     join :: a -> a -> a 
     }
 
+instance Show a => Show (Lattice a) where
+    show = show . carrier
+
 \end{code}
 
 Not every object of type lattice is an actual lattice in the mathematical sense: in particular three conditions have to be met for an object "l" of type "Lattice a", to be an actual lattice.
