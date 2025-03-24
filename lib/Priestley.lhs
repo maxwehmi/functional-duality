@@ -222,7 +222,7 @@ instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
     arbitrary = sized randomPS where
         randomPS :: (Arbitrary a, Ord a) => Int -> Gen (PriestleySpace a)
         randomPS n = do
-            os <- resize n arbitrary
+            os <- resize (min n 10) arbitrary
             let s = set os
             t <- fromList <$> sublistOf (toList $ powerSet s)
             let t' = topologyTS $ fixTopology $ TS s t
