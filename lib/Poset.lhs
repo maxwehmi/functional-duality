@@ -23,6 +23,7 @@ An object (P, R) of type OrderedSet a, is not necessarily a partially ordered se
 module Poset where
 
 import qualified Data.Set as Set
+import Test.QuickCheck
 
 type Relation a = Set.Set (a,a)
 
@@ -60,22 +61,22 @@ checkRelationWellDef (OS s r) = tuplesUnfold r `Set.isSubsetOf` s
 \end{code}
 
 
-Checking for relations conditions are fairly self-explanatory and readable. If reflexive and transitive closure have been defined correctly, then it's a matter of checking closure is idempotent. But, I'm also including alternative checks, as a sanity test that doesn't rely on closures being correctly defined. Anti-symmetry is clear.
+Checking for relations conditions is fairly self-explanatory and readable. If reflexive and transitive closure have been defined correctly, then it's a matter of checking closure is idempotent. But, I'm also including alternative checks, as a sanity test that doesn't rely on closures being correctly defined. Anti-symmetry is clear.
 
 With the 3 properties checks, checking PoSets is quick (I additionally include checking the relation is well defined).
 
 \begin{code}
-checkRefl :: Ord a =>  OrderedSet a -> Bool
-checkRefl os = os == closureRefl os
-
-checkTrans :: Ord a => OrderedSet a -> Bool
-checkTrans os = os == closureTrans os
+checkReflAlt :: Ord a =>  OrderedSet a -> Bool
+checkReflAlt os = os == closureRefl os
 
 checkTransAlt :: Ord a => OrderedSet a -> Bool
-checkTransAlt (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
+checkTransAlt os = os == closureTrans os
 
-checkReflAlt :: Ord a =>  OrderedSet a -> Bool
-checkReflAlt (OS s r) = all (\x ->  (x, x) `Set.member` r) s
+checkTrans :: Ord a => OrderedSet a -> Bool
+checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
+
+checkRefl :: Ord a =>  OrderedSet a -> Bool
+checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 
 checkAntiSym :: Ord a => OrderedSet a -> Bool
 checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
@@ -110,7 +111,7 @@ transStep :: Ord a => OrderedSet a -> OrderedSet a
 transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z (OS s r)])
 \end{code}
 
-Since this only adds "one-step" transtivity, we need to recurse the process until it is idempotent, i.e. the relation is fully transitive. Then we have obtained our transitive closure. This might be a bit hacky, perhaps there is a more straighforward way, similar to reflexive closure, but again it did not come to me.
+%Since this only adds "one-step" transtivity, we need to recurse the process until it is idempotent, i.e. the relation is fully transitive. Then we have obtained our transitive closure. This might be a bit hacky, perhaps there is a more straighforward way, similar to reflexive closure, but again it did not come to me.
 
 \begin{code}
 closureTrans :: Ord a => OrderedSet a -> OrderedSet a
@@ -170,11 +171,6 @@ Pros:
 \item it does not modify the carrier set (eg \texttt{Set.size}, the cardinality, will remain the same after the procedure).
 \end{itemize}
 
-Cons: 
-\begin{itemize}
-\item doesn't preserve logical properties. 
-\item we should test that this does tend torawrds very trivial posets when applied after transitive closure.
-\end{itemize}
 
 
 
@@ -191,7 +187,7 @@ forceAntiSym (OS s r)
 
 \subparagraph{Transitive preserving}
 
-We want to make sure that forcing anti-symmetry (removing the edges way) does not make us loose an existing property of the relations. It is fairly obvious that it does not remove reflexivity given $x \neq y$ is a condition (and anyways I apply reflexivity \emph{after} forcing anti-symmetry when forcing PoSets).
+We want to make sure that forcing anti-symmetry (removing the edges way) does not make us loose an existing property of the relations. It is fairly obvious that it does not remove reflexivity given $x \neq y$ is a condition (and anyways we apply reflexivity \emph{after} forcing anti-symmetry when forcing PoSets).
 
 But it is not obvious we don't lose transitivity, so here's a sketch of the proof.
 
@@ -214,7 +210,7 @@ Suppose $xR^{\dagger}y$ and $yR^{\dagger}z$ (for distinct $x,y,z$, the cases whe
 
 If $x=y$ we're quickly done, since then $xR^{\dagger}z$. Likewise if $y=z$. So suppose they aren't equal to each other.
 
-Now suppose for contradiction $x \cancel{R^{\dagger}} z$. Latex does not know \cancel, I dont know what this should mean
+Now suppose for contradiction $x \cancel{R^{\dagger}} z$. 
 Again by how $R^{\dagger}$ was defined, we must've had $zR^{+}x$. (If we didn't, then $(x,z) \notin \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, and so we'd have $(x,z) \in R^{+} \setminus \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$).
 
 But then by transitivity of $R^{+}$ we'd have $yR^{+}x$. But then $(x,y) \in \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, so by definition $(x,y) \notin R^{\dagger}$, i.e. $x\cancel{R^{\dagger}} y$, contradicting our assumption that $xR^{\dagger}y$.
@@ -232,28 +228,24 @@ Pros:
 
 Cons: 
 \begin{itemize}
-\item This does change the carrier set (yes, haskell's texttt{Data.Set} does not implement a meta-notion of named elements referring to the same objects. When we define a set trough a list, which is what we always do, the elements are presumed to be distinct. This is showcased by the fact that a set has a defifinite cardinality. This wouldn't be possible without such an asumption, since then [a,b,c,d] could be of card 4, but might aswell be card 1, depending on how equality turns out.)
+\item This does change the carrier set.
 
-\item doing it after taking the transitive closure (which we want to i think) often results in a huge collapse, and makes the resulting set very small. Because any loop in the initial Ord set will all collapse to one point after the forcing anti-symm(alternative) to its transitive closure. 
+\item doing it after taking the transitive closure often results in a huge collapse, and makes the resulting set very small. Because any loop in the initial Ord set will all collapse to one point after the forcing anti-symm(alternative) to its transitive closure. 
 \end{itemize}
 
-To obtain it from a set wrt to a relation, we compute the quotientSet wrt to anti-symmetry: remove from s the bigger x that appears in a symmetric pair. This is a cheeky trick to select one of the two elements, based on the fact that we have \texttt{Ord a}. Without that I think it would be a real pain. So for any symmetric pair, we keep the smallest element in that pair as our cluster rapresentative.
+%To obtain it from a set wrt to a relation, we compute the quotientSet wrt to anti-symmetry: remove from s the bigger x that appears in a symmetric pair. This is a cheeky trick to select one of the two elements, based on the fact that we have \texttt{Ord a}. Without that I think it would be a real pain. So for any symmetric pair, we keep the smallest element in that pair as our cluster rapresentative. 
 
-Then we just let such quotient set be the new carrier set, and force the relation to be well-defined, just as sanity check.
+%Then we just let such quotient set be the new carrier set, and force the relation to be well-defined, just as sanity check.
 
 \begin{code}
 quotientAntiSym :: Ord a => Set.Set a -> Relation a -> Set.Set a
-quotientAntiSym s r = s `Set.difference` Set.fromList [x| (x,y) <- Set.toList r, (y,x) `Set.member` r, x /= y, y < x] 
+quotientAntiSym s r = s `Set.difference` Set.fromList [x | (x,y) <- Set.toList r, (y,x) `Set.member` r, x /= y, y < x] 
 
 forceAntiSymAlt :: Ord a => OrderedSet a -> OrderedSet a
 forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
 
 \end{code}
 
-The proof that this preserves transitivity is to do, but it seems fairly straightforward
-
-
-(there would also be a third way that David came up with when I chatted with him abou this, whose advantage is that it does not reduce either sets nor edges by much, so we might get more consistently interesting posets from arbitrary ordsets. But its more contrived and complicated, I'll think over it better before putting it in)
 
 
 \paragraph{forcePoset}
@@ -271,7 +263,17 @@ forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
 
 \end{code}
 
-Here's some GPT-generated test sets to play around with.
+To use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. It is called an arbitrary ordered set, but in fact it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
+
+\begin{code}
+instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
+    arbitrary = sized randomOS where
+        randomOS :: (Arbitrary a, Ord a) => Int -> Gen (OrderedSet a)
+        randomOS n = do
+            s <- Set.fromList <$> vector n
+            r <- Set.fromList . take n <$> sublistOf (Set.toList $ Set.cartesianProduct s s)
+            return $ forcePoSet $ OS s r
+\end{code}
 
 \begin{code}
 os6 :: OrderedSet Integer

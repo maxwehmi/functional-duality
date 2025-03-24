@@ -8,7 +8,7 @@ import Priestley
 import Poset
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
-
+import Test.QuickCheck
 
 
 \end{code}
@@ -35,6 +35,9 @@ data Lattice a = L {
     meet :: a -> a -> a,
     join :: a -> a -> a 
     }
+
+instance (Ord a, Show a) => Show (Lattice a) where
+    show l = show (carrier l) ++ "; Meet: " ++ show (Set.fromList [(x,y, meet l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))])  ++ "; Join: " ++ show (Set.fromList [(x,y, join l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))]) 
 
 \end{code}
 
@@ -117,8 +120,6 @@ be a lattice. For two arbirtray elements $a,b \in L$, we want that (meet a b) $\
 
 \begin{code}
 
--- maybe use this function but do it to ordered sets instead of lattices?
--- rewrite with more intuitive variable names?
 checkClosedMeetJoin :: Ord a => Lattice a -> Bool
 checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair in l
                         &&
@@ -244,6 +245,113 @@ makeLattice :: Ord a => OrderedSet a -> Lattice a
 makeLattice os = L os (\x y -> fromJust $ findMeet preLattice x y) (\x y -> fromJust $ findJoin preLattice x y)
                 where preLattice = L os const const -- give it two mock functions
 
+\end{code}
+
+To use QuickTests in our project, we have to have also an arbitrary instance for distributive lattices. 
+
+\begin{code}
+instance (Arbitrary a, Ord a) => Arbitrary (Lattice a) where
+    arbitrary = sized randomPS where
+        randomPS :: (Arbitrary a, Ord a) => Int -> Gen (Lattice a)
+        randomPS n = do
+            o <- resize (max n 1) arbitrary
+            let l = fixLattice $ fixTopBottom o
+            return $ makeLattice l 
+
+fixTopBottom :: Ord a => OrderedSet a -> OrderedSet a
+fixTopBottom o = collapseTops $ collapseBottoms o
+
+collapseTops :: Ord a => OrderedSet a -> OrderedSet a
+collapseTops (OS s r) = collapseElements 
+    (Set.filter 
+        (\ x -> Set.size (Set.filter (\ (y,_) -> y == x) r) == 1) 
+    s) (OS s r)
+
+collapseBottoms :: Ord a => OrderedSet a -> OrderedSet a
+collapseBottoms (OS s r) = collapseElements 
+    (Set.filter 
+        (\ x -> Set.size (Set.filter (\ (_,y) -> y == x) r) == 1)
+    s) (OS s r)
+
+collapseElements :: Ord a => Set.Set a -> OrderedSet a -> OrderedSet a
+collapseElements s (OS s' r) | Set.size s == 0 = OS s' r
+                             | otherwise = cleanUp $ OS new_s new_r where
+                                new_s = (s' `Set.difference` s) `Set.union` Set.singleton (Set.elemAt 0 s)
+                                new_r = rel $ closureTrans $ OS s' (addRelations (Set.elemAt 0 s)) 
+                                addRelations x = r `Set.union` succs x `Set.union` precs x
+                                succs x = Set.map (\ (_,z) -> (x,z)) $ Set.filter (\ (y,_) -> y `elem` s) r 
+                                precs x = Set.map (\ (z,_) -> (z,x)) $ Set.filter (\ (_,y) -> y `elem` s) r 
+
+fixLattice :: Ord a => OrderedSet a -> OrderedSet a
+fixLattice o = 
+    let recurse_o = fixDistributivityN $ fixJoinMeetN o
+    in if recurse_o == o
+        then o
+        else fixLattice recurse_o
+
+fixJoinMeet :: Ord a => OrderedSet a -> OrderedSet a
+fixJoinMeet (OS s r) = cleanUp $ OS (s `Set.difference` calculateJoinMeetFailures (OS s r)) r 
+
+calculateJoinMeetFailures :: Ord a => OrderedSet a -> Set.Set a
+calculateJoinMeetFailures o = calculateJoinFailures o `Set.union` calculateMeetFailures o
+
+calculateJoinFailures :: Ord a => OrderedSet a -> Set.Set a 
+calculateJoinFailures (OS s r) = bigUnion $ Set.map (uncurry calculateMultipleJoins) (s `Set.cartesianProduct` s) where
+    calculateMultipleJoins x y = calculateJoins (OS s r) x y `Set.difference` Set.singleton (Set.elemAt 0 (calculateJoins (OS s r) x y))
+
+calculateMeetFailures :: Ord a => OrderedSet a -> Set.Set a 
+calculateMeetFailures (OS s r) = bigUnion $ Set.map (uncurry calculateMultipleMeets) (s `Set.cartesianProduct` s) where
+    calculateMultipleMeets x y = calculateMeets (OS s r) x y `Set.difference` Set.singleton (Set.elemAt 0 (calculateMeets (OS s r) x y))
+
+loop :: Ord a => Set.Set (a,a) -> OrderedSet a -> ((a,a) -> OrderedSet a -> OrderedSet a) -> OrderedSet a
+loop s o action | Set.size s == 0 = o
+                | fst s0 `Set.notMember` set o = loop (Set.delete s0 s) o action
+                | snd s0 `Set.notMember` set o = loop (Set.delete s0 s) o action
+                | otherwise = loop (Set.delete s0 s) (action s0 o) action where
+                    s0 = Set.elemAt 0 s
+
+fixMeetN :: Ord a => OrderedSet a -> OrderedSet a
+fixMeetN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) (\ (x,y) o' -> collapseElements (calculateMeets o' x y) o')
+
+fixJoinN :: Ord a => OrderedSet a -> OrderedSet a
+fixJoinN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) (\ (x,y) o' -> collapseElements (calculateMeets o' x y) o')
+
+fixJoinMeetN :: Ord a => OrderedSet a -> OrderedSet a
+fixJoinMeetN = fixMeetN . fixJoinN
+
+fixDistributivityN :: Ord a => OrderedSet a -> OrderedSet a
+fixDistributivityN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) 
+    (\ (x,y) o' -> case () of 
+        _ | any distrFailN (set o') -> collapseElements (Set.fromList [x,y]) o'
+          | otherwise -> o' where
+            distrFailN z = calculateMeet (calculateJoin x y) (calculateJoin x z) /= calculateJoin x (calculateMeet y z) && x < z && y < z
+            calculateMeet g h = Set.elemAt 0 $ calculateMeets o' g h
+            calculateJoin g h = Set.elemAt 0 $ calculateJoins o' g h
+            ) 
+
+bigUnion :: Ord a => Set.Set (Set.Set a) -> Set.Set a
+bigUnion s = Set.fromList $ concatMap Set.toList $ Set.toList s
+
+calculateMeets :: Eq a => OrderedSet a -> a -> a -> Set.Set a
+calculateMeets (OS s r) x y = Set.filter (\ z -> lowerBound z && not (any (\ w -> (z,w) `elem` r && w /= z && lowerBound w) s)) s where
+    lowerBound v = (v,x) `elem` r && (v,y) `elem` r
+
+calculateJoins :: Eq a => OrderedSet a -> a -> a -> Set.Set a
+calculateJoins (OS s r) x y = Set.filter (\ z -> upperBound z && not (any (\ w -> (w,z) `elem` r && w /= z && upperBound w) s)) s where
+    upperBound v = (x,v) `elem` r && (y,v) `elem` r
+
+fixDistributivity :: Ord a => OrderedSet a -> OrderedSet a
+fixDistributivity (OS s r) = cleanUp $ OS (s `Set.difference` calculateDistributiveFailures (OS s r)) r
+
+calculateDistributiveFailures :: Ord a => OrderedSet a -> Set.Set a
+calculateDistributiveFailures (OS s r) = Set.filter 
+    (\x -> any (\ y -> any (\ z -> distrFail x y z && x < y && x < z) s) s) s where
+        distrFail d e f = calculateMeet (calculateJoin d e) (calculateJoin e f) /= calculateJoin d (calculateMeet e f) where
+            calculateMeet g h = Set.elemAt 0 $ calculateMeets (OS s r) g h
+            calculateJoin g h = Set.elemAt 0 $ calculateJoins (OS s r) g h
+
+cleanUp :: Eq a => OrderedSet a -> OrderedSet a 
+cleanUp (OS s r) = OS s (Set.filter (\ (x,y) -> x `elem` s && y `elem` s) r)
 \end{code}
 
 Below are a few test cases. 'myos' is a poset. Furthermore, 'mylat1' is a non well-defined lattice, meaning
