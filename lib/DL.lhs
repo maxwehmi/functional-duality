@@ -4,7 +4,7 @@
 
 \begin{code}
 module DL where
-
+import Priestley
 import Poset
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
@@ -267,5 +267,78 @@ myos2 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4,5]) (Set.fromList [(1,2),
 
 mylat2 :: Lattice Int
 mylat2 = makeLattice myos2
+
+\end{code}
+
+\subsection{Filters and the Priestey-map}
+
+In order to compute the dual space of our lattices, we first need to be able to isolate filters within them. \newline 
+Intuitively, a filter is a collection of elements of an ordered set such that it is closed upwards and closed under meets. In our case the only relevant filters 
+are going to be \textit{Prime filters}, which are just filters that do not contain the bottom element of the lattice, and that never contain a join of two elements without 
+also containing at least one of the two. \newline 
+
+First, we make a type-shorthand for prime filters (those are just sets of elements), and we implement helper functions to compute the closure under meets of a set, and the upward closure of a set.
+
+
+\begin{code}
+type PrimeFilter a = Set a 
+
+meetClosure :: (Eq a, Ord a) =>  Set a -> Set a 
+meetClosure x = do 
+                let cycle2 = closeOnceUnderMeet x 
+                    where closeOnceUnderMeet x =  Data.Set.map (uncurry meet) (cartesianProduct x x)
+                if x == cycle2 then x 
+                else closeOnceUnderMeet cycle2
+
+\end{code}
+next, we want to extract from a given lattice the set of its prime filters. We thus first implement a function to check primeness of a given filter, and then we pull the strings 
+together, making use of the "upClosure" function from the Priestley section.
+\begin{code}
+
+
+--This would be wayy cooler with lenses but I really don't have time for that now
+
+isPrime :: (Eq a, Ord a) =>  Lattice a -> Filter a -> Bool 
+isPrime lattice filter = (foldr && True ) $ toList 
+                        (Data.Set.map 
+                        (\ x -> implies 
+                                (member (uncurry join x) filter) 
+                                ((member (fst x) filter) || (member (snd x) filter) ) ) 
+                        (cartesianProduct $ set (carrier lattice)))
+
+
+findFilters :: (Eq a, Ord a) => Lattice a -> Set (Filter a)
+findFilters lattice = let base = set (carrier lattice),
+                          ord = rel (carrier lattice)
+                      in filter (\ k -> (notElem (fromJust bot lattice) k) &&
+                                        (meetClosure k == k ) && 
+                                        upClosure k ord == k ) 
+                                (powerSet base) 
+
+findPrimeFilters :: (Eq a, Ord a) => Lattice a -> Set (Filter a)
+findPrimeFilters lattice = filter (\ k -> isPrime k) findFilters lattice 
+\end{code}
+
+Next, we want to implement the \textit{Priestley map}, which is going to be our translation from distributive lattices into Priestey spaces. \newline 
+More specifically, given a lattice $L$, we want to construct a topological space out of the set of prime filters of $L$, and order it under inclusion. Further, we are going to 
+construct a topology collecting together, for any $l\in L$, all prime filters in $\mathcal{P}(L)$ of which $l$ is an element, together with their complement. \newline 
+This is going to provide us with a "subbasis" for our topology, which means that the collections of opens in our dual space is the result of closing this set of prime filters first under intersection and then under unions.
+
+
+
+\begin{code}
+
+phi :: Lattice a -> a -> Set (Filter a)
+phi x lattice = filter (\ k -> member x k) findPrimeFilters lattice 
+
+priesMap :: Lattice a -> PriestleySpace (Filter a)
+priesMap lattice = PS 
+                    findPrimeFilters lattice 
+                    priestleyTopology lattice 
+                        where priestleyTopology x = 
+                        let phimap = Data.Set.map (flip phi x) (set (carrier x)) 
+                        in unionClosure $ intersectionClosure (union phimap (Data.Set.map (\ k -> difference k (findPrimeFilters lattice)) phimap ) )
+                    inclusionOrder (findPrimeFilters lattice)
+
 
 \end{code}
