@@ -377,3 +377,6 @@ mylat2 :: Lattice Int
 mylat2 = makeLattice myos2
 
 \end{code}
+
+
+-- Just adding something to test
