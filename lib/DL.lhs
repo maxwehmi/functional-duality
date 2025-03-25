@@ -99,6 +99,7 @@ We want to work with distributive lattices. A lattice $L$ is distributive if for
 \item Law 1: $a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
 \item Law 2: $a \wedge (b \vee c) = (a \wedge b) \vee (a \wedge c)$
 \end{itemize}
+
 The function 'checkDistributivity' checks whether a lattice is distributive. Furthermore, law 1 and 2 are equivalent
 and so the function will only check law 1, which is sufficient.
 
@@ -126,7 +127,6 @@ checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair 
         j = Set.cartesianProduct lSet lSet -- sets of pairs
         pairMeet = uncurry (meet l) 
         pairJoin = uncurry (join l)
-
 
 \end{code}
 
