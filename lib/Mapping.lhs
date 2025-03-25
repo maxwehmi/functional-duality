@@ -1,6 +1,6 @@
 \section{Mappings}\label{sec:Mappings}
 
-As in most of mathematics, maps and more specifically isomorphisms are of great importance to our project. As usual in mathematics, we implement maps as a set of pairs. 
+As in most of mathematics, maps (and more specifically isomorphisms) are of great importance to our project. As usual in mathematics, we implement maps as a set of pairs. 
 
 \begin{code}
 module Mapping where
@@ -20,7 +20,7 @@ getPreimages :: (Ord a, Ord b) => Map a b -> b -> Set a
 getPreimages mapping y = Data.Set.map fst $ Data.Set.filter (\ (_,z) -> z == y) mapping
 \end{code}
 
-Using these functions, we can check if a given set of pairs is acutally a map, i.e. every element in its domain has exactly one image. Similarly, we can check bijectivity by confirming that the preimage of every element in the codaim is a singleton. 
+Using these functions, we can check if a given set of pairs is actually a map, i.e. every element in its domain has exactly one image. Similarly, we can check bijectivity by confirming that the preimage of every element in the range is a singleton. 
 
 \begin{code}
 checkMapping :: (Ord a, Ord b) => Set a -> Map a b -> Bool

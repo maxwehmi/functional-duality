@@ -2,7 +2,7 @@
 \input{latexmacros.tex}
 
 \title{A Haskell implementation of translations between Distributive Lattices and Priestley Spaces}
-\author{Giacomo de Antonelllis, Estel Koole, Marco de Mayda, Edoardo Menorello, Max Wehmeier}
+\author{Giacomo de Antonelllis, \and Estel Koole, \and Marco de Mayda, \and  Edoardo Menorello, \and  Max Wehmeier}
 \date{\today}
 \hypersetup{pdfauthor={Giacomo de Antonelllis, Estel Koole, Marco de Mayda, Edoardo Menorello, Max Wehmeier}, pdftitle={A Haskell implementation of translations between Distributive Lattices and Priestley Spaces}}
 
@@ -10,12 +10,20 @@
 
 \maketitle
 
-% I am leaving this in, so we remember that we still have to write them
+
 \begin{abstract}
-We give a toy example of a report in \emph{literate programming} style.
-The main advantage of this is that source code and documentation can
-be written and presented next to each other.
-We use the listings package to typeset Haskell source code nicely.
+
+The aim of this project is to provide a Haskell implementation for the Duality-theoretic translations between Distributive lattices and Priestley spaces.
+
+In order to do so in Section 1 we define mappings. In section 2 we encode Partially ordered sets in Haskell, making use of the Data.set library. In section 2 we offer an implementation for Distributive lattices based on the on partially ordered set onstruction. In section 4 we define Priestley spaces in Haskell, making use of a prexisting Topology library. In section 5 we effectively implement translations between Priestley spaces and Distributive lattices.
+
+
+
+
+% We give a toy example of a report in \emph{literate programming} style.
+%The main advantage of this is that source code and documentation can
+%be written and presented next to each other.
+%We use the listings package to typeset Haskell source code nicely.
 
 The repository of the project can be found at https://github.com/maxwehmi/functional-duality.
 \end{abstract}
@@ -33,9 +41,10 @@ The repository of the project can be found at https://github.com/maxwehmi/functi
 
 \input{lib/Poset.lhs}
 
+\input{lib/DL.lhs}
+
 \input{lib/Priestley.lhs}
 
-\input{lib/DL.lhs}
 
 % I am leaving these in, so we remember that we still have to write them
 \input{exec/Main.lhs}
