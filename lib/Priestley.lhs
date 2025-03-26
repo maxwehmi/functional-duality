@@ -85,16 +85,16 @@ It is assumed that the input is finite. In case the input does not respect the c
 
 \begin{code}
 checkTopology :: Ord a => TopoSpace a -> Bool
-checkTopology (TS space top) = Set.member space top 
-    && Set.member Set.empty top 
-    && all (\u -> all (\v -> (u `Set.union` v) `elem` top) top) top
-    && all (\u -> all (\v -> (u `Set.intersection` v) `elem` top) top) top
+checkTopology (TS space t) = Set.member space t 
+    && Set.member Set.empty t 
+    && all (\u -> all (\v -> (u `Set.union` v) `elem` t) t) t
+    && all (\u -> all (\v -> (u `Set.intersection` v) `elem` t) t) t
 \end{code}
 
 \begin{code}
 fixTopology :: Ord a => TopoSpace a -> TopoSpace a
-fixTopology (TS space top) = TS space fixedTop  where 
-    fixedTop  = Set.fromList [space, Set.empty] `Set.union` unionClosure (intersectionClosure top)
+fixTopology (TS space t) = TS space fixedTop  where 
+    fixedTop  = Set.fromList [space, Set.empty] `Set.union` unionClosure (intersectionClosure t)
 
 \end{code}
 The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order.
@@ -131,9 +131,9 @@ checkPriestley p = checkTopology (getTopoSpace p) && checkPoset (getOrderedSet p
 
 checkPSA :: (Eq a, Ord a) => PriestleySpace a -> Bool
 
-checkPSA (PS space top order) = all (\ pair -> 
+checkPSA (PS space t order) = all (\ pair -> 
  implies (pair `notElem` order) (any (\ open -> elem (fst pair) open 
-   && notElem (snd pair) open) (clopUp (PS space top order)) )) $ allPairs space 
+   && notElem (snd pair) open) (clopUp (PS space t order)) )) $ allPairs space 
 
 allPairs :: Set.Set a -> [(a,a)]
 allPairs space = [(x,y) | x <- Set.toList space ,y <- Set.toList space ]
@@ -142,8 +142,8 @@ implies :: Bool -> Bool -> Bool
 implies x y = not x || y
 
 clopUp :: Ord a => PriestleySpace a -> Topology a
-clopUp (PS space top ord) = Set.intersection (clopens top) (upsets top) where 
-        clopens = Set.filter (\ x -> Set.difference space x `elem` top)  
+clopUp (PS space t ord) = Set.intersection (clopens t) (upsets t) where 
+        clopens = Set.filter (\ x -> Set.difference space x `elem` t)  
         upsets = Set.filter (\ y -> y == upClosure y ord)
 
 upClosure :: (Eq a, Ord a) => Set.Set a -> Relation a -> Set.Set a 

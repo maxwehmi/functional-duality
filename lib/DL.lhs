@@ -110,7 +110,7 @@ and so the function will only check law 1, which is sufficient.
 
 checkDistributivity :: Eq a => Lattice a -> Bool
 checkDistributivity (L (OS s _) m v) = and 
-                        [(a `m` (b `v` c) == (a `m` b) `v` (a `m` c))
+                        [a `m` (b `v` c) == (a `m` b) `v` (a `m` c)
                         | a <- Set.toList s, b <- Set.toList s, c <- Set.toList s]
 
 \end{code}
