@@ -4,7 +4,7 @@
 
 \begin{code}
 module DL where
-import Priestley
+--import Priestley
 import Poset
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
@@ -289,20 +289,6 @@ fixLattice o =
         then o
         else fixLattice recurse_o
 
-fixJoinMeet :: Ord a => OrderedSet a -> OrderedSet a
-fixJoinMeet (OS s r) = cleanUp $ OS (s `Set.difference` calculateJoinMeetFailures (OS s r)) r 
-
-calculateJoinMeetFailures :: Ord a => OrderedSet a -> Set.Set a
-calculateJoinMeetFailures o = calculateJoinFailures o `Set.union` calculateMeetFailures o
-
-calculateJoinFailures :: Ord a => OrderedSet a -> Set.Set a 
-calculateJoinFailures (OS s r) = bigUnion $ Set.map (uncurry calculateMultipleJoins) (s `Set.cartesianProduct` s) where
-    calculateMultipleJoins x y = calculateJoins (OS s r) x y `Set.difference` Set.singleton (Set.elemAt 0 (calculateJoins (OS s r) x y))
-
-calculateMeetFailures :: Ord a => OrderedSet a -> Set.Set a 
-calculateMeetFailures (OS s r) = bigUnion $ Set.map (uncurry calculateMultipleMeets) (s `Set.cartesianProduct` s) where
-    calculateMultipleMeets x y = calculateMeets (OS s r) x y `Set.difference` Set.singleton (Set.elemAt 0 (calculateMeets (OS s r) x y))
-
 loop :: Ord a => Set.Set (a,a) -> OrderedSet a -> ((a,a) -> OrderedSet a -> OrderedSet a) -> OrderedSet a
 loop s o action | Set.size s == 0 = o
                 | fst s0 `Set.notMember` set o = loop (Set.delete s0 s) o action
@@ -329,9 +315,6 @@ fixDistributivityN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r)
             calculateJoin g h = Set.elemAt 0 $ calculateJoins o' g h
             ) 
 
-bigUnion :: Ord a => Set.Set (Set.Set a) -> Set.Set a
-bigUnion s = Set.fromList $ concatMap Set.toList $ Set.toList s
-
 calculateMeets :: Eq a => OrderedSet a -> a -> a -> Set.Set a
 calculateMeets (OS s r) x y = Set.filter (\ z -> lowerBound z && not (any (\ w -> (z,w) `elem` r && w /= z && lowerBound w) s)) s where
     lowerBound v = (v,x) `elem` r && (v,y) `elem` r
@@ -339,16 +322,6 @@ calculateMeets (OS s r) x y = Set.filter (\ z -> lowerBound z && not (any (\ w -
 calculateJoins :: Eq a => OrderedSet a -> a -> a -> Set.Set a
 calculateJoins (OS s r) x y = Set.filter (\ z -> upperBound z && not (any (\ w -> (w,z) `elem` r && w /= z && upperBound w) s)) s where
     upperBound v = (x,v) `elem` r && (y,v) `elem` r
-
-fixDistributivity :: Ord a => OrderedSet a -> OrderedSet a
-fixDistributivity (OS s r) = cleanUp $ OS (s `Set.difference` calculateDistributiveFailures (OS s r)) r
-
-calculateDistributiveFailures :: Ord a => OrderedSet a -> Set.Set a
-calculateDistributiveFailures (OS s r) = Set.filter 
-    (\x -> any (\ y -> any (\ z -> distrFail x y z && x < y && x < z) s) s) s where
-        distrFail d e f = calculateMeet (calculateJoin d e) (calculateJoin e f) /= calculateJoin d (calculateMeet e f) where
-            calculateMeet g h = Set.elemAt 0 $ calculateMeets (OS s r) g h
-            calculateJoin g h = Set.elemAt 0 $ calculateJoins (OS s r) g h
 
 cleanUp :: Eq a => OrderedSet a -> OrderedSet a 
 cleanUp (OS s r) = OS s (Set.filter (\ (x,y) -> x `elem` s && y `elem` s) r)
@@ -386,67 +359,3 @@ are going to be \textit{Prime filters}, which are just filters that do not conta
 also containing at least one of the two. \newline 
 
 First, we make a type-shorthand for prime filters (those are just sets of elements), and we implement helper functions to compute the closure under meets of a set, and the upward closure of a set.
-
-
-\begin{code}
-type PrimeFilter a = Set a 
-
-meetClosure :: (Eq a, Ord a) =>  Set a -> Set a 
-meetClosure x = do 
-                let cycle2 = closeOnceUnderMeet x 
-                    where closeOnceUnderMeet x =  Data.Set.map (uncurry meet) (cartesianProduct x x)
-                if x == cycle2 then x 
-                else closeOnceUnderMeet cycle2
-
-\end{code}
-next, we want to extract from a given lattice the set of its prime filters. We thus first implement a function to check primeness of a given filter, and then we pull the strings 
-together, making use of the "upClosure" function from the Priestley section.
-\begin{code}
-
-
---This would be wayy cooler with lenses but I really don't have time for that now
-
-isPrime :: (Eq a, Ord a) =>  Lattice a -> Filter a -> Bool 
-isPrime lattice filter = (foldr && True ) $ toList 
-                        (Data.Set.map 
-                        (\ x -> implies 
-                                (member (uncurry join x) filter) 
-                                ((member (fst x) filter) || (member (snd x) filter) ) ) 
-                        (cartesianProduct $ set (carrier lattice)))
-
-
-findFilters :: (Eq a, Ord a) => Lattice a -> Set (Filter a)
-findFilters lattice = let base = set (carrier lattice),
-                          ord = rel (carrier lattice)
-                      in filter (\ k -> (notElem (fromJust bot lattice) k) &&
-                                        (meetClosure k == k ) && 
-                                        upClosure k ord == k ) 
-                                (powerSet base) 
-
-findPrimeFilters :: (Eq a, Ord a) => Lattice a -> Set (Filter a)
-findPrimeFilters lattice = filter (\ k -> isPrime k) findFilters lattice 
-\end{code}
-
-Next, we want to implement the \textit{Priestley map}, which is going to be our translation from distributive lattices into Priestey spaces. \newline 
-More specifically, given a lattice $L$, we want to construct a topological space out of the set of prime filters of $L$, and order it under inclusion. Further, we are going to 
-construct a topology collecting together, for any $l\in L$, all prime filters in $\mathcal{P}(L)$ of which $l$ is an element, together with their complement. \newline 
-This is going to provide us with a "subbasis" for our topology, which means that the collections of opens in our dual space is the result of closing this set of prime filters first under intersection and then under unions.
-
-
-
-\begin{code}
-
-phi :: Lattice a -> a -> Set (Filter a)
-phi x lattice = filter (\ k -> member x k) findPrimeFilters lattice 
-
-priesMap :: Lattice a -> PriestleySpace (Filter a)
-priesMap lattice = PS 
-                    findPrimeFilters lattice 
-                    priestleyTopology lattice 
-                        where priestleyTopology x = 
-                        let phimap = Data.Set.map (flip phi x) (set (carrier x)) 
-                        in unionClosure $ intersectionClosure (union phimap (Data.Set.map (\ k -> difference k (findPrimeFilters lattice)) phimap ) )
-                    inclusionOrder (findPrimeFilters lattice)
-
-
-\end{code}
