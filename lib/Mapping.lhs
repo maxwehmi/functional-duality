@@ -42,7 +42,7 @@ getPreimage mapping y | size (getPreimages mapping y) == 1 = elemAt 0 (getPreima
                       | otherwise = error "Either no or too many preimages"
 \end{code}
 
-Since it is not so nice to use functions in their set theoretic encoding, we define a helper functions that let us define a mapping by just "naturally" describing the function, as we would in the "everyday".
+It's nice to be able to quickly define Mapping with a function defined as we'd do "in everyday", this function helps with that.
 
 \begin{code}
 
