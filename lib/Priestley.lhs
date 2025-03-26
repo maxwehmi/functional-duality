@@ -182,13 +182,13 @@ First, we make a type-shorthand for prime filters (those are just sets of elemen
 
 
 \begin{code}
-type PrimeFilter a = Set a 
-type Filter a = Set a 
+type PrimeFilter a = Set.Set a 
+type Filter a = Set.Set a 
 
-closeOnceUnderMeet :: Ord b => Lattice b -> Set b -> Set b
-closeOnceUnderMeet lattice1 set1 =  Data.Set.map (uncurry (meet lattice1) ) (cartesianProduct set1 set1 ) 
+closeOnceUnderMeet :: Ord b => Lattice b -> Set.Set b -> Set.Set b
+closeOnceUnderMeet lattice1 set1 =  Set.map (uncurry (meet lattice1) ) (Set.cartesianProduct set1 set1 ) 
 
-meetClosure :: (Eq a, Ord a) => Lattice a -> Set a -> Set a 
+meetClosure :: (Eq a, Ord a) => Lattice a -> Set.Set a -> Set.Set a 
 meetClosure lattice2 set2 = do 
                 let cycle2 = closeOnceUnderMeet lattice2 set2 
                  in   
@@ -204,24 +204,24 @@ together, making use of the "upClosure" function from above.
 --This would be wayy cooler with lenses but I really don't have time for that now
 
 isPrime :: (Eq a, Ord a) =>  Lattice a -> Filter a -> Bool 
-isPrime lattice filter1 = (foldr (&&) True ) $ toList 
-                        (Data.Set.map 
+isPrime lattice filter1 = and $ Set.toList 
+                        (Set.map 
                         (\ x -> implies 
-                                (member (uncurry (join lattice) x) filter1) 
-                                ((member (fst x) filter1) || (member (snd x) filter1))) 
-                        (cartesianProduct  (set (carrier lattice)) (set (carrier lattice))))
+                                (Set.member (uncurry (join lattice) x) filter1) 
+                                (Set.member (fst x) filter1 || Set.member (snd x) filter1)) 
+                        (Set.cartesianProduct  (set (carrier lattice)) (set (carrier lattice))))
 
 
-findFilters :: (Eq a, Ord a) => Lattice a -> Set (Filter a)
+findFilters :: (Eq a, Ord a) => Lattice a -> Set.Set (Filter a)
 findFilters lattice = let base = set (carrier lattice)
                           ord = rel (carrier lattice)
-                      in Data.Set.filter (\ k -> (notElem (fromJust $ bot lattice) k) &&
+                      in Set.filter (\ k -> notElem (fromJust $ bot lattice) k &&
                                         (meetClosure lattice k == k ) && 
                                         upClosure k ord == k ) 
-                                (powerSet base) 
+                                (Set.powerSet base) 
 
-findPrimeFilters :: (Eq a, Ord a) => Lattice a -> Set (Filter a)
-findPrimeFilters lattice = Data.Set.filter (\ k -> isPrime lattice k) (findFilters lattice)
+findPrimeFilters :: (Eq a, Ord a) => Lattice a -> Set.Set (Filter a)
+findPrimeFilters lattice = Set.filter (isPrime lattice) (findFilters lattice)
 \end{code}
 
 Next, we want to implement the \textit{Priestley map}, which is going to be our translation from distributive lattices into Priestey spaces. \newline 
@@ -233,12 +233,12 @@ This is going to provide us with a "subbasis" for our topology, which means that
 
 \begin{code}
 
-phi :: (Eq a, Ord a) => Lattice a -> a -> Set (Filter a)
-phi lattice x = Data.Set.filter (\ k -> member x k) $ findPrimeFilters lattice 
+phi :: (Eq a, Ord a) => Lattice a -> a -> Set.Set (Filter a)
+phi lattice x = Set.filter (Set.member x) $ findPrimeFilters lattice 
 
 priestleyTopology :: (Eq a, Ord a) => Lattice a -> Topology (Filter a)
-priestleyTopology x = let phimap = Data.Set.map (phi x) (set (carrier x)) 
-                    in unionClosure $ intersectionClosure (union phimap (Data.Set.map (\ k -> difference k (findPrimeFilters x)) phimap ))
+priestleyTopology x = let phimap = Set.map (phi x) (set (carrier x)) 
+                    in unionClosure $ intersectionClosure (Set.union phimap (Set.map (\ k -> Set.difference k (findPrimeFilters x)) phimap ))
                                     
 priesMap :: (Eq a, Ord a) => Lattice a -> PriestleySpace (Filter a)
 priesMap lattice = PS (findPrimeFilters lattice) (priestleyTopology lattice) (inclusionOrder (findPrimeFilters lattice))
