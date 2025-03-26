@@ -275,8 +275,38 @@ We want to check wether two Lattices are isomorphic. This means checking that, u
 
 \begin{code}
 
+functionMorphism:: (Ord a, Ord b) => Lattice a -> Lattice b -> Map a b -> Bool
+functionMorphism l1  l2 f 
+    | not(checkLattice l1 && checkLattice l2) = error "not lattices"
+    | not (checkMapping s1 f) = error "not a mapping"
+    | otherwise = checkBijective s2 f 
+                &&
+                (fromJust $ top l1, fromJust $ top l2) `Set.member` f
+                &&
+                (fromJust $ bot l1, fromJust $ bot l2) `Set.member` f
+                && 
+                all 
+                (\(x,y) -> fromJust (findJoin l1 x y) == getPreimage f (fromJust (findJoin l2 (getImage f x) (getImage f y))))
+                (s1 `Set.cartesianProduct` s1)
+                 &&
+                all 
+                (\(x,y) -> fromJust (findMeet l1 x y) == getPreimage f (fromJust (findMeet l2 (getImage f x) (getImage f y))))
+                (s1 `Set.cartesianProduct` s1)
+                where
+                    s1 = set $ carrier l1
+                    s2 = set $ carrier l2
+                            
+                            
 
--- helper functions that redfine previous function to not have Maybe... type, for ease of typechecking
+
+                        
+
+--all (\(x,y) -> findMeet (L c1 m1 j1) x y == f (findMeet (L c2 m2 j2 ) x y)) c1
+
+
+
+
+-- helper functions that redfine previous function to not have Maybe... type, for ease of typechecking ----------------
 realTop:: Ord a => Lattice a -> a
 realTop l 
     | M.isNothing (top l) = error "there's no top"
@@ -306,24 +336,5 @@ realLeast :: Ord a => OrderedSet a -> Set.Set a -> a
 realLeast os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (x , y ) `Set.member` rel os ) s) s
 
 
-
-
-
-functionMorphism:: (Ord a, Ord b) => Lattice a -> Lattice b -> Map a b -> Bool
-functionMorphism (L c1 m1 j1)  (L (OS s r) m2 j2) f = 
-                        checkBijective s f 
-                        &&
-                        (realTop (L c1 m1 j1), realTop (L (OS s r) m2 j2)) `Set.member` f
-                        &&
-                        (realBot (L c1 m1 j1), realBot (L (OS s r) m2 j2)) `Set.member` f
-                        &&
-                        all _ c1 --(((realJoin (L c1 m1 j1) x y), realJoin (L (OS s r) m2 j2) u v) `Set.member`  f  )
-                        &&
-                        all _ (OS s r)
-
-
-                        
-
---all (\(x,y) -> findMeet (L c1 m1 j1) x y == f (findMeet (L c2 m2 j2 ) x y)) c1
 
 \end{code}
