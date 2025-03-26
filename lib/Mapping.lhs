@@ -1,11 +1,11 @@
 \section{Mappings}\label{sec:Mappings}
 
-As in most of mathematics, maps and more specifically isomorphisms are of great importance to our project. As usual in mathematics, we implement maps as a set of pairs. 
+As in most of mathematics, maps (and more specifically isomorphisms) are of great importance to our project. As usual in mathematics, we implement maps as a set of pairs. 
 
 \begin{code}
 module Mapping where
 
-import Data.Set (Set, map, size, elemAt, filter)
+import Data.Set (Set, map, size, elemAt, filter,fromList,toList)
 
 type Map a b = Set (a,b)
 \end{code}
@@ -20,7 +20,7 @@ getPreimages :: (Ord a, Ord b) => Map a b -> b -> Set a
 getPreimages mapping y = Data.Set.map fst $ Data.Set.filter (\ (_,z) -> z == y) mapping
 \end{code}
 
-Using these functions, we can check if a given set of pairs is acutally a map, i.e. every element in its domain has exactly one image. Similarly, we can check bijectivity by confirming that the preimage of every element in the codaim is a singleton. 
+Using these functions, we can check if a given set of pairs is actually a map, i.e. every element in its domain has exactly one image. Similarly, we can check bijectivity by confirming that the preimage of every element in the range is a singleton. 
 
 \begin{code}
 checkMapping :: (Ord a, Ord b) => Set a -> Map a b -> Bool
@@ -40,4 +40,13 @@ getImage mapping x | size (getImages mapping x) == 1 = elemAt 0 (getImages mappi
 getPreimage :: (Ord a, Ord b) => Map a b -> b -> a
 getPreimage mapping y | size (getPreimages mapping y) == 1 = elemAt 0 (getPreimages mapping y)
                       | otherwise = error "Either no or too many preimages"
+\end{code}
+
+It's nice to be able to quickly define Mapping with a function defined as we'd do "in everyday", this function helps with that.
+
+\begin{code}
+
+makeMap :: (Ord a, Ord b) => Set a -> Set b -> (a -> b) -> Map a b
+makeMap s1 s2 f = fromList [(x,y)| x <- toList s1, y <- toList s2, y == f x]
+
 \end{code}

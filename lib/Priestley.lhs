@@ -6,8 +6,10 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use infix" #-}
 module Priestley where
-import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, member, empty, cartesianProduct, powerSet)
+import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, member, empty, cartesianProduct, toList, fromList, powerSet, singleton)
 import Data.Bifunctor (bimap)
+import Test.QuickCheck
+
 import DL 
 import Poset
 import Mapping
@@ -23,7 +25,7 @@ In the definition of the types, we keep it as close as possible to their mathema
 In particular it is required that $X,\emptyset$ are elements of $\tau$, and $\tau$ is closed under finitary intersections and arbitrary unions. \newline 
 Notice that, since we are working with finite cases, finitary and arbitrary unions (and intersections) coincide.
 \item a Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set. Moreover, it satisfies the following Priestley Separation Axiom:
-$$ \text{PSA:} x\not \leq y \rightarrow \exists C\subseteq X (C=\uparrow C \& C \in \tau \& (X\setminus C)\in \tau \& x\in C \& y\notin C) $$
+$$ \text{PSA:} x\not \leq y \rightarrow \exists C\subseteq X ((C=\uparrow C) \& (C \in \tau) \& ((X\setminus C)\in \tau) \& (x\in C) \& (y\notin C)) $$
 Intuitively, for any $x,\,y$ that are not related by $\leq$, there exists a upwards-closed set in the topology that separates them. Moreover, the complement of such set should also be in the topology.\newline 
 Elements of $\tau$ such that their complement in $X$
  also is in the topology are called "Clopen Sets".
@@ -35,12 +37,14 @@ data TopoSpace a = TS {
     setTS :: Set a,
     topologyTS :: Topology a
 }
+    deriving (Eq, Ord,Show)
 
 data PriestleySpace a = PS {
     setPS :: Set a,
     topologyPS :: Topology a,
     relationPS :: Relation a
 }
+    deriving (Eq, Ord,Show)
 
 \end{code}
 
@@ -81,7 +85,10 @@ It is assumed that the input is finite. In case the input does not respect the c
 
 \begin{code}
 checkTopology :: Ord a => TopoSpace a -> Bool
-checkTopology (TS space top) = member space top && member empty top && unionClosure top == top && intersectionClosure top == top 
+checkTopology (TS space top) = member space top 
+    && member empty top 
+    && all (\u -> all (\v -> (u `union` v) `elem` top) top) top
+    && all (\u -> all (\v -> (u `intersection` v) `elem` top) top) top
 \end{code}
 
 \begin{code}
@@ -304,11 +311,29 @@ mapRel mapping = Data.Set.map (Data.Bifunctor.bimap (getImage mapping) (getImage
 
 premapRel :: (Ord a, Ord b) => Map a b -> Relation b -> Relation a
 premapRel mapping = Data.Set.map (bimap (getPreimage mapping) (getPreimage mapping))
+\end{code}
 
+To be able to use QuickCheck, we also have to write an Arbitrary instace for PriestleySpaces:
 
+\begin{code}
+instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
+    arbitrary = sized randomPS where
+        randomPS :: (Arbitrary a, Ord a) => Int -> Gen (PriestleySpace a)
+        randomPS n = do
+            os <- resize (min n 10) arbitrary
+            let s = set os
+            t <- fromList <$> sublistOf (toList $ powerSet s)
+            let t' = topologyTS $ fixTopology $ TS s t
+            let r' = rel $ forcePoSet $ OS s (rel os)
+            return $ fixPS $ PS s t' r'
 
+fixPS :: Ord a => PriestleySpace a -> PriestleySpace a
+fixPS (PS s t r) = PS s (topologyTS $ fixTopology $ TS s (topologyPS $ fixPSA $ PS s t r)) r
 
+fixPSA :: Ord a => PriestleySpace a -> PriestleySpace a
+fixPSA (PS s t r) = PS s (t `union` getMissingUpsets s r) r 
 
-
-
+getMissingUpsets :: Ord a => Set a -> Relation a -> Topology a
+getMissingUpsets s r = Data.Set.map (\ x -> upClosure (singleton x) r) firsts `union` Data.Set.map (\ x -> s `difference` upClosure (singleton x) r) firsts where
+    firsts = Data.Set.map fst $ cartesianProduct s s `difference` r
 \end{code}

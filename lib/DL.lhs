@@ -8,8 +8,8 @@ module DL where
 import Poset
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
-
-
+import Test.QuickCheck
+import Mapping
 
 \end{code}
 
@@ -35,6 +35,9 @@ data Lattice a = L {
     meet :: a -> a -> a,
     join :: a -> a -> a 
     }
+
+instance (Ord a, Show a) => Show (Lattice a) where
+    show l = show (carrier l) ++ "; Meet: " ++ show (Set.fromList [(x,y, meet l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))])  ++ "; Join: " ++ show (Set.fromList [(x,y, join l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))]) 
 
 \end{code}
 
@@ -99,6 +102,7 @@ We want to work with distributive lattices. A lattice $L$ is distributive if for
 \item Law 1: $a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
 \item Law 2: $a \wedge (b \vee c) = (a \wedge b) \vee (a \wedge c)$
 \end{itemize}
+
 The function 'checkDistributivity' checks whether a lattice is distributive. Furthermore, law 1 and 2 are equivalent
 and so the function will only check law 1, which is sufficient.
 
@@ -117,8 +121,6 @@ be a lattice. For two arbirtray elements $a,b \in L$, we want that (meet a b) $\
 
 \begin{code}
 
--- maybe use this function but do it to ordered sets instead of lattices?
--- rewrite with more intuitive variable names?
 checkClosedMeetJoin :: Ord a => Lattice a -> Bool
 checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair in l
                         &&
@@ -128,7 +130,6 @@ checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair 
         j = Set.cartesianProduct lSet lSet -- sets of pairs
         pairMeet = uncurry (meet l) 
         pairJoin = uncurry (join l)
-
 
 \end{code}
 
@@ -246,6 +247,86 @@ makeLattice os = L os (\x y -> fromJust $ findMeet preLattice x y) (\x y -> from
 
 \end{code}
 
+To use QuickTests in our project, we have to have also an arbitrary instance for distributive lattices. 
+
+\begin{code}
+instance (Arbitrary a, Ord a) => Arbitrary (Lattice a) where
+    arbitrary = sized randomPS where
+        randomPS :: (Arbitrary a, Ord a) => Int -> Gen (Lattice a)
+        randomPS n = do
+            o <- resize (max n 1) arbitrary
+            let l = fixLattice $ fixTopBottom o
+            return $ makeLattice l 
+
+fixTopBottom :: Ord a => OrderedSet a -> OrderedSet a
+fixTopBottom o = collapseTops $ collapseBottoms o
+
+collapseTops :: Ord a => OrderedSet a -> OrderedSet a
+collapseTops (OS s r) = collapseElements 
+    (Set.filter 
+        (\ x -> Set.size (Set.filter (\ (y,_) -> y == x) r) == 1) 
+    s) (OS s r)
+
+collapseBottoms :: Ord a => OrderedSet a -> OrderedSet a
+collapseBottoms (OS s r) = collapseElements 
+    (Set.filter 
+        (\ x -> Set.size (Set.filter (\ (_,y) -> y == x) r) == 1)
+    s) (OS s r)
+
+collapseElements :: Ord a => Set.Set a -> OrderedSet a -> OrderedSet a
+collapseElements s (OS s' r) | Set.size s == 0 = OS s' r
+                             | otherwise = cleanUp $ OS new_s new_r where
+                                new_s = (s' `Set.difference` s) `Set.union` Set.singleton (Set.elemAt 0 s)
+                                new_r = rel $ closureTrans $ OS s' (addRelations (Set.elemAt 0 s)) 
+                                addRelations x = r `Set.union` succs x `Set.union` precs x
+                                succs x = Set.map (\ (_,z) -> (x,z)) $ Set.filter (\ (y,_) -> y `elem` s) r 
+                                precs x = Set.map (\ (z,_) -> (z,x)) $ Set.filter (\ (_,y) -> y `elem` s) r 
+
+fixLattice :: Ord a => OrderedSet a -> OrderedSet a
+fixLattice o = 
+    let recurse_o = fixDistributivityN $ fixJoinMeetN o
+    in if recurse_o == o
+        then o
+        else fixLattice recurse_o
+
+loop :: Ord a => Set.Set (a,a) -> OrderedSet a -> ((a,a) -> OrderedSet a -> OrderedSet a) -> OrderedSet a
+loop s o action | Set.size s == 0 = o
+                | fst s0 `Set.notMember` set o = loop (Set.delete s0 s) o action
+                | snd s0 `Set.notMember` set o = loop (Set.delete s0 s) o action
+                | otherwise = loop (Set.delete s0 s) (action s0 o) action where
+                    s0 = Set.elemAt 0 s
+
+fixMeetN :: Ord a => OrderedSet a -> OrderedSet a
+fixMeetN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) (\ (x,y) o' -> collapseElements (calculateMeets o' x y) o')
+
+fixJoinN :: Ord a => OrderedSet a -> OrderedSet a
+fixJoinN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) (\ (x,y) o' -> collapseElements (calculateMeets o' x y) o')
+
+fixJoinMeetN :: Ord a => OrderedSet a -> OrderedSet a
+fixJoinMeetN = fixMeetN . fixJoinN
+
+fixDistributivityN :: Ord a => OrderedSet a -> OrderedSet a
+fixDistributivityN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) 
+    (\ (x,y) o' -> case () of 
+        _ | any distrFailN (set o') -> collapseElements (Set.fromList [x,y]) o'
+          | otherwise -> o' where
+            distrFailN z = calculateMeet (calculateJoin x y) (calculateJoin x z) /= calculateJoin x (calculateMeet y z) && x < z && y < z
+            calculateMeet g h = Set.elemAt 0 $ calculateMeets o' g h
+            calculateJoin g h = Set.elemAt 0 $ calculateJoins o' g h
+            ) 
+
+calculateMeets :: Eq a => OrderedSet a -> a -> a -> Set.Set a
+calculateMeets (OS s r) x y = Set.filter (\ z -> lowerBound z && not (any (\ w -> (z,w) `elem` r && w /= z && lowerBound w) s)) s where
+    lowerBound v = (v,x) `elem` r && (v,y) `elem` r
+
+calculateJoins :: Eq a => OrderedSet a -> a -> a -> Set.Set a
+calculateJoins (OS s r) x y = Set.filter (\ z -> upperBound z && not (any (\ w -> (w,z) `elem` r && w /= z && upperBound w) s)) s where
+    upperBound v = (x,v) `elem` r && (y,v) `elem` r
+
+cleanUp :: Eq a => OrderedSet a -> OrderedSet a 
+cleanUp (OS s r) = OS s (Set.filter (\ (x,y) -> x `elem` s && y `elem` s) r)
+\end{code}
+
 Below are a few test cases. 'myos' is a poset. Furthermore, 'mylat1' is a non well-defined lattice, meaning
 that the functions for 'meet' and 'join' do not coincide with 'findMeet' and 'findJoin'. Lastly, mylat is 
 a lattice. 
@@ -270,3 +351,63 @@ mylat2 = makeLattice myos2
 
 \end{code}
 
+\subsection{mrophisms}
+
+We want to check wether two Lattices are isomorphic. This means checking that, under some function between them, immages preserve bot,top, and all meets and joins. These suffice for the preservation of distributivity and boundedness, so we do not need to explicitly check for those.
+
+\begin{code}
+
+functionMorphism:: (Ord a, Ord b) => Lattice a -> Lattice b -> Map a b -> Bool
+functionMorphism l1  l2 f 
+    | not(checkLattice l1 && checkLattice l2) = error "not lattices"
+    | not (checkMapping s1 f) = error "not a mapping"
+    | otherwise = checkBijective s2 f 
+                &&
+                (fromJust $ top l1, fromJust $ top l2) `Set.member` f
+                &&
+                (fromJust $ bot l1, fromJust $ bot l2) `Set.member` f
+                && 
+                all 
+                (\(x,y) -> fromJust (findJoin l2 (getImage f x) (getImage f y)) == getImage f (fromJust (findJoin l1 x y)))
+                (s1 `Set.cartesianProduct` s1)
+                &&
+                all
+                (\(x,y) -> fromJust (findMeet l2 (getImage f x) (getImage f y)) == getImage f (fromJust (findMeet l1 x y)))
+                (s1 `Set.cartesianProduct` s1)
+                where
+                    s1 = set $ carrier l1
+                    s2 = set $ carrier l2                         
+\end{code}
+
+                        
+
+% \begin{code}
+%-- helper functions that redfine previous function to not have Maybe... type, for ease of typechecking ----------------
+% realTop:: Ord a => Lattice a -> a
+% realTop l 
+%     | M.isNothing (top l) = error "there's no top"
+%     | otherwise =  Set.elemAt 0 (Set.filter ( isTop l ) ( set $ carrier l ))
+
+
+% realBot:: Ord a => Lattice a -> a
+% realBot l 
+%     | M.isNothing (bot l) = error "there's no bot"
+%     | otherwise =  Set.elemAt 0 (Set.filter ( isBot l ) ( set $ carrier l ))
+
+% realJoin :: Ord a => Lattice a -> a -> a -> a
+% realJoin l x y
+%     | not (checkLattice l) = error "not a lattice"
+%     | otherwise = realLeast ( carrier l ) ( upperBounds ( carrier l ) x y )
+
+
+% realMeet :: Ord a => Lattice a -> a -> a -> a
+% realMeet l x y
+%     | not (checkLattice l) = error "not a lattice"
+%     | otherwise = realGreatest ( carrier l ) ( lowerBounds ( carrier l ) x y )
+
+% realGreatest :: Ord a => OrderedSet a -> Set.Set a -> a
+% realGreatest os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (y , x ) `Set.member` rel os) s ) s
+
+% realLeast :: Ord a => OrderedSet a -> Set.Set a -> a
+% realLeast os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (x , y ) `Set.member` rel os ) s) s
+% \end{code}
