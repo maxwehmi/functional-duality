@@ -9,7 +9,7 @@ import Poset
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
 import Test.QuickCheck
-
+import Mapping
 
 \end{code}
 
@@ -102,6 +102,7 @@ We want to work with distributive lattices. A lattice $L$ is distributive if for
 \item Law 1: $a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
 \item Law 2: $a \wedge (b \vee c) = (a \wedge b) \vee (a \wedge c)$
 \end{itemize}
+
 The function 'checkDistributivity' checks whether a lattice is distributive. Furthermore, law 1 and 2 are equivalent
 and so the function will only check law 1, which is sufficient.
 
@@ -129,7 +130,6 @@ checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair 
         j = Set.cartesianProduct lSet lSet -- sets of pairs
         pairMeet = uncurry (meet l) 
         pairJoin = uncurry (join l)
-
 
 \end{code}
 
@@ -351,11 +351,63 @@ mylat2 = makeLattice myos2
 
 \end{code}
 
-\subsection{Filters and the Priestey-map}
+\subsection{mrophisms}
 
-In order to compute the dual space of our lattices, we first need to be able to isolate filters within them. \newline 
-Intuitively, a filter is a collection of elements of an ordered set such that it is closed upwards and closed under meets. In our case the only relevant filters 
-are going to be \textit{Prime filters}, which are just filters that do not contain the bottom element of the lattice, and that never contain a join of two elements without 
-also containing at least one of the two. \newline 
+We want to check wether two Lattices are isomorphic. This means checking that, under some function between them, immages preserve bot,top, and all meets and joins. These suffice for the preservation of distributivity and boundedness, so we do not need to explicitly check for those.
 
-First, we make a type-shorthand for prime filters (those are just sets of elements), and we implement helper functions to compute the closure under meets of a set, and the upward closure of a set.
+\begin{code}
+
+functionMorphism:: (Ord a, Ord b) => Lattice a -> Lattice b -> Map a b -> Bool
+functionMorphism l1  l2 f 
+    | not(checkLattice l1 && checkLattice l2) = error "not lattices"
+    | not (checkMapping s1 f) = error "not a mapping"
+    | otherwise = checkBijective s2 f 
+                &&
+                (fromJust $ top l1, fromJust $ top l2) `Set.member` f
+                &&
+                (fromJust $ bot l1, fromJust $ bot l2) `Set.member` f
+                && 
+                all 
+                (\(x,y) -> fromJust (findJoin l2 (getImage f x) (getImage f y)) == getImage f (fromJust (findJoin l1 x y)))
+                (s1 `Set.cartesianProduct` s1)
+                &&
+                all
+                (\(x,y) -> fromJust (findMeet l2 (getImage f x) (getImage f y)) == getImage f (fromJust (findMeet l1 x y)))
+                (s1 `Set.cartesianProduct` s1)
+                where
+                    s1 = set $ carrier l1
+                    s2 = set $ carrier l2                         
+\end{code}
+
+                        
+
+% \begin{code}
+%-- helper functions that redfine previous function to not have Maybe... type, for ease of typechecking ----------------
+% realTop:: Ord a => Lattice a -> a
+% realTop l 
+%     | M.isNothing (top l) = error "there's no top"
+%     | otherwise =  Set.elemAt 0 (Set.filter ( isTop l ) ( set $ carrier l ))
+
+
+% realBot:: Ord a => Lattice a -> a
+% realBot l 
+%     | M.isNothing (bot l) = error "there's no bot"
+%     | otherwise =  Set.elemAt 0 (Set.filter ( isBot l ) ( set $ carrier l ))
+
+% realJoin :: Ord a => Lattice a -> a -> a -> a
+% realJoin l x y
+%     | not (checkLattice l) = error "not a lattice"
+%     | otherwise = realLeast ( carrier l ) ( upperBounds ( carrier l ) x y )
+
+
+% realMeet :: Ord a => Lattice a -> a -> a -> a
+% realMeet l x y
+%     | not (checkLattice l) = error "not a lattice"
+%     | otherwise = realGreatest ( carrier l ) ( lowerBounds ( carrier l ) x y )
+
+% realGreatest :: Ord a => OrderedSet a -> Set.Set a -> a
+% realGreatest os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (y , x ) `Set.member` rel os) s ) s
+
+% realLeast :: Ord a => OrderedSet a -> Set.Set a -> a
+% realLeast os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (x , y ) `Set.member` rel os ) s) s
+% \end{code}
