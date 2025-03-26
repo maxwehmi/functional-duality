@@ -286,55 +286,46 @@ functionMorphism l1  l2 f
                 (fromJust $ bot l1, fromJust $ bot l2) `Set.member` f
                 && 
                 all 
-                (\(x,y) -> fromJust (findJoin l1 x y) == getPreimage f (fromJust (findJoin l2 (getImage f x) (getImage f y))))
+                (\(x,y) -> fromJust (findJoin l2 (getImage f x) (getImage f y)) == getImage f (fromJust (findJoin l1 x y)))
                 (s1 `Set.cartesianProduct` s1)
                 &&
-                all 
-                (\(x,y) -> fromJust (findMeet l1 x y) == getPreimage f (fromJust (findMeet l2 (getImage f x) (getImage f y))))
+                all
+                (\(x,y) -> fromJust (findMeet l2 (getImage f x) (getImage f y)) == getImage f (fromJust (findMeet l1 x y)))
                 (s1 `Set.cartesianProduct` s1)
                 where
                     s1 = set $ carrier l1
-                    s2 = set $ carrier l2
-                            
-                            
-
+                    s2 = set $ carrier l2                         
+\end{code}
 
                         
 
---all (\(x,y) -> findMeet (L c1 m1 j1) x y == f (findMeet (L c2 m2 j2 ) x y)) c1
+% \begin{code}
+%-- helper functions that redfine previous function to not have Maybe... type, for ease of typechecking ----------------
+% realTop:: Ord a => Lattice a -> a
+% realTop l 
+%     | M.isNothing (top l) = error "there's no top"
+%     | otherwise =  Set.elemAt 0 (Set.filter ( isTop l ) ( set $ carrier l ))
 
 
+% realBot:: Ord a => Lattice a -> a
+% realBot l 
+%     | M.isNothing (bot l) = error "there's no bot"
+%     | otherwise =  Set.elemAt 0 (Set.filter ( isBot l ) ( set $ carrier l ))
+
+% realJoin :: Ord a => Lattice a -> a -> a -> a
+% realJoin l x y
+%     | not (checkLattice l) = error "not a lattice"
+%     | otherwise = realLeast ( carrier l ) ( upperBounds ( carrier l ) x y )
 
 
--- helper functions that redfine previous function to not have Maybe... type, for ease of typechecking ----------------
-realTop:: Ord a => Lattice a -> a
-realTop l 
-    | M.isNothing (top l) = error "there's no top"
-    | otherwise =  Set.elemAt 0 (Set.filter ( isTop l ) ( set $ carrier l ))
+% realMeet :: Ord a => Lattice a -> a -> a -> a
+% realMeet l x y
+%     | not (checkLattice l) = error "not a lattice"
+%     | otherwise = realGreatest ( carrier l ) ( lowerBounds ( carrier l ) x y )
 
+% realGreatest :: Ord a => OrderedSet a -> Set.Set a -> a
+% realGreatest os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (y , x ) `Set.member` rel os) s ) s
 
-realBot:: Ord a => Lattice a -> a
-realBot l 
-    | M.isNothing (bot l) = error "there's no bot"
-    | otherwise =  Set.elemAt 0 (Set.filter ( isBot l ) ( set $ carrier l ))
-
-realJoin :: Ord a => Lattice a -> a -> a -> a
-realJoin l x y
-    | not (checkLattice l) = error "not a lattice"
-    | otherwise = realLeast ( carrier l ) ( upperBounds ( carrier l ) x y )
-
-
-realMeet :: Ord a => Lattice a -> a -> a -> a
-realMeet l x y
-    | not (checkLattice l) = error "not a lattice"
-    | otherwise = realGreatest ( carrier l ) ( lowerBounds ( carrier l ) x y )
-
-realGreatest :: Ord a => OrderedSet a -> Set.Set a -> a
-realGreatest os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (y , x ) `Set.member` rel os) s ) s
-
-realLeast :: Ord a => OrderedSet a -> Set.Set a -> a
-realLeast os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (x , y ) `Set.member` rel os ) s) s
-
-
-
-\end{code}
+% realLeast :: Ord a => OrderedSet a -> Set.Set a -> a
+% realLeast os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (x , y ) `Set.member` rel os ) s) s
+% \end{code}
