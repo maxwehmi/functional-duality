@@ -9,6 +9,10 @@ and test some properties.
 module Main where
 
 import Basics
+import Mapping
+import DL
+import Poset
+import Priestley
 
 import Test.Hspec
 import Test.QuickCheck
@@ -22,12 +26,12 @@ The second and third test use QuickCheck.
 main :: IO ()
 main = hspec $ do
   describe "Basics" $ do
-    it "somenumbers should be the same as [1..10]" $
-      somenumbers `shouldBe` [1..10]
-    it "if n > - then funnyfunction n > 0" $
-      property (\n -> n > 0 ==> funnyfunction n > 0)
-    it "myreverse: using it twice gives back the same list" $
-      property $ \str -> myreverse (myreverse str) == (str::String)
+    it "All arbitrary Ordered Sets should be Posets (for now the tests just use Ordered Sets on Integers, but the type does not really matter)" $
+      property $ \ o -> checkPoset (o :: OrderedSet Int)
+    it "All arbitrary Lattices should be distributive Lattices (for now the tests just use Ordered Sets on Integers, but the type does not really matter)" $
+      property $ \ l -> checkDL (l :: Lattice Int)
+    it "All arbitrary Priestley Spaces should be Priestley Spaces (for now the tests just use Ordered Sets on Integers, but the type does not really matter)" $
+      property $ \ ps -> checkPriestley (ps :: PriestleySpace Int)
 \end{code}
 
 To run the tests, use \verb|stack test|.

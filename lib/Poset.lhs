@@ -15,6 +15,7 @@ An object $(P, R)$ of type \texttt {OrderedSet a}, is not necessarily a partiall
 module Poset where
 
 import qualified Data.Set as Set
+import Test.QuickCheck
 type Relation a = Set.Set (a,a)
 
 data OrderedSet a = OS {set :: Set.Set a, rel :: Relation a} 
@@ -68,6 +69,19 @@ Moreover if the relation is not well-defined relation, we might want to force it
 %
 
 \begin{code}
+
+checkReflAlt :: Ord a =>  OrderedSet a -> Bool
+checkReflAlt os = os == closureRefl os
+
+checkTransAlt :: Ord a => OrderedSet a -> Bool
+checkTransAlt os = os == closureTrans os
+
+checkTrans :: Ord a => OrderedSet a -> Bool
+checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
+
+checkRefl :: Ord a =>  OrderedSet a -> Bool
+checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
+
 -- this maybe could've been done more simply, but idk it seems to work like this
 forceRelation :: Ord a => OrderedSet a -> OrderedSet a
 forceRelation (OS s r) 
@@ -305,6 +319,10 @@ Now since the definition of \texttt{forceAntiSym} corresponds to that of $R^\dag
 Finally, we define the following function in order to chek for any given an object of type \texttt{OrderedSet a}, whether its relation is antisymmetric.
 
 \begin{code}
+
+quotientAntiSym :: Ord a => Set.Set a -> Relation a -> Set.Set a
+quotientAntiSym s r = s `Set.difference` Set.fromList [x | (x,y) <- Set.toList r, (y,x) `Set.member` r, x /= y, y < x] 
+
 checkAntiSym :: Ord a => OrderedSet a -> Bool
 checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 \end{code}
@@ -370,12 +388,21 @@ forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
 
 \end{code}
 
+To use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. It is called an arbitrary ordered set, but in fact it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
+
+\begin{code}
+instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
+    arbitrary = sized randomOS where
+        randomOS :: (Arbitrary a, Ord a) => Int -> Gen (OrderedSet a)
+        randomOS n = do
+            s <- Set.fromList <$> vector n
+            r <- Set.fromList . take n <$> sublistOf (Set.toList $ Set.cartesianProduct s s)
+            return $ forcePoSet $ OS s r
+\end{code}
+
 \paragraph{Checking the poset}
 
 In order to check if an object of type \texttt{OrderedSet a} is indeed a poset, we define the following function: 
-
-
-
 \begin{code}
 
 checkPoset :: Ord a => OrderedSet a -> Bool
@@ -385,8 +412,6 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 
 \subsection{Examples}
 Here are some toy examples to work with. 
-
-
 
 \begin{code}
 os6 :: OrderedSet Integer
