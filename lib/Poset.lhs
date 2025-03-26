@@ -69,19 +69,6 @@ Moreover if the relation is not well-defined relation, we might want to force it
 %
 
 \begin{code}
-
-checkReflAlt :: Ord a =>  OrderedSet a -> Bool
-checkReflAlt os = os == closureRefl os
-
-checkTransAlt :: Ord a => OrderedSet a -> Bool
-checkTransAlt os = os == closureTrans os
-
-checkTrans :: Ord a => OrderedSet a -> Bool
-checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
-
-checkRefl :: Ord a =>  OrderedSet a -> Bool
-checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
-
 -- this maybe could've been done more simply, but idk it seems to work like this
 forceRelation :: Ord a => OrderedSet a -> OrderedSet a
 forceRelation (OS s r) 
@@ -119,12 +106,8 @@ We now define the following two functions to check if
  given an object of type \texttt{OrderedSet a }, its relation is reflexive: the first makes use of the \texttt{closureRefl} function, the second works independently. 
 
 \begin{code}
-
 checkRefl :: Ord a =>  OrderedSet a -> Bool
-checkRefl os = os == closureRefl os
-
-checkReflAlt :: Ord a =>  OrderedSet a -> Bool
-checkReflAlt (OS s r) = all (\x ->  (x, x) `Set.member` r) s
+checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 \end{code}
 
 
@@ -165,14 +148,8 @@ We now define the following two functions to check if
  given an object of type \texttt{OrderedSet a }, its relation is transitive: the first makes use of the \texttt{closureTrans} function, the second works independently. 
 
 \begin{code}
-
-
 checkTrans :: Ord a => OrderedSet a -> Bool
-checkTrans os = os == closureTrans os
-
-checkTransAlt :: Ord a => OrderedSet a -> Bool
-checkTransAlt (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
-
+checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
 \end{code}
 
 %
@@ -319,10 +296,6 @@ Now since the definition of \texttt{forceAntiSym} corresponds to that of $R^\dag
 Finally, we define the following function in order to chek for any given an object of type \texttt{OrderedSet a}, whether its relation is antisymmetric.
 
 \begin{code}
-
-quotientAntiSym :: Ord a => Set.Set a -> Relation a -> Set.Set a
-quotientAntiSym s r = s `Set.difference` Set.fromList [x | (x,y) <- Set.toList r, (y,x) `Set.member` r, x /= y, y < x] 
-
 checkAntiSym :: Ord a => OrderedSet a -> Bool
 checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 \end{code}
