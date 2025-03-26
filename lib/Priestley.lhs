@@ -168,6 +168,104 @@ clopMap  ps = do
 
 \end{code}
 
+
+
+
+\subsection{Filters and the Priestey-map}
+
+In order to compute the dual space of our lattices, we first need to be able to isolate filters within them. \newline 
+Intuitively, a filter is a collection of elements of an ordered set such that it is closed upwards and closed under meets. In our case the only relevant filters 
+are going to be \textit{Prime filters}, which are just filters that do not contain the bottom element of the lattice, and that never contain a join of two elements without 
+also containing at least one of the two. \newline 
+
+First, we make a type-shorthand for prime filters (those are just sets of elements), and we implement helper functions to compute the closure under meets of a set, and the upward closure of a set.
+
+
+\begin{code}
+type PrimeFilter a = Set a 
+type Filter a = Set a 
+
+closeOnceUnderMeet :: Ord b => Lattice b -> Set b -> Set b
+closeOnceUnderMeet lattice1 set1 =  Data.Set.map (uncurry (meet lattice1) ) (cartesianProduct set1 set1 ) 
+
+meetClosure :: (Eq a, Ord a) => Lattice a -> Set a -> Set a 
+meetClosure lattice2 set2 = do 
+                let cycle2 = closeOnceUnderMeet lattice2 set2 
+                 in   
+                 if set2 == cycle2 then set2 
+                else closeOnceUnderMeet lattice2 cycle2
+
+\end{code}
+next, we want to extract from a given lattice the set of its prime filters. We thus first implement a function to check primeness of a given filter, and then we pull the strings 
+together, making use of the "upClosure" function from above.
+\begin{code}
+
+
+--This would be wayy cooler with lenses but I really don't have time for that now
+
+isPrime :: (Eq a, Ord a) =>  Lattice a -> Filter a -> Bool 
+isPrime lattice filter1 = (foldr (&&) True ) $ toList 
+                        (Data.Set.map 
+                        (\ x -> implies 
+                                (member (uncurry (join lattice) x) filter1) 
+                                ((member (fst x) filter1) || (member (snd x) filter1))) 
+                        (cartesianProduct  (set (carrier lattice)) (set (carrier lattice))))
+
+
+findFilters :: (Eq a, Ord a) => Lattice a -> Set (Filter a)
+findFilters lattice = let base = set (carrier lattice)
+                          ord = rel (carrier lattice)
+                      in Data.Set.filter (\ k -> (notElem (fromJust $ bot lattice) k) &&
+                                        (meetClosure lattice k == k ) && 
+                                        upClosure k ord == k ) 
+                                (powerSet base) 
+
+findPrimeFilters :: (Eq a, Ord a) => Lattice a -> Set (Filter a)
+findPrimeFilters lattice = Data.Set.filter (\ k -> isPrime lattice k) (findFilters lattice)
+\end{code}
+
+Next, we want to implement the \textit{Priestley map}, which is going to be our translation from distributive lattices into Priestey spaces. \newline 
+More specifically, given a lattice $L$, we want to construct a topological space out of the set of prime filters of $L$, and order it under inclusion. Further, we are going to 
+construct a topology collecting together, for any $l\in L$, all prime filters in $\mathcal{P}(L)$ of which $l$ is an element, together with their complement. \newline 
+This is going to provide us with a "subbasis" for our topology, which means that the collections of opens in our dual space is the result of closing this set of prime filters first under intersection and then under unions.
+
+
+
+\begin{code}
+
+phi :: (Eq a, Ord a) => Lattice a -> a -> Set (Filter a)
+phi lattice x = Data.Set.filter (\ k -> member x k) $ findPrimeFilters lattice 
+
+priestleyTopology :: (Eq a, Ord a) => Lattice a -> Topology (Filter a)
+priestleyTopology x = let phimap = Data.Set.map (phi x) (set (carrier x)) 
+                    in unionClosure $ intersectionClosure (union phimap (Data.Set.map (\ k -> difference k (findPrimeFilters x)) phimap ))
+                                    
+priesMap :: (Eq a, Ord a) => Lattice a -> PriestleySpace (Filter a)
+priesMap lattice = PS (findPrimeFilters lattice) (priestleyTopology lattice) (inclusionOrder (findPrimeFilters lattice))
+    
+
+
+\end{code}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 When working with Priestley Space, we want to be able to check if two given ones are "similar enough", i.e. isomorphic. This will become important when we want to confirm that a Priestley Space is isomorphic to the dual of its dual. \\
 To check isomorphism, we have to be given two Priestley Spaces and a map between them. The map is an isomorphism, if it is actually a map, bijective, a homoemorphism on the topological spaces and an order isomorphism on the relations. If the map is an isomorphism, the spaces are isomorphic. 
 

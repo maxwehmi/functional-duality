@@ -4,7 +4,7 @@
 
 \begin{code}
 module DL where
---import Priestley
+
 import Poset
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
