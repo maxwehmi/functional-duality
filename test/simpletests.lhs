@@ -8,14 +8,13 @@ and test some properties.
 \begin{code}
 module Main where
 
+import Test.Hspec
+import Test.QuickCheck
+
 import Basics
-import Mapping
 import DL
 import Poset
 import Priestley
-
-import Test.Hspec
-import Test.QuickCheck
 \end{code}
 
 The following uses the HSpec library to define different tests.
@@ -40,3 +39,105 @@ To also find out which part of your program is actually used for these tests,
 run \verb|stack clean && stack test --coverage|. Then look for ``The coverage
 report for ... is available at ... .html'' and open this file in your browser.
 See also: \url{https://wiki.haskell.org/Haskell_program_coverage}.
+
+
+\subsection{More tests} % clean up and expand this
+
+-- Below are a few test cases. 'myos' is a poset. Furthermore, 'mylat1' is a non well-defined lattice, meaning
+-- that the functions for 'meet' and 'join' do not coincide with 'findMeet' and 'findJoin'. Lastly, mylat is 
+-- a lattice. 
+
+-- \begin{code}
+
+-- myos :: OrderedSet Int
+-- myos = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
+
+-- -- not well-defined lattice
+-- mylat1 :: Lattice Int
+-- mylat1 = L myos (-) (+)
+
+-- mylat :: Lattice Int
+-- mylat = makeLattice myos
+
+-- myos2 :: OrderedSet Int
+-- myos2 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4,5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4)])
+
+-- mylat2 :: Lattice Int
+-- mylat2 = makeLattice myos2
+
+-- \end{code}
+
+
+
+-- \subsection{Examples}
+-- Here are some toy examples to work with. 
+
+-- \begin{code}
+-- os6 :: OrderedSet Integer
+-- os6 = OS (Set.fromList [1, 2, 3]) 
+--          (Set.fromList [(1,1), (2,2), (3,3), (1,2), (2,3), (1,3)])
+
+-- os7 :: OrderedSet Integer
+-- os7 = OS (Set.fromList [1, 2, 3]) 
+--          (Set.fromList [(1,1), (2,2), (3,3), (1,2), (2,1), (1,3), (3,1)])
+
+-- os8 :: OrderedSet Integer
+-- os8 = OS (Set.fromList [1, 2, 3]) 
+--          (Set.fromList [(1,1), (2,2), (3,3), (1,2), (2,3), (3,2)])
+
+-- os9 :: OrderedSet Integer
+-- os9 = OS (Set.fromList [1, 2, 3]) 
+--          (Set.fromList [(1,1), (2,2), (3,3), (1,2), (2,3), (3,2), (1,3)])
+
+-- os10 :: OrderedSet Integer
+-- os10 = OS (Set.fromList [1, 2, 3]) 
+--           (Set.fromList [(1,1), (2,2), (3,3), (1,2), (2,1)])
+
+-- os11 :: OrderedSet Integer
+-- os11 = OS (Set.fromList [1, 2, 3]) 
+--           (Set.fromList [(2,2), (3,3), (1,2), (2,3), (1,3)])
+-- os12 :: OrderedSet Integer
+-- os12 = OS (Set.fromList [1, 2, 3]) 
+--           (Set.fromList [(2,2), (3,3), (1,2), (2,3)])
+
+-- os13 :: OrderedSet Integer
+-- os13 = OS (Set.fromList [1, 2, 3]) 
+--           (Set.fromList [(2,2), (3,3), (1,2), (2,3), (3,1)])
+
+-- os14 :: OrderedSet Integer
+-- os14 = OS (Set.fromList [1, 2, 3, 4, 5]) 
+--           (Set.fromList [(1,1), (2,2), (3,3), (4,4), (5,5), 
+--                          (1,2), (2,3), (1,3), (4,5), (1,4), (2,5)])
+
+-- os15 :: OrderedSet Integer
+-- os15 = OS (Set.fromList [1, 2, 3, 4, 5, 6]) 
+--           (Set.fromList [(1,1), (2,2), (3,3), (4,4), (5,5), (6,6), 
+--                          (1,2), (2,3), (3,4), (4,5), (5,6), (1,3), (1,4), (1,5), (1,6)])
+
+-- os16 :: OrderedSet Integer
+-- os16 = OS (Set.fromList [1, 2, 3, 4, 5]) 
+--           (Set.fromList [(1,1), (2,2), (3,3), (4,4), (5,5), 
+--                          (1,2), (2,3), (1,3), (4,5), (5,4)])
+
+-- os17 :: OrderedSet Integer
+-- os17 = OS (Set.fromList [1, 2, 3]) 
+--           (Set.fromList [(1,1), (2,2), (3,3), (1,2), (2,1), (1,3), (3,1)])
+
+-- os18 :: OrderedSet Integer
+-- os18 = OS (Set.fromList [1, 2, 3]) 
+--           (Set.fromList [(1,1), (2,2), (3,3), (1,2), (2,1)])
+
+-- os19 :: OrderedSet Integer
+-- os19 = OS Set.empty Set.empty
+
+
+-- myOS :: OrderedSet Integer
+-- myOS = OS (Set.fromList [1..4]) (Set.fromList [(1,4), (4,5), (5,4),(4,1),(2,1),(2,2),(3,3),(3,1),(1,1),(4,4)])
+
+-- emptyRelOS :: OrderedSet Integer
+-- emptyRelOS = OS (Set.fromList[1..4]) (Set.fromList [])
+
+-- myCircle :: OrderedSet Integer
+-- myCircle = OS (Set.fromList [1,2,3]) (Set.fromList [(1,2),(2,3),(3,1)])
+
+-- \end{code}

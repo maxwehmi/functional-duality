@@ -5,12 +5,12 @@
 \begin{code}
 module DL where
 
-import Poset
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
 import Test.QuickCheck
-import Mapping
 
+import Poset
+import Basics
 \end{code}
 
 This section is dedicated to Distributive Lattices. A lattice is a poset $P$ such that for every $a,b \in P$ the greatest lower bound of $\{a,b\}$ (the meet of $a,b: a \wedge b$) is in $P$ and least upper bound of $\{a,b\}$ (the join of $a,b: a \vee b$) is in $P$. 
@@ -237,12 +237,8 @@ and joins.
 
 \begin{code}
 
-fromJust :: Maybe a -> a
-fromJust (Just x) = x
-fromJust Nothing = error "Sorry, but your poset is not closed under meet and joins"
-
 makeLattice :: Ord a => OrderedSet a -> Lattice a 
-makeLattice os = L os (\x y -> fromJust $ findMeet preLattice x y) (\x y -> fromJust $ findJoin preLattice x y)
+makeLattice os = L os (\x y -> M.fromJust $ findMeet preLattice x y) (\x y -> M.fromJust $ findJoin preLattice x y)
                 where preLattice = L os const const -- give it two mock functions
 
 \end{code}
@@ -284,7 +280,7 @@ collapseElements s (OS s' r) | Set.size s == 0 = OS s' r
 
 fixLattice :: Ord a => OrderedSet a -> OrderedSet a
 fixLattice o = 
-    let recurse_o = fixDistributivityN $ fixJoinMeetN o
+    let recurse_o = fixDistributivity $ fixJoinMeet o
     in if recurse_o == o
         then o
         else fixLattice recurse_o
@@ -296,17 +292,17 @@ loop s o action | Set.size s == 0 = o
                 | otherwise = loop (Set.delete s0 s) (action s0 o) action where
                     s0 = Set.elemAt 0 s
 
-fixMeetN :: Ord a => OrderedSet a -> OrderedSet a
-fixMeetN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) (\ (x,y) o' -> collapseElements (calculateMeets o' x y) o')
+fixMeet :: Ord a => OrderedSet a -> OrderedSet a
+fixMeet (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) (\ (x,y) o' -> collapseElements (calculateMeets o' x y) o')
 
-fixJoinN :: Ord a => OrderedSet a -> OrderedSet a
-fixJoinN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) (\ (x,y) o' -> collapseElements (calculateMeets o' x y) o')
+fixJoin :: Ord a => OrderedSet a -> OrderedSet a
+fixJoin (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) (\ (x,y) o' -> collapseElements (calculateMeets o' x y) o')
 
-fixJoinMeetN :: Ord a => OrderedSet a -> OrderedSet a
-fixJoinMeetN = fixMeetN . fixJoinN
+fixJoinMeet :: Ord a => OrderedSet a -> OrderedSet a
+fixJoinMeet = fixMeet . fixJoin
 
-fixDistributivityN :: Ord a => OrderedSet a -> OrderedSet a
-fixDistributivityN (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) 
+fixDistributivity :: Ord a => OrderedSet a -> OrderedSet a
+fixDistributivity (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r) 
     (\ (x,y) o' -> case () of 
         _ | any distrFailN (set o') -> collapseElements (Set.fromList [x,y]) o'
           | otherwise -> o' where
@@ -327,31 +323,7 @@ cleanUp :: Eq a => OrderedSet a -> OrderedSet a
 cleanUp (OS s r) = OS s (Set.filter (\ (x,y) -> x `elem` s && y `elem` s) r)
 \end{code}
 
-Below are a few test cases. 'myos' is a poset. Furthermore, 'mylat1' is a non well-defined lattice, meaning
-that the functions for 'meet' and 'join' do not coincide with 'findMeet' and 'findJoin'. Lastly, mylat is 
-a lattice. 
-
-\begin{code}
-
-myos :: OrderedSet Int
-myos = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
-
--- not well-defined lattice
-mylat1 :: Lattice Int
-mylat1 = L myos (-) (+)
-
-mylat :: Lattice Int
-mylat = makeLattice myos
-
-myos2 :: OrderedSet Int
-myos2 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4,5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4)])
-
-mylat2 :: Lattice Int
-mylat2 = makeLattice myos2
-
-\end{code}
-
-\subsection{mrophisms}
+\subsection{Morphisms}
 
 We want to check wether two Lattices are isomorphic. This means checking that, under some function between them, immages preserve bot,top, and all meets and joins. These suffice for the preservation of distributivity and boundedness, so we do not need to explicitly check for those.
 
@@ -363,16 +335,16 @@ functionMorphism l1  l2 f
     | not (checkMapping s1 f) = error "not a mapping"
     | otherwise = checkBijective s2 f 
                 &&
-                (fromJust $ top l1, fromJust $ top l2) `Set.member` f
+                (M.fromJust $ top l1, M.fromJust $ top l2) `Set.member` f
                 &&
-                (fromJust $ bot l1, fromJust $ bot l2) `Set.member` f
+                (M.fromJust $ bot l1, M.fromJust $ bot l2) `Set.member` f
                 && 
                 all 
-                (\(x,y) -> fromJust (findJoin l2 (getImage f x) (getImage f y)) == getImage f (fromJust (findJoin l1 x y)))
+                (\(x,y) -> M.fromJust (findJoin l2 (getImage f x) (getImage f y)) == getImage f (M.fromJust (findJoin l1 x y)))
                 (s1 `Set.cartesianProduct` s1)
                 &&
                 all
-                (\(x,y) -> fromJust (findMeet l2 (getImage f x) (getImage f y)) == getImage f (fromJust (findMeet l1 x y)))
+                (\(x,y) -> M.fromJust (findMeet l2 (getImage f x) (getImage f y)) == getImage f (M.fromJust (findMeet l1 x y)))
                 (s1 `Set.cartesianProduct` s1)
                 where
                     s1 = set $ carrier l1
