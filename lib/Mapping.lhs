@@ -5,7 +5,7 @@ As in most of mathematics, maps (and more specifically isomorphisms) are of grea
 \begin{code}
 module Mapping where
 
-import Data.Set (Set, map, size, elemAt, filter)
+import Data.Set (Set, map, size, elemAt, filter,fromList,toList)
 
 type Map a b = Set (a,b)
 \end{code}
@@ -40,4 +40,13 @@ getImage mapping x | size (getImages mapping x) == 1 = elemAt 0 (getImages mappi
 getPreimage :: (Ord a, Ord b) => Map a b -> b -> a
 getPreimage mapping y | size (getPreimages mapping y) == 1 = elemAt 0 (getPreimages mapping y)
                       | otherwise = error "Either no or too many preimages"
+\end{code}
+
+Since it is not so nice to use functions in their set theoretic encoding, we define a helper functions that let us define a mapping by just "naturally" describing the function, as we would in the "everyday".
+
+\begin{code}
+
+makeMap :: (Ord a, Ord b) => Set a -> Set b -> (a -> b) -> Map a b
+makeMap s1 s2 f = fromList [(x,y)| x <- toList s1, y <- toList s2, y == f x]
+
 \end{code}
