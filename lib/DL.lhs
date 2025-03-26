@@ -288,7 +288,7 @@ functionMorphism l1  l2 f
                 all 
                 (\(x,y) -> fromJust (findJoin l1 x y) == getPreimage f (fromJust (findJoin l2 (getImage f x) (getImage f y))))
                 (s1 `Set.cartesianProduct` s1)
-                 &&
+                &&
                 all 
                 (\(x,y) -> fromJust (findMeet l1 x y) == getPreimage f (fromJust (findMeet l2 (getImage f x) (getImage f y))))
                 (s1 `Set.cartesianProduct` s1)
