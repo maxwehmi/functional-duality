@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use infix" #-}
 module Priestley where
-import Data.Set (Set, toList, fromList, intersection, union, difference, filter, map, size, elemAt, isSubsetOf, member, empty, cartesianProduct, toList, fromList, powerSet, singleton)
+import qualified Data.Set as Set 
 import Data.Bifunctor (bimap)
 import Test.QuickCheck
 
@@ -31,16 +31,16 @@ Elements of $\tau$ such that their complement in $X$
  also is in the topology are called "Clopen Sets".
 \end{enumerate}
 \begin{code}
-type Topology a = Set (Set a)
+type Topology a = Set.Set (Set.Set a)
 
 data TopoSpace a = TS {
-    setTS :: Set a,
+    setTS :: Set.Set a,
     topologyTS :: Topology a
 }
     deriving (Eq, Ord,Show)
 
 data PriestleySpace a = PS {
-    setPS :: Set a,
+    setPS :: Set.Set a,
     topologyPS :: Topology a,
     relationPS :: Relation a
 }
@@ -59,9 +59,9 @@ is identical to its own one-step intersection (resp. union) closure.
 
 \begin{code} 
 unionStep :: (Ord a) => Topology a -> Topology a
-unionStep x = Data.Set.map (uncurry union) (cartesianProduct x x)
+unionStep x = Set.map (uncurry Set.union) (Set.cartesianProduct x x)
 intersectionStep :: (Ord a) => Topology a -> Topology a
-intersectionStep x = Data.Set.map (uncurry intersection) (cartesianProduct x x)
+intersectionStep x = Set.map (uncurry Set.intersection) (Set.cartesianProduct x x)
 
 unionClosure :: (Eq a, Ord a) => Topology a -> Topology a
 unionClosure y = do 
@@ -85,16 +85,16 @@ It is assumed that the input is finite. In case the input does not respect the c
 
 \begin{code}
 checkTopology :: Ord a => TopoSpace a -> Bool
-checkTopology (TS space top) = member space top 
-    && member empty top 
-    && all (\u -> all (\v -> (u `union` v) `elem` top) top) top
-    && all (\u -> all (\v -> (u `intersection` v) `elem` top) top) top
+checkTopology (TS space top) = Set.member space top 
+    && Set.member Set.empty top 
+    && all (\u -> all (\v -> (u `Set.union` v) `elem` top) top) top
+    && all (\u -> all (\v -> (u `Set.intersection` v) `elem` top) top) top
 \end{code}
 
 \begin{code}
 fixTopology :: Ord a => TopoSpace a -> TopoSpace a
 fixTopology (TS space top) = TS space fixedTop  where 
-    fixedTop  = fromList [space, empty] `union` unionClosure (intersectionClosure top)
+    fixedTop  = Set.fromList [space, Set.empty] `Set.union` unionClosure (intersectionClosure top)
 
 \end{code}
 The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order.
@@ -135,19 +135,19 @@ checkPSA (PS space top order) = all (\ pair ->
  implies (pair `notElem` order) (any (\ open -> elem (fst pair) open 
    && notElem (snd pair) open) (clopUp (PS space top order)) )) $ allPairs space 
 
-allPairs :: Set a -> [(a,a)]
-allPairs space = [(x,y) | x <- toList space ,y <- toList space ]
+allPairs :: Set.Set a -> [(a,a)]
+allPairs space = [(x,y) | x <- Set.toList space ,y <- Set.toList space ]
 
 implies :: Bool -> Bool -> Bool
 implies x y = not x || y
 
 clopUp :: Ord a => PriestleySpace a -> Topology a
-clopUp (PS space top ord) = intersection (clopens top) (upsets top) where 
-        clopens = Data.Set.filter (\ x -> difference space x `elem` top)  
-        upsets = Data.Set.filter (\ y -> y == upClosure y ord)
+clopUp (PS space top ord) = Set.intersection (clopens top) (upsets top) where 
+        clopens = Set.filter (\ x -> Set.difference space x `elem` top)  
+        upsets = Set.filter (\ y -> y == upClosure y ord)
 
-upClosure :: (Eq a, Ord a) => Set a -> Relation a -> Set a 
-upClosure set1 relation = Data.Set.map snd (Data.Set.filter (\ x -> fst x `elem` set1 ) relation) `union` set1 
+upClosure :: (Eq a, Ord a) => Set.Set a -> Relation a -> Set.Set a 
+upClosure set1 relation = Set.map snd (Set.filter (\ x -> fst x `elem` set1 ) relation) `Set.union` set1 
 \end{code}
 \subsection{Dual maps and Isomorphisms}
 We present some functions to check basic properties of topological spaces.
@@ -158,10 +158,10 @@ To this extent, we implement a function to extract an order based on set-theoret
 Next, we construct a lattice using the Clopen Upsets of our topological space and endowing this set with the desired inclusion-order. We make use of functions from the "DL" section to both construct the lattice and check it is distributive.
 \begin{code}
 
-inclusionOrder :: Ord a => Topology a -> Relation (Set a)
-inclusionOrder x = fromList [ (z ,y) |  z <- toList x, y <- toList x, isSubsetOf z y ]
+inclusionOrder :: Ord a => Topology a -> Relation (Set.Set a)
+inclusionOrder x = Set.fromList [ (z ,y) |  z <- Set.toList x, y <- Set.toList x, Set.isSubsetOf z y ]
 
-clopMap :: Ord a => PriestleySpace a -> Lattice (Set a)
+clopMap :: Ord a => PriestleySpace a -> Lattice (Set.Set a)
 clopMap  ps = do 
               let result = makeLattice $  OS (clopUp ps) (inclusionOrder (clopUp ps)) 
               if checkDL result then result else error "104!"
@@ -184,18 +184,18 @@ Assuming bijectivity (by laziness of \&\&), to check that the given map is a hom
 \begin{code}
 checkHomoemorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
 checkHomoemorphism ta tb mapping = 
-    mapTop mapping ta `isSubsetOf` tb
-    && premapTop mapping tb `isSubsetOf` ta
+    mapTop mapping ta `Set.isSubsetOf` tb
+    && premapTop mapping tb `Set.isSubsetOf` ta
 \end{code}
 
-To apply the map to every open and thus every element of every open, we have to nest \verb:Data.Set.map: twice. Again, we deal similarly with the preimages.
+To apply the map to every open and thus every element of every open, we have to nest \verb:Set.map: twice. Again, we deal similarly with the preimages.
 
 \begin{code}
 mapTop :: (Ord a, Ord b) => Map a b -> Topology a -> Topology b
-mapTop mapping = Data.Set.map (Data.Set.map (getImage mapping))
+mapTop mapping = Set.map (Set.map (getImage mapping))
 
 premapTop :: (Ord a, Ord b) => Map a b -> Topology b -> Topology a
-premapTop mapping = Data.Set.map (Data.Set.map (getPreimage mapping))
+premapTop mapping = Set.map (Set.map (getPreimage mapping))
 \end{code}
 
 Lastly, it remains the check that the map is an order isomorphism, which means that two elements $x,y$ of the domain satisfy $x\leq y$ in the domain iff $f(x)\leq f(y)$ in the codomain (here $f$ is the map). This means that applying the map component wise to every pair of the relation in the domain should yield the relation of the codomain and vice versa. 
@@ -205,14 +205,14 @@ checkOrderIso :: (Ord a, Ord b) => Relation a -> Relation b -> Map a b -> Bool
 checkOrderIso ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
 \end{code}
 
-Similar to above, we have to nest \verb:Data.Set.map: with \verb:Data.Bifunctor.bimap: to apply the map to both components of all pairs in the relation.
+Similar to above, we have to nest \verb:Set.map: with \verb:Data.Bifunctor.bimap: to apply the map to both components of all pairs in the relation.
 
 \begin{code}
 mapRel :: (Ord a, Ord b) => Map a b -> Relation a -> Relation b
-mapRel mapping = Data.Set.map (Data.Bifunctor.bimap (getImage mapping) (getImage mapping))
+mapRel mapping = Set.map (Data.Bifunctor.bimap (getImage mapping) (getImage mapping))
 
 premapRel :: (Ord a, Ord b) => Map a b -> Relation b -> Relation a
-premapRel mapping = Data.Set.map (bimap (getPreimage mapping) (getPreimage mapping))
+premapRel mapping = Set.map (bimap (getPreimage mapping) (getPreimage mapping))
 \end{code}
 
 To be able to use QuickCheck, we also have to write an Arbitrary instace for PriestleySpaces:
@@ -224,7 +224,7 @@ instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
         randomPS n = do
             os <- resize (min n 10) arbitrary
             let s = set os
-            t <- fromList <$> sublistOf (toList $ powerSet s)
+            t <- Set.fromList <$> sublistOf (Set.toList $ Set.powerSet s)
             let t' = topologyTS $ fixTopology $ TS s t
             let r' = rel $ forcePoSet $ OS s (rel os)
             return $ fixPS $ PS s t' r'
@@ -233,9 +233,9 @@ fixPS :: Ord a => PriestleySpace a -> PriestleySpace a
 fixPS (PS s t r) = PS s (topologyTS $ fixTopology $ TS s (topologyPS $ fixPSA $ PS s t r)) r
 
 fixPSA :: Ord a => PriestleySpace a -> PriestleySpace a
-fixPSA (PS s t r) = PS s (t `union` getMissingUpsets s r) r 
+fixPSA (PS s t r) = PS s (t `Set.union` getMissingUpsets s r) r 
 
-getMissingUpsets :: Ord a => Set a -> Relation a -> Topology a
-getMissingUpsets s r = Data.Set.map (\ x -> upClosure (singleton x) r) firsts `union` Data.Set.map (\ x -> s `difference` upClosure (singleton x) r) firsts where
-    firsts = Data.Set.map fst $ cartesianProduct s s `difference` r
+getMissingUpsets :: Ord a => Set.Set a -> Relation a -> Topology a
+getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Set.union` Set.map (\ x -> s `Set.difference` upClosure (Set.singleton x) r) firsts where
+    firsts = Set.map fst $ Set.cartesianProduct s s `Set.difference` r
 \end{code}
