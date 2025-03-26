@@ -11,32 +11,15 @@ An object $(P, R)$ of type \texttt {OrderedSet a}, is not necessarily a partiall
 
 
 
-
-
-
-
-
-
-
-
 \begin{code}
 module Poset where
 
 import qualified Data.Set as Set
-
-
-
-
-
-
-
 type Relation a = Set.Set (a,a)
 
 data OrderedSet a = OS {set :: Set.Set a, rel :: Relation a} 
     deriving (Eq, Ord,Show)
 \end{code}
-
-
 
 
 
@@ -102,27 +85,6 @@ forceRelation (OS s r)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \subsection{Closures}
 
  
@@ -149,10 +111,6 @@ checkRefl os = os == closureRefl os
 
 checkReflAlt :: Ord a =>  OrderedSet a -> Bool
 checkReflAlt (OS s r) = all (\x ->  (x, x) `Set.member` r) s
-
-
-
-
 \end{code}
 
 
@@ -270,9 +228,8 @@ forceAntiSym (OS s r)
 
 
 \paragraph{Second Implementation}
-Given any $(P,R)$ of type \texttt{OrderedSet a}, we can
 % to make Edo happy :)
- quotient the set $P$ on the symmetric points, i.e. merge the \emph{vertex} that see each other into a cluster. That is, for any $x \in P$ we define the equivalence class $[x]_s$ as the set $\{y \in P| y \neq x \wedge x R y \wedge y R x \}$.  
+Given any $(P,R)$ of type \texttt{OrderedSet a}, we can quotient the set $P$ on the symmetric points, i.e. merge the \emph{vertex} that see each other into a cluster. That is, for any $x \in P$ we define the equivalence class $[x]_s$ as the set $\{y \in P| y \neq x \wedge x R y \wedge y R x \}$.  
 
 
 \begin{code}
@@ -288,8 +245,7 @@ forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
 
 
 \begin{itemize}
-\item Advantages: this does preserve logical properties
-
+\item Advantages: this does preserve logical properties (in particular, there is a p-morphism to the quotiented set).
 
 
 
@@ -307,9 +263,8 @@ forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
 %Then we just let such quotient set be the new carrier set, and force the relation to be well-defined, just as sanity check.
 
 
+
 \subparagraph{Preservation of properties}
-
-
 
 We need to make sure that forcing anti-symmetry in our two implementation does not make us loose an existing property of the relations. While it is immediate that the second implementation does so, this is not the case for the first implementation.
 
@@ -337,7 +292,7 @@ Then, if $R$ is transitive also $R^\dagger$ is transitive.
 
    Let $R^\dagger$ be as in the above definition. Take now any $x,y,z \in P$ such that $x R^\dagger y \wedge y R^\dagger z$. We need to show that $x R^\dagger z$.
 
-   Now since $R^\dagger \subseteq R$ by definition, $x R y \wedge y R^\dagger z$. Therefore $x R z$. Suppose now towards contradiction that $(x,z)\cancel{\in} R^\dagger$. Therefore $z R x$ and $z\neq x$. But then, since $y R z$, by transitivity of $R$, $y R x$. 
+   Now since $R^\dagger \subseteq R$ by definition, $x R y \wedge y R z$. So by the transitivity of $R$, we have $x R z$. Suppose now towards contradiction that $(x,z)\cancel{\in} R^\dagger$. Therefore $z R x$ and $z\neq x$. But then, since $y R z$, by transitivity of $R$, $y R x$. 
 
    Clearly, since we assumed $y R^\dagger z$ and $(x,z)\cancel{\in} R^\dagger$, $y \neq x$. But then, by definition of $R^\dagger$,  $(x,y)\cancel{\in} R^\dagger$, which is a contradiction to our assumpion. Therefore  $(x,z)\in R^\dagger$, which is what we had to show.
 
