@@ -1,11 +1,16 @@
-
-module Prettyprinting where
-
-import DL
+\begin{code}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use infix" #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use infix" #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use infix" #-}
+module PrettyGraphs where
+import Data.Set as Set
+import qualified Data.Maybe as M
+import DL 
 import Poset
 import Priestley
-import qualified Data.Set as Set
-import qualified Data.Maybe as M
 
 
 import Data.GraphViz.Types.Monadic
@@ -13,12 +18,26 @@ import Data.GraphViz.Types.Generalised
 import Data.GraphViz.Attributes
 import Data.GraphViz.Attributes.Colors
 
+import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
+import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
+
 import Data.GraphViz.Commands
 
 import qualified Data.GraphViz.Attributes.Complete as A
 import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
 import Data.GraphViz.Printing
 
+
+
+
+
+\end{code}
+
+This section is dedicated to the visualization of the structure of the most fundamental mathematical objects we have insofar defined and operated with: that is ordered sets, lattices and Priestley Spaces. 
+
+
+
+\begin{code}
 
 
 
@@ -36,8 +55,6 @@ toGraphRel r = digraph' $  do
 toyRel:: Relation Int
 toyRel = Set.fromList [(0,1)]
 
---toGraphOrd :: Ord a => OrderedSet a -> DotGraph a 
---toGraphOrd p = toGraphRel (rel (fromReflTrans p) )
 
 
 
@@ -67,3 +84,6 @@ fromReflexive (OS s r) = OS s k where
 fromReflTrans::Ord a => OrderedSet a -> OrderedSet a
 fromReflTrans  = fromTransitive.fromReflexive
  
+
+\end{code}
+
