@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\input{latexmacros.tex}
+\input{latex/latexmacros.tex}
 
 \title{A Haskell implementation of translations between Distributive Lattices and Priestley Spaces}
 \author{Giacomo de Antonelllis, \and Estel Koole, \and Marco de Mayda, \and  Edoardo Menorello, \and  Max Wehmeier}
@@ -36,7 +36,7 @@ The repository of the project can be found at https://github.com/maxwehmi/functi
 
 % We include one file for each section. The ones containing code should
 % be called something.lhs and also mentioned in the .cabal file.
-
+\input{intro-conclusion/introduction}
 \input{lib/Mapping.lhs}
 
 \input{lib/Poset.lhs}
@@ -51,7 +51,7 @@ The repository of the project can be found at https://github.com/maxwehmi/functi
 
 \input{test/simpletests.lhs}
 
-\input{Conclusion.tex}
+\input{intro-conclusion/Conclusion.tex}
 
 \addcontentsline{toc}{section}{Bibliography}
 \bibliographystyle{alpha}
