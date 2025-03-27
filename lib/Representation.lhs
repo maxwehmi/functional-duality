@@ -21,12 +21,11 @@ Intuitively, a filter is a collection of elements of an ordered set such that it
 are going to be \textit{Prime filters}, which are just filters that do not contain the bottom element of the lattice, and that never contain a join of two elements without 
 also containing at least one of the two. \newline 
 
-First, we make a type-shorthand for prime filters (those are just sets of elements), 
+First, we make a type-shorthand for filters (those are just sets of elements), 
 and we implement helper functions to compute them.
 
 
 \begin{code}
-type PrimeFilter = Set.Set a 
 type Filter a = Set.Set a 
 
 \end{code}
