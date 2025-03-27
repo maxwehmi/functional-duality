@@ -47,7 +47,14 @@ import Data.GraphViz.Commands
 --   node "start" [shape MDiamond]
 --   node "end" [shape MSquare]
 --
+toGraph' :: Relation a -> Dot a
+toGraph'  =  mapM_ (uncurry (-->)) 
 
+toGraph:: Relation a -> DotGraph a
+toGraph r = digraph' $ toGraph' r 
+
+toyRel:: Relation Int
+toyRel = Set.fromList [(0,1)]
 
 fromTransitive::Ord a => OrderedSet a -> OrderedSet a
 fromTransitive (OS s r) = OS s k where
