@@ -69,12 +69,12 @@ together, making use of the "upClosure" function from above.
 --This would be wayy cooler with lenses but I really don't have time for that now
 
 isPrime :: (Eq a, Ord a) =>  Lattice a -> Filter a -> Bool 
-isPrime lattice filter1 = and $ Set.toList 
+isPrime lattice filter1 = (filter1 /= Set.empty) && and (Set.toList 
                         (Set.map 
                         (\ x -> implies 
                                 (Set.member (uncurry (join lattice) x) filter1) 
                                 (Set.member (fst x) filter1 || Set.member (snd x) filter1)) 
-                        (Set.cartesianProduct  (set (carrier lattice)) (set (carrier lattice))))
+                        (Set.cartesianProduct  (set (carrier lattice)) (set (carrier lattice)))))
 
 
 findFilters :: (Eq a, Ord a) => Lattice a -> Set.Set (Filter a)
@@ -103,11 +103,18 @@ phi lattice x = Set.filter (Set.member x) $ findPrimeFilters lattice
 
 priestleyTopology :: (Eq a, Ord a) => Lattice a -> Topology (Filter a)
 priestleyTopology x = let phimap = Set.map (phi x) (set (carrier x)) 
-                    in unionClosure $ intersectionClosure (Set.union phimap (Set.map (\ k -> Set.difference k (findPrimeFilters x)) phimap ))
+                    in unionClosure $ intersectionClosure (Set.union phimap (Set.map (Set.difference(findPrimeFilters x)) phimap ))
                                     
 priesMap :: (Eq a, Ord a) => Lattice a -> PriestleySpace (Filter a)
 priesMap lattice = PS (findPrimeFilters lattice) (priestleyTopology lattice) (inclusionOrder (findPrimeFilters lattice))
-    
+\end{code}
 
 
+\begin{code}
+calculateEpsilon :: Ord a => PriestleySpace a -> Map a (Filter (Set.Set a))
+calculateEpsilon ps = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps] where
+                eps a = Set.fromList [ u | u <- (Set.toList . set . carrier .clopMap) ps, a `elem` u]
+
+calculatePhi :: Ord a => Lattice a -> Map a (Set.Set (Filter a))
+calculatePhi l = Set.fromList [(x, phi l x) | x <- (Set.toList . set . carrier) l] 
 \end{code}
