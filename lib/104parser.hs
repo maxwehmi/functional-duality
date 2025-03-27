@@ -12,28 +12,27 @@ parseOrderedSet :: Parser (OrderedSet String)
 parseOrderedSet = do
   elements <- parseSetLine
   relations <- parseOrderLine
-  eof  
+  eof
   return $ OS (Set.fromList elements) (Set.fromList relations)
 
 parseSetLine :: Parser [String]
 parseSetLine = do
   void $ string "Set:" <* spaces
-  identifier `sepBy` (symbol ",")
-  
+  identifier `sepBy` symbol ","
+
 parseOrderLine :: Parser [(String, String)]
 parseOrderLine = do
   void $ string "Order:" <* spaces
-  tuple `sepBy` (symbol ",")
+  pair `sepBy` symbol ","
 
--- Basic combinators
 symbol :: String -> Parser String
 symbol s = try (spaces *> string s <* spaces)
 
 identifier :: Parser String
 identifier = many1 letter <* spaces
 
-tuple :: Parser (String, String)
-tuple = between (symbol "(") (symbol ")") $ do
+pair :: Parser (String, String)
+pair = between (symbol "(") (symbol ")") $ do
   a <- identifier
   void $ symbol ","
   b <- identifier
