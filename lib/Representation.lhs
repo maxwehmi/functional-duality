@@ -67,7 +67,19 @@ findFilters lattice = let base = set (carrier lattice)
 
 findPrimeFilters :: (Eq a, Ord a) => Lattice a -> Set.Set (Filter a)
 findPrimeFilters lattice = Set.filter (isPrime lattice) (findFilters lattice)
+
+phi :: (Eq a, Ord a) => Lattice a -> a -> Set.Set (Filter a)
+phi lattice x = Set.filter (Set.member x) $ findPrimeFilters lattice 
+
+priestleyTopology :: (Eq a, Ord a) => Lattice a -> Topology (Filter a)
+priestleyTopology x = let phimap = Set.map (phi x) (set (carrier x)) 
+                    in unionClosure $ intersectionClosure (Set.union phimap (Set.map (Set.difference(findPrimeFilters x)) phimap ))
+
+                                    
+priesMap :: (Eq a, Ord a) => Lattice a -> PriestleySpace (Filter a)
+priesMap lattice = PS (findPrimeFilters lattice) (priestleyTopology lattice) (inclusionOrder (findPrimeFilters lattice))
 \end{code}
+
 
 
 \subsection{Dual maps and Isomorphisms for Priestley Spaces}
