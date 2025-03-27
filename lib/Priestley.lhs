@@ -4,6 +4,20 @@ We introduce the main data types of this section.
 
 \begin{code}
 module Priestley where
+import Data.GraphViz.Types.Monadic
+import Data.GraphViz.Types.Generalised
+import Data.GraphViz.Attributes
+import Data.GraphViz.Attributes.Colors
+
+import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
+import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
+
+import Data.GraphViz.Commands
+
+import qualified Data.GraphViz.Attributes.Complete as A
+import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
+import Data.GraphViz.Printing
+
 
 import qualified Data.Set as Set 
 import Data.Bifunctor (bimap)
@@ -217,4 +231,13 @@ fixPSA (PS s t r) = PS s (t `Set.union` getMissingUpsets s r) r
 getMissingUpsets :: Ord a => Set.Set a -> Relation a -> Topology a
 getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Set.union` Set.map (\ x -> s `Set.difference` upClosure (Set.singleton x) r) firsts where
     firsts = Set.map fst $ Set.cartesianProduct s s `Set.difference` r
+\end{code}
+
+
+\section{Printing machinery}
+
+\begin{code}
+showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
+showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
+
 \end{code}

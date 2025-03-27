@@ -103,7 +103,7 @@ phi lattice x = Set.filter (Set.member x) $ findPrimeFilters lattice
 
 priestleyTopology :: (Eq a, Ord a) => Lattice a -> Topology (Filter a)
 priestleyTopology x = let phimap = Set.map (phi x) (set (carrier x)) 
-                    in unionClosure $ intersectionClosure (Set.union phimap (Set.map (\ k -> Set.difference k (findPrimeFilters x)) phimap ))
+                    in unionClosure $ intersectionClosure (Set.union phimap (Set.map (\ k -> Set.difference (findPrimeFilters x) k) phimap ))
                                     
 priesMap :: (Eq a, Ord a) => Lattice a -> PriestleySpace (Filter a)
 priesMap lattice = PS (findPrimeFilters lattice) (priestleyTopology lattice) (inclusionOrder (findPrimeFilters lattice))

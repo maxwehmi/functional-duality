@@ -4,6 +4,20 @@
 
 \begin{code}
 module DL where
+import Data.GraphViz.Types.Monadic
+import Data.GraphViz.Types.Generalised
+import Data.GraphViz.Attributes
+import Data.GraphViz.Attributes.Colors
+
+import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
+import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
+
+import Data.GraphViz.Commands
+
+import qualified Data.GraphViz.Attributes.Complete as A
+import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
+import Data.GraphViz.Printing
+
 
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
@@ -350,8 +364,11 @@ functionMorphism l1  l2 f
                     s1 = set $ carrier l1
                     s2 = set $ carrier l2                         
 \end{code}
-
-                        
+\section{Printing machinery}
+\begin{code}
+showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
+showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))) Xlib
+\end{code}
 
 % \begin{code}
 %-- helper functions that redfine previous function to not have Maybe... type, for ease of typechecking ----------------

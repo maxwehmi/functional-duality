@@ -13,6 +13,19 @@ An object $(P, R)$ of type \texttt {OrderedSet a}, is not necessarily a partiall
 
 \begin{code}
 module Poset where
+import Data.GraphViz.Types.Monadic
+import Data.GraphViz.Types.Generalised
+import Data.GraphViz.Attributes
+import Data.GraphViz.Attributes.Colors
+
+import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
+import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
+
+import Data.GraphViz.Commands
+
+import qualified Data.GraphViz.Attributes.Complete as A
+import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
+import Data.GraphViz.Printing
 
 import qualified Data.Set as Set
 import Test.QuickCheck
@@ -380,4 +393,39 @@ In order to check if an object of type \texttt{OrderedSet a} is indeed a poset, 
 
 checkPoset :: Ord a => OrderedSet a -> Bool
 checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWellDef x
+\end{code}
+
+
+
+\section{Printing machinery}
+\begin{code}
+
+
+
+toGraphRel' :: Relation a -> Dot a
+toGraphRel'  =  mapM_ (uncurry (-->)) 
+
+toGraphRel:: Relation a -> DotGraph a
+toGraphRel r = digraph' $  do 
+                        edgeAttrs [A.Dir A.NoDir]
+                        nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
+                        graphAttrs[A.RankDir A.FromBottom]
+                        toGraphRel' r 
+
+showOrdSet ::(Ord a, Data.GraphViz.Printing.PrintDot a) => OrderedSet a -> IO ()
+showOrdSet p = runGraphvizCanvas' (toGraphRel $ rel (fromReflTrans p)) Xlib
+
+fromTransitive::Ord a => OrderedSet a -> OrderedSet a
+fromTransitive (OS s r) = OS s k where
+              k = Set.difference r (Set.fromList [(x,y)| (x,y) <- Set.toList r,   any (\z -> Set.member (x,z)  r && Set.member (z,y) r ) s   ])
+
+
+fromReflexive::Ord a => OrderedSet a -> OrderedSet a
+fromReflexive (OS s r) = OS s k where
+   k = Set.difference r (Set.fromList [(x,y)| (x,y) <- Set.toList r, x == y])
+
+fromReflTrans::Ord a => OrderedSet a -> OrderedSet a
+fromReflTrans  = fromTransitive.fromReflexive
+
+
 \end{code}
