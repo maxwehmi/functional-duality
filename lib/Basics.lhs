@@ -1,6 +1,6 @@
 \section{Basics}\label{sec:Basics}
 
-In this section, we introduce the basics for our project. These will be imported in all other modules. 
+In this section, we introduce the basics for our project. For the most part, this is concerned with maps between spaces and some other helper functions. These will be imported in all other modules. 
 
 \begin{code}
 module Basics where
@@ -36,7 +36,7 @@ checkBijective :: (Ord a, Ord b) => Set.Set b -> Map a b -> Bool
 checkBijective sb mapping = all (\ y -> Set.size (getPreimages mapping y) == 1) sb
 \end{code}
 
-After confirming that the set of pairs is actually a map and bijective, we can evaluate it for a given point or calculate the preimage. To avoid errors, these functions should only be used after checking well-definedness and/or bijectivity.
+After confirming that the set of pairs is actually a map and bijective, we can evaluate it for a given point or calculate the preimage. To avoid errors, these functions should only be used after checking well-definedness and bijectivity.
 
 \begin{code}
 getImage :: (Ord a, Ord b) => Map a b -> a -> b
@@ -46,13 +46,6 @@ getImage mapping x | Set.size (getImages mapping x) == 1 = Set.elemAt 0 (getImag
 getPreimage :: (Ord a, Ord b) => Map a b -> b -> a
 getPreimage mapping y | Set.size (getPreimages mapping y) == 1 = Set.elemAt 0 (getPreimages mapping y)
                       | otherwise = error "Either no or too many preimages"
-\end{code}
-
-It's nice to be able to quickly define Mapping with a function defined as we'd do "in everyday", this function helps with that.
-
-\begin{code}
-makeMap :: (Ord a, Ord b) => Set.Set a -> Set.Set b -> (a -> b) -> Map a b
-makeMap s1 s2 f = Set.fromList [(x,y)| x <- Set.toList s1, y <- Set.toList s2, y == f x]
 \end{code}
 
 \subsection{Helpful functions}

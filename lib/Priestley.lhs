@@ -4,21 +4,8 @@ We introduce the main data types of this section.
 
 \begin{code}
 module Priestley where
-import Data.GraphViz.Types.Monadic
-import Data.GraphViz.Types.Generalised
-import Data.GraphViz.Attributes
-import Data.GraphViz.Attributes.Colors
 
-import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
-import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
-
-import Data.GraphViz.Commands
-
-import qualified Data.GraphViz.Attributes.Complete as A
-import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
-import Data.GraphViz.Printing
-
-
+import Data.GraphViz
 import qualified Data.Set as Set 
 import Data.Bifunctor (bimap)
 import Test.QuickCheck
@@ -30,15 +17,14 @@ import Basics
 In the definition of the types, we keep it as close as possible to their mathematical counterparts: 
 
 \begin{enumerate}
-
-\item a Topological Space is a set \textit{X} endowed with a collection of subsets of \textit{X} $\tau$. \newline 
+\item a Topological Space is a set $X$ endowed with a collection $\tau$ of subsets of $X$. \newline 
 In particular it is required that $X,\emptyset$ are elements of $\tau$, and $\tau$ is closed under finitary intersections and arbitrary unions. \newline 
 Notice that, since we are working with finite cases, finitary and arbitrary unions (and intersections) coincide.
-\item a Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set. Moreover, it satisfies the following Priestley Separation Axiom:
-$$ \text{PSA:} x\not \leq y \rightarrow \exists C\subseteq X ((C=\uparrow C) \& (C \in \tau) \& ((X\setminus C)\in \tau) \& (x\in C) \& (y\notin C)) $$
-Intuitively, for any $x,\,y$ that are not related by $\leq$, there exists a upwards-closed set in the topology that separates them. Moreover, the complement of such set should also be in the topology.\newline 
-Elements of $\tau$ such that their complement in $X$
- also is in the topology are called "Clopen Sets".
+\item a Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set. Moreover, it satisfies the following Priestley Separation Axiom: \newline
+For any $x\not \leq y$, there is a clopen Upset $C$, such that $x \in C$ and $y \notin C$. \newline
+Intuitively, for any $x,\,y$ that are not related by $\leq$, there exists a upwards-closed set in the topology that separates them. Moreover, the complement of such set should also be in the topology. Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
+implies $y\in S$.
+Elements of $\tau$ such that their complement in $X$ also is in the topology are called "Clopen Sets".
 \end{enumerate}
 
 \begin{code}
@@ -60,10 +46,8 @@ data PriestleySpace a = PS {
 \end{code}
 
 
-
-
 \subsection{Set-theoretic preliminaries}
-In order to deal effectively with topological spaces, we first define some Set-theoretic preliminary notions. In addition to the standard functions drawn from "Data.set" library
+In order to deal effectively with topological spaces, we first define some Set-theoretic preliminary notions. In addition to the standard functions drawn from \verb:Data.Set: library,
 we define new functions to compute the closure of a given set under arbitrary unions and intersections. \newline 
 In both cases, we first define functions to perform a one-step intersection (resp. union) of a set with itself, and then iterate the function until the resulting set 
 is identical to its own one-step intersection (resp. union) closure. 
@@ -71,6 +55,7 @@ is identical to its own one-step intersection (resp. union) closure.
 \begin{code} 
 unionStep :: (Ord a) => Topology a -> Topology a
 unionStep x = Set.map (uncurry Set.union) (Set.cartesianProduct x x)
+
 intersectionStep :: (Ord a) => Topology a -> Topology a
 intersectionStep x = Set.map (uncurry Set.intersection) (Set.cartesianProduct x x)
 
@@ -80,6 +65,7 @@ unionClosure y = do
                 if y == cycle1 
                 then y
                 else unionStep cycle1 
+
 intersectionClosure :: (Eq a, Ord a) => Topology a -> Topology a
 intersectionClosure z = do 
                 let cycle1 = intersectionStep z
@@ -100,17 +86,15 @@ checkTopology (TS space t) = Set.member space t
     && Set.member Set.empty t 
     && all (\u -> all (\v -> (u `Set.union` v) `elem` t) t) t
     && all (\u -> all (\v -> (u `Set.intersection` v) `elem` t) t) t
-\end{code}
-
-\begin{code}
+    
 fixTopology :: Ord a => TopoSpace a -> TopoSpace a
 fixTopology (TS space t) = TS space fixedTop  where 
     fixedTop  = Set.fromList [space, Set.empty] `Set.union` unionClosure (intersectionClosure t)
-
 \end{code}
-The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order.
-\begin{code}
 
+The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order.
+
+\begin{code}
 getTopoSpace :: PriestleySpace a -> TopoSpace a
 getTopoSpace p = TS (setPS p) (topologyPS p)
 
@@ -119,21 +103,10 @@ getOrderedSet p = OS (setPS p) (relationPS p)
 \end{code}
 
 Next, we define a function to check whether a given Space really is a Priestley space. \newline 
-We make use of some secondary helper functions:
+We make use of a secondary helper function: 
+The "clopUpset" function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
+This function makes use of the "upClosure" function, which computes the upwards-closure of any given set with respect to the given order.
 
-\begin{enumerate}
-\item the implementation for "implies" is routine,
-\item the "allPairs" function extracts the totality of order pairs, % I replaced this with the cartesian product
-
-from the carrier set $X$ (this is required for the antecedent of the PSA axiom above),
-\item the "clopUpset" function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
-Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
- implies $y\in S$.  \newline
- This function makes use of the "upClosure" function, which computes the upwards-closure of any given set with respect to the given order.
- 
-
-
-\end{enumerate}
 The output of those is then fed to the "checkPSA" function, which then ensures the validity of the Priestley separation axiom for all points in $X$ not related by $\leq$.
 
 \begin{code}
@@ -141,7 +114,6 @@ checkPriestley :: (Eq a, Ord a) => PriestleySpace a -> Bool
 checkPriestley p = checkTopology (getTopoSpace p) && checkPoset (getOrderedSet p) && checkPSA p 
 
 checkPSA :: (Eq a, Ord a) => PriestleySpace a -> Bool
-
 checkPSA (PS space t order) = all (\ pair -> 
  implies (pair `notElem` order) (any (\ open -> elem (fst pair) open 
    && notElem (snd pair) open) (clopUp (PS space t order)) )) $ Set.cartesianProduct space space 
@@ -155,11 +127,7 @@ upClosure :: (Eq a, Ord a) => Set.Set a -> Relation a -> Set.Set a
 upClosure set1 relation = Set.map snd (Set.filter (\ x -> fst x `elem` set1 ) relation) `Set.union` set1 
 \end{code}
 
-
-
-
-
-
+\subsection{Isomorphisms}
 
 When working with Priestley Space, we want to be able to check if two given ones are "similar enough", i.e. isomorphic. This will become important when we want to confirm that a Priestley Space is isomorphic to the dual of its dual. \\
 To check isomorphism, we have to be given two Priestley Spaces and a map between them. The map is an isomorphism, if it is actually a map, bijective, a homoemorphism on the topological spaces and an order isomorphism on the relations. If the map is an isomorphism, the spaces are isomorphic. 
@@ -208,6 +176,8 @@ premapRel :: (Ord a, Ord b) => Map a b -> Relation b -> Relation a
 premapRel mapping = Set.map (bimap (getPreimage mapping) (getPreimage mapping))
 \end{code}
 
+\subsection{Arbitrary PriestleySpace}
+
 To be able to use QuickCheck, we also have to write an Arbitrary instace for PriestleySpaces:
 
 \begin{code}
@@ -221,7 +191,11 @@ instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
             let t' = topologyTS $ fixTopology $ TS s t
             let r' = rel $ forcePoSet $ OS s (rel os)
             return $ fixPS $ PS s t' r'
+\end{code}
 
+After generating a space, which might not fulfill all requirements yet, we have to make it into a Priestley space using helper functions. Since we already have the machinary to make a set of subsets into a topology, we just have to make sure that the Priestley Seperation axiom is satisfied. By adding all missing upsets, we make sure that it is definetely satisfied. 
+
+\begin{code}
 fixPS :: Ord a => PriestleySpace a -> PriestleySpace a
 fixPS (PS s t r) = PS s (topologyTS $ fixTopology $ TS s (topologyPS $ fixPSA $ PS s t r)) r
 
@@ -233,11 +207,11 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
     firsts = Set.map fst $ Set.cartesianProduct s s `Set.difference` r
 \end{code}
 
-
 \section{Printing machinery}
 
-\begin{code}
-showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
-showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
+When we say that we print a Priestley space, we mean that we print the underlying relation. This can be done with the functions from Poset:
 
+\begin{code}
+showPriestley ::(Ord a, Data.GraphViz.PrintDot a) => PriestleySpace a -> IO ()
+showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
 \end{code}
