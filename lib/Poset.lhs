@@ -381,7 +381,7 @@ instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
     arbitrary = sized randomOS where
         randomOS :: (Arbitrary a, Ord a) => Int -> Gen (OrderedSet a)
         randomOS n = do
-            s <- Set.fromList <$> vector n
+            s <- Set.fromList <$> vector (max n 1)
             r <- Set.fromList . take n <$> sublistOf (Set.toList $ Set.cartesianProduct s s)
             return $ forcePoSet $ OS s r
 \end{code}
