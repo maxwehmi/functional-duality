@@ -241,11 +241,11 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 
 \begin{code}
 
-{-instance (Eq a, PrintDot a) => PrintDot (Set.Set a) where 
-    toDot t = toDot (head $  toList t)
-    unqtDot = unqtDot (head $  toList t)
-    unqtListToDot = unqtListToDot $ toList t
-    listToDot = toDot (head $  toList t)-}
+--instance (Eq a, PrintDot a) => PrintDot (Set.Set a) where 
+--    toDot t = toDot (head $  toList t)
+--    unqtDot = unqtDot (head $  toList t)
+--    unqtListToDot = unqtListToDot $ toList t
+--    listToDot = toDot (head $  toList t)
 
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
 showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
