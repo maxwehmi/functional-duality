@@ -16,6 +16,7 @@ import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
 
 import Data.GraphViz.Commands
 
+
 import qualified Data.GraphViz.Attributes.Complete as A
 import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
 import Data.GraphViz.Printing
@@ -126,9 +127,7 @@ We make use of some secondary helper functions:
 
 \begin{enumerate}
 \item the implementation for "implies" is routine,
-\item the "allPairs" function extracts the totality of order pairs, % I replaced this with the cartesian product
 
-from the carrier set $X$ (this is required for the antecedent of the PSA axiom above),
 \item the "clopUpset" function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
 Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
  implies $y\in S$.  \newline
@@ -165,21 +164,21 @@ upClosure set1 relation = Set.map snd (Set.filter (\ x -> fst x `elem` set1 ) re
 
 
 When working with Priestley Space, we want to be able to check if two given ones are "similar enough", i.e. isomorphic. This will become important when we want to confirm that a Priestley Space is isomorphic to the dual of its dual. \\
-To check isomorphism, we have to be given two Priestley Spaces and a map between them. The map is an isomorphism, if it is actually a map, bijective, a homoemorphism on the topological spaces and an order isomorphism on the relations. If the map is an isomorphism, the spaces are isomorphic. 
+To check isomorphism, we have to be given two Priestley Spaces and a map between them. The map is an isomorphism, if it is actually a map, bijective, a Homeomorphism on the topological spaces and an order isomorphism on the relations. If the map is an isomorphism, the spaces are isomorphic. 
 
 \begin{code}
 checkIso :: (Ord a, Ord b) => PriestleySpace a -> PriestleySpace b -> Map a b -> Bool
 checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping 
     && checkBijective sb mapping 
-    && checkHomoemorphism ta tb mapping
+    && checkHomeomorphism ta tb mapping
     && checkOrderIso ra rb mapping
 \end{code}
 
-Assuming bijectivity (by laziness of \&\&), to check that the given map is a homeomorphism, we have to check that it is an open and continuous map, i.e. it maps opens to opens and the preimages of opens are also open. This means that applying the map to an open set in the topology of the domain should yield an element of the topology of the codomain, so applying it to the set of opens of the domain (its topology) should yield a subset of the opens of the codomain (its topology). Similarly, we check that the preimage of the topology of the codomain is a subset of the topology of the domain.
+Assuming bijectivity (by laziness of \&\&), to check that the given map is a Homeomorphism, we have to check that it is an open and continuous map, i.e. it maps opens to opens and the preimages of opens are also open. This means that applying the map to an open set in the topology of the domain should yield an element of the topology of the codomain, so applying it to the set of opens of the domain (its topology) should yield a subset of the opens of the codomain (its topology). Similarly, we check that the preimage of the topology of the codomain is a subset of the topology of the domain.
 
 \begin{code}
-checkHomoemorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
-checkHomoemorphism ta tb mapping = 
+checkHomeomorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
+checkHomeomorphism ta tb mapping = 
     mapTop mapping ta `Set.isSubsetOf` tb
     && premapTop mapping tb `Set.isSubsetOf` ta
 \end{code}
@@ -241,11 +240,22 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 
 \begin{code}
 
-{-instance (Eq a, PrintDot a) => PrintDot (Set.Set a) where 
-    toDot t = toDot (head $  toList t)
-    unqtDot = unqtDot (head $  toList t)
-    unqtListToDot = unqtListToDot $ toList t
-    listToDot = toDot (head $  toList t)-}
+    {-instance Data.GraphViz.Printing.PrintDot a => Data.GraphViz.Printing.PrintDot(Set.Set a) where 
+    unqtDot x = unqtDot (Set.elemAt 0 x)
+    toDot = unqtDot 
+    unqtListToDot = list . mapM unqtDot
+    listToDot = dquotes . unqtListToDot-}
+{-instance (Show a) => PrintDot (Set.Set a) where
+    toDot s = toDot (DotNode "node" [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1])-}
+
+{-newtype DotSet a = DotSet (Set.Set a)
+
+-- Define a PrintDot instance for the wrapped Set
+toDot (DotSet s) = 
+    let nodeId = "node_" ++ show (hash s)  -- Unique identifier
+    in Data.GraphViz.Printing.toDot (DotNode nodeId [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1])-}
+
+
 
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
 showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 

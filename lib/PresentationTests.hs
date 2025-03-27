@@ -39,3 +39,6 @@ mySpace = priesMap myLattice1
 --- >>> showOrdSet myOS5
 
 --- >>> showPriestley mySpace
+
+--- >>> generate arbitrary :: IO (Lattice Int)
+-- OS {set = fromList [-28,-21], rel = fromList [(-28,-28),(-28,-21),(-21,-21)]}; Meet: fromList [(-28,-28,-28),(-28,-21,-28),(-21,-28,-28),(-21,-21,-21)]; Join: fromList [(-28,-28,-28),(-28,-21,-21),(-21,-28,-21),(-21,-21,-21)]
