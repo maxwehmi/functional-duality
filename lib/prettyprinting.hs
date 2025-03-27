@@ -9,7 +9,11 @@ import qualified Data.Maybe as M
 
 import Data.GraphViz.Types.Monadic
 import Data.GraphViz.Types.Generalised
+import Data.GraphViz.Attributes
+import Data.GraphViz.Attributes.Colors
 import Data.GraphViz.Commands
+import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
+import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
 --toGraph:: OrderedSet a -> DotGraph String
 --toGraph t =  digraph' $ toGraph' t where
 --         toGraph' :: OrderedSet a -> Dot String
@@ -51,7 +55,9 @@ toGraph' :: Relation a -> Dot a
 toGraph'  =  mapM_ (uncurry (-->)) 
 
 toGraph:: Relation a -> DotGraph a
-toGraph r = digraph' $ toGraph' r 
+toGraph r = digraph' $  do 
+                        graphAttrs [Data.GraphViz.Attributes.RankDir Data.GraphViz.Attributes.FromBottom]
+                        toGraph' r 
 
 toyRel:: Relation Int
 toyRel = Set.fromList [(0,1)]
