@@ -10,11 +10,13 @@ module Main where
 
 import Test.Hspec
 import Test.QuickCheck
+import qualified Data.Set as Set 
 
 import Basics
 import DL
 import Poset
 import Priestley
+import Representation
 \end{code}
 
 The following uses the HSpec library to define different tests.
@@ -29,6 +31,10 @@ main = hspec $ do
       property $ \ o -> checkPoset (o :: OrderedSet Int)
     it "All arbitrary Lattices should be distributive Lattices (for now the tests just use Ordered Sets on Integers, but the type does not really matter)" $
       property $ \ l -> checkDL (l :: Lattice Int)
+    it "The dual of the dual of a Priestley Space should be isomorphic to the original space" $
+      property $ \ ps -> checkIso (ps :: PriestleySpace Int) (priesMap (clopMap ps)) (calculateEpsilon ps)
+    it "The dual of the dual of a distributive lattice should be isomorphic to the original lattice" $
+      property $ \ l -> functionMorphism (l :: Lattice Int) (clopMap (priesMap l)) (calculatePhi l)
     it "All arbitrary Priestley Spaces should be Priestley Spaces (for now the tests just use Ordered Sets on Integers, but the type does not really matter)" $
       property $ \ ps -> checkPriestley (ps :: PriestleySpace Int)
 \end{code}

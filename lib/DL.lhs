@@ -55,6 +55,7 @@ instance (Ord a, Show a) => Show (Lattice a) where
 
 \end{code}
 
+\subsection{Lattice definition} Well-definedness of lattices
 Not every object of type lattice is an actual lattice in the mathematical sense: in particular three conditions have to be met for an object "l" of type "Lattice a", to be an actual lattice.
 
 
@@ -73,7 +74,7 @@ Not every object of type lattice is an actual lattice in the mathematical sense:
 
 \end{itemize}
 
-
+\subsection{Check lattice properties}
 The aim of the following functions is to ensure that the objects of type "Lattice a" behave as desired.
 \\
 \\
@@ -242,6 +243,8 @@ checkDL l =        checkLattice l
 
 \end{code}
 
+\subsection{Generating a lattice from a poset}
+
 Lastly, we want to be able to go from the type 'OrderedSet' to the type of 'Lattice'. 
 In our function makeLattice the ordered set given as input is used as the structure of the 
 lattice and the functions for 'meet' and 'join' are added. 
@@ -256,6 +259,8 @@ makeLattice os = L os (\x y -> M.fromJust $ findMeet preLattice x y) (\x y -> M.
                 where preLattice = L os const const -- give it two mock functions
 
 \end{code}
+
+\subsection{Generating arbitrary lattices}
 
 To use QuickTests in our project, we have to have also an arbitrary instance for distributive lattices. 
 
@@ -339,7 +344,9 @@ cleanUp (OS s r) = OS s (Set.filter (\ (x,y) -> x `elem` s && y `elem` s) r)
 
 \subsection{Morphisms}
 
-We want to check wether two Lattices are isomorphic. This means checking that, under some function between them, immages preserve bot,top, and all meets and joins. These suffice for the preservation of distributivity and boundedness, so we do not need to explicitly check for those.
+We want to check wether two Lattices are isomorphic. This means checking that, under some function between them, 
+images preserve bottom, top, and all meets and joins. 
+These suffice for the preservation of distributivity and boundedness, so we do not need to explicitly check for those.
 
 \begin{code}
 

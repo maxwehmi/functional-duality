@@ -165,7 +165,7 @@ When working with Priestley Space, we want to be able to check if two given ones
 To check isomorphism, we have to be given two Priestley Spaces and a map between them. The map is an isomorphism, if it is actually a map, bijective, a homoemorphism on the topological spaces and an order isomorphism on the relations. If the map is an isomorphism, the spaces are isomorphic. 
 
 \begin{code}
-checkIso :: (Eq a, Ord a) => PriestleySpace a -> PriestleySpace a -> Map a a -> Bool
+checkIso :: (Ord a, Ord b) => PriestleySpace a -> PriestleySpace b -> Map a b -> Bool
 checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping 
     && checkBijective sb mapping 
     && checkHomoemorphism ta tb mapping
@@ -215,7 +215,7 @@ instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
     arbitrary = sized randomPS where
         randomPS :: (Arbitrary a, Ord a) => Int -> Gen (PriestleySpace a)
         randomPS n = do
-            os <- resize (min n 10) arbitrary
+            os <- resize (min n 5) arbitrary
             let s = set os
             t <- Set.fromList <$> sublistOf (Set.toList $ Set.powerSet s)
             let t' = topologyTS $ fixTopology $ TS s t
