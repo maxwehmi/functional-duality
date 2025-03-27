@@ -350,15 +350,21 @@ These suffice for the preservation of distributivity and boundedness, so we do n
 
 \begin{code}
 
+
+something :: Ord b => Lattice b -> b
+something l2 = M.fromJust $ top l2
+
+
 functionMorphism:: (Ord a, Ord b) => Lattice a -> Lattice b -> Map a b -> Bool
 functionMorphism l1  l2 f 
     | not(checkLattice l1 && checkLattice l2) = error "not lattices"
     | not (checkMapping s1 f) = error "not a mapping"
-    | otherwise = checkBijective s2 f 
+    | otherwise = 
+                checkBijective s2 f 
                 &&
-                (M.fromJust $ top l1, M.fromJust $ top l2) `Set.member` f
+                getImage f (M.fromJust $ top l1) == M.fromJust (top l2)
                 &&
-                (M.fromJust $ bot l1, M.fromJust $ bot l2) `Set.member` f
+                getImage f (M.fromJust $ bot l1) == M.fromJust (bot l2)
                 && 
                 all 
                 (\(x,y) -> M.fromJust (findJoin l2 (getImage f x) (getImage f y)) == getImage f (M.fromJust (findJoin l1 x y)))
