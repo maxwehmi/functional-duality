@@ -43,15 +43,15 @@ toyRel = Set.fromList [(0,1)]
 
 
 showOrdSet ::(Ord a, Data.GraphViz.Printing.PrintDot a) => OrderedSet a -> IO ()
-showOrdSet p = runGraphvizCanvas' (toGraphRel (rel p)) Xlib
+showOrdSet p = runGraphvizCanvas' (toGraphRel $ rel (fromReflTrans p)) Xlib
 
 
 showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
-showLattice l = runGraphvizCanvas' (toGraphRel (rel (carrier l))) Xlib
+showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))) Xlib
 
  
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
-showPriestley p = runGraphvizCanvas' (toGraphRel (relationPS p)) Xlib 
+showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
 
 
 
@@ -67,3 +67,6 @@ fromReflexive (OS s r) = OS s k where
 fromReflTrans::Ord a => OrderedSet a -> OrderedSet a
 fromReflTrans  = fromTransitive.fromReflexive
  
+
+myos1 :: OrderedSet Int
+myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
