@@ -3,7 +3,9 @@
 We introduce the main data types of this section.
 
 \begin{code}
+
 module Priestley where
+import Data.Monoid
 import Data.GraphViz.Types.Monadic
 import Data.GraphViz.Types.Generalised
 import Data.GraphViz.Attributes
@@ -25,6 +27,7 @@ import Test.QuickCheck
 
 import Poset
 import Basics
+import Data.Foldable (Foldable(toList))
 \end{code}
 
 In the definition of the types, we keep it as close as possible to their mathematical counterparts: 
@@ -237,6 +240,13 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 \section{Printing machinery}
 
 \begin{code}
+
+{-instance (Eq a, PrintDot a) => PrintDot (Set.Set a) where 
+    toDot t = toDot (head $  toList t)
+    unqtDot = unqtDot (head $  toList t)
+    unqtListToDot = unqtListToDot $ toList t
+    listToDot = toDot (head $  toList t)-}
+
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
 showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
 

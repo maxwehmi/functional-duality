@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
+module BerlusconiSilvio where 
 import qualified Data.Set as Set
 import Text.Parsec
+    ( letter, spaces, string, between, eof, many1, sepBy, parse, try )
 import Poset
 import Text.Parsec.String (Parser)
 import Control.Monad (void)
