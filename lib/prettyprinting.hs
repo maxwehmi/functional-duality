@@ -11,9 +11,11 @@ import Data.GraphViz.Types.Monadic
 import Data.GraphViz.Types.Generalised
 import Data.GraphViz.Attributes
 import Data.GraphViz.Attributes.Colors
+
 import Data.GraphViz.Commands
-import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
-import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
+
+import qualified Data.GraphViz.Attributes.Complete as A
+import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
 --toGraph:: OrderedSet a -> DotGraph String
 --toGraph t =  digraph' $ toGraph' t where
 --         toGraph' :: OrderedSet a -> Dot String
@@ -56,7 +58,9 @@ toGraph'  =  mapM_ (uncurry (-->))
 
 toGraph:: Relation a -> DotGraph a
 toGraph r = digraph' $  do 
-                        graphAttrs [Data.GraphViz.Attributes.RankDir Data.GraphViz.Attributes.FromBottom]
+                        edgeAttrs [A.Dir A.NoDir]
+                        nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] --, A.Label (StrLabel "")]
+                        graphAttrs[A.RankDir A.FromBottom]
                         toGraph' r 
 
 toyRel:: Relation Int
