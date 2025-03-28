@@ -80,7 +80,7 @@ open = do
   elements <- between (symbol "[") (symbol "]") $
     identifier `sepBy` symbol ","
   return $ Set.fromList elements
-
+--PriestleySpace
 twoexample :: IO ()
 twoexample = do
   let input = "Space: a, b, c\nTopology: [], [a], [a,b] \nSpaceOrder: (a,b), (b,c)"
