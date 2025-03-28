@@ -240,7 +240,7 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 
 \begin{code}
 
-    {-instance Data.GraphViz.Printing.PrintDot a => Data.GraphViz.Printing.PrintDot(Set.Set a) where 
+{-instance Data.GraphViz.Printing.PrintDot a => Data.GraphViz.Printing.PrintDot(Set.Set a) where 
     unqtDot x = unqtDot (Set.elemAt 0 x)
     toDot = unqtDot 
     unqtListToDot = list . mapM unqtDot
