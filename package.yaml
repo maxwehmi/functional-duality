@@ -24,6 +24,7 @@ dependencies:
   - random
   - template-haskell
   - graphviz
+  - text >= 2.0.2
 
 library:
   source-dirs: lib
