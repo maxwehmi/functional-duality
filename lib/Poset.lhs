@@ -1,18 +1,17 @@
 
 \section{Partially ordered sets}
+\label{posets}
 
 
+\subsection*{Irrelevants}
 
-This section is devoted to the construction of posets. A poset $(P,\leq)$ is a structure such that $P$ is a set and $\leq$ is a partial order, that is, $\leq$ is reflexive, transitive and antisymmetric. 
-
-We import the standard library for sets, Data.Set, in order to be able to work with objects that behave like sets and we start by defining the  \texttt{OrderedSet} data type for sets equipped with a relation.
-
-An object $(P, R)$ of type \texttt {OrderedSet a}, is not necessarily a partially ordered set, therefore we need some helper functions in order to transform $R$ in to a partial order.
+This first ugly block of import is unfortunatelly necessary for some pretty printing. We'll see more about it in the dedicated \hyperref[sec:posetprinting]{subsection}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
 
 
 
 \begin{code}
 module Poset where
+
 import Data.GraphViz.Types.Monadic
 import Data.GraphViz.Types.Generalised
 import Data.GraphViz.Attributes
@@ -27,15 +26,34 @@ import qualified Data.GraphViz.Attributes.Complete as A
 import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
 import Data.GraphViz.Printing
 
-import qualified Data.Set as Set
 import Test.QuickCheck
+\end{code}
+
+\subsection{Definitions}
+
+This section is devoted to the construction of posets. A poset $(P,\leq)$ set $P$ with a relation $\leq$, such that $\leq$ is:
+
+\begin{itemize}
+\item reflexive
+\item transitive
+\item antisymmetric
+\end{itemize}
+
+We import the standard library for sets, Data.Set, in order to be able to work with objects that behave like sets and we start by defining the  \texttt{OrderedSet} data type for sets equipped with a relation.
+
+An object $(P, R)$ of type \texttt {OrderedSet a}, is not necessarily a partially ordered set, therefore we need some helper functions in order to transform $R$ in to a partial order.
+
+
+For our structures, we define a relation as a set of tuples, as is standard. Then, an \texttt{OrderedSet} (ordset) is our notion of our set embued with a relation (of any kind).
+
+\begin{code}
+import qualified Data.Set as Set
+
 type Relation a = Set.Set (a,a)
 
 data OrderedSet a = OS {set :: Set.Set a, rel :: Relation a} 
     deriving (Eq, Ord,Show)
 \end{code}
-
-
 
 
 \subsection{Well-definedness}
@@ -45,9 +63,9 @@ Firstly we need to check given an object of type \texttt{OrderedSet a }, the rel
 
 We shall call a relation $R$ "well-defined with respect to a set $P$" iff $R \subseteq P \times P$. We shall just say "well-defined" when the carrier set is clear form the context.
 
-In order to check well-definedness of a relation we shall fisrt define the function \texttt{tuplesUnfold}, which "unfolds" the tuples of a set of tuples, i.e. a relation.
+In order to check well-definedness of a relation we shall fisrt define the function \texttt{tuplesUnfold}, which ``unfolds" the tuples of a set of tuples, i.e. a relation.
 
-The implementation follows this idea: given a relation R, we get the list of the first elements in all the tuples by mapping \texttt{fst} to all the elements of R. We do the same with \texttt{snd} in order to get the list of all the second elements of the tuples. We then join these lists and turn the resulting list into a set, which then gives us the set of elements of of the tuples of R.
+The implementation follows this idea: given a relation $R$, we get the list of the first elements in all the tuples by mapping \texttt{fst} to all the elements of $R$. We do the same with \texttt{snd} in order to get the list of all the second elements of the tuples. We then join these lists and turn the resulting list into a set, which then gives us the set of elements of of the tuples of $R$.
 
 \begin{code}
 tuplesUnfold :: Ord a => Relation a -> Set.Set a
@@ -55,70 +73,41 @@ tuplesUnfold r = Set.fromList (Prelude.map fst (Set.toList r) ++ Prelude.map snd
 \end{code}
 
 
-
-
-
 Using \texttt{tuplesUnfold} we can now easily check for well-definedness. 
 
 \begin{code}
 checkRelationWellDef :: Ord a => OrderedSet a -> Bool
 checkRelationWellDef (OS s r) = tuplesUnfold r `Set.isSubsetOf` s
-
-
 \end{code}
 
-Moreover if the relation is not well-defined relation, we might want to force it to be. The following function takes care of this:
-
-%For this we first need to define the following helper function, which given two sets $a,b$ gives us back the set $c$ of all elements not in $a$ and in $b$.
-%
-%
-%\begin{code}
-%unsharedElements :: Ord a => Set.Set a -> Set.Set a -> Set.Set a
-%unsharedElements x y = (x `Set.union` y) `Set.difference`  (x `Set.intersection` y)
-%\end{code}
-%
-%
-%Now we can use \texttt{unsharedElements} to remove from the relation all the tuples whose first or second element is not in the carrier set. 
-%
+Moreover if the relation is not well-defined relation, we might want to force it to be. The following function takes care of this by removing from a relation, set of elements in it, but not in the the carrier set.
 
 \begin{code}
--- this maybe could've been done more simply, but idk it seems to work like this
 forceRelation :: Ord a => OrderedSet a -> OrderedSet a
 forceRelation (OS s r) 
  | checkRelationWellDef (OS s r) = OS s r
  | otherwise = OS s ( r `Set.difference` Set.fromList (
-                                                        [(x,y) | (x,y) <- Set.toList r, x `Set.member` (tuplesUnfold r `Set.difference` s)] 
-                                                        ++ 
-                                                        [(x,y) | (x,y) <- Set.toList r, y  `Set.member` (tuplesUnfold r `Set.difference` s)]
+    [(x,y) | (x,y) <- Set.toList r, x `Set.member` (tuplesUnfold r `Set.difference` s)] 
+    ++ 
+    [(x,y) | (x,y) <- Set.toList r, y  `Set.member` (tuplesUnfold r `Set.difference` s)]
                                                        )
                     )
 \end{code}
 
 
 
+\subsection{Checks and Closures}
 
+Secondly, given an object of type \texttt{OrderedSet a }, the relation need not to be reflexive, anti-symmetric and transitive, as, again, the implementation of \texttt{OrderedSet} does accept cases which are not of this sort. Therefore we shall define checks and closures for our desired properties.
 
+\subsubsection{Reflexivity} 
 
-\subsection{Closures}
-
- 
-Secondly, given an object of type \texttt{OrderedSet a }, the relation need not to be reflexive and transitive, as, again, the implementation of \texttt{OrderedSet} does accept cases which are not of this sort. Therefore we shall define some functions in order to close the relation of any object of type \texttt{OrderedSet a },reflexivity and transitivity. 
-
-Moreover, we shall define some functions in order to check whether the relation of an object of type \texttt{OrderedSet a } is reflexive and transitive. 
-
-
-
-\subsubsection{Closure under reflexivity} 
+Both closures and checks are straightforwards, and well readable from the code implementation. We simply need add, or check the existance of, reflexive tuples.
 
 \begin{code}
 closureRefl :: Ord a => OrderedSet a -> OrderedSet a
 closureRefl (OS s r) = OS s (r `Set.union` Set.fromList [(x,x)| x <- Set.toList s])
-\end{code}
 
-We now define the following two functions to check if 
- given an object of type \texttt{OrderedSet a }, its relation is reflexive: the first makes use of the \texttt{closureRefl} function, the second works independently. 
-
-\begin{code}
 checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 \end{code}
@@ -126,28 +115,23 @@ checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 
 
 \subsubsection{Closure under transitivity}
-The transitive closure requires more working: let $(P,R)$ be an object of type \texttt{OrderedSet a }. 
+The transitive closure requires a little more working: let $(P,R)$ be an object of type \texttt{OrderedSet a }. 
 
- Firstly, we define the helper function \texttt{transPair}, to check if, given any $x,z$, there is a $y$ such that $x R y \wedge y R z$.
+Firstly, we define the helper function \texttt{transPair}, to check if, given any $x,z$, there is a $y$ such that $x R y \wedge y R z$.
+
 \begin{code}
 transPair ::  Ord a => a -> a -> OrderedSet a -> Bool
 transPair x z (OS s r)=  any (\y -> (x, y) `Set.member` r && (y,z) `Set.member` r) s
 \end{code}
 
-Now, we add to the relation any pair which satisfies \texttt{transPair}, so that we have "one-step" transitivity.
+This allows us to know which ``one-step" transitive chains are currently missing. So, we add to the relation any pair which satisfies \texttt{transPair}, so that we have ``one-step" transitivity.
 
 \begin{code}
 transStep :: Ord a => OrderedSet a -> OrderedSet a
 transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z (OS s r)])
 \end{code}
 
-%Since this only adds "one-step" transtivity, we need to recurse the process until it is idempotent, i.e. the relation is fully transitive. Then we have obtained our transitive closure. This might be a bit hacky, perhaps there is a more straighforward way, similar to reflexive closure, but again it did not come to me.
-
-
-Now that with \texttt{transStep} we have enlarged our relation, new pairs which satisfy \texttt{transPair} might arise. Therefore in order to fully close the relation under transitivity we need to "recursively" apply the \texttt{transStep} function to our object $(P,R)$ of type \texttt{OrderedSet a} until we reach a $"tr"(P,R)$ such that \texttt{transStep tr(P,R) == tr(P,R)}. 
-
-\texttt{closureTrans} is the function that does exaxtly this: 
-
+Of course this won't suffice. Now that we have enlarged our relation, new pairs which satisfy \texttt{transPair} might arise. Therefore in order to fully close the relation under transitivity, for any transitive chain, we need to recursively apply the \texttt{transStep} function to our object \texttt{os} of type \texttt{OrderedSet a} until it reaces a fixed point, i.e. until \texttt{transStep os == os}. The code should be self explanatory for this:
 
 \begin{code}
 closureTrans :: Ord a => OrderedSet a -> OrderedSet a
@@ -157,41 +141,24 @@ closureTrans  currentSet =
             then currentSet 
             else closureTrans recursedSet
 \end{code}
-We now define the following two functions to check if 
- given an object of type \texttt{OrderedSet a }, its relation is transitive: the first makes use of the \texttt{closureTrans} function, the second works independently. 
+
+
+Checking is again fairly straightforward. For any triple $(x,y,z)$, wherein $xRy$, $y'Rz$ and $y=y'$ (this is an implementation quirk, of course we're just checking $xRyRz$), we make sure that that also $xRz$.
 
 \begin{code}
 checkTrans :: Ord a => OrderedSet a -> Bool
 checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
 \end{code}
 
-%
-%We can now make certain objects of type  \texttt{OrderedSet a} into posets. In particular ones where:
-%
-%\begin{itemize}
-%\item the relation is a subset of the cartesian product of the carrier set. 
-%
-%%(though perhaps forcing the relation to be well defined, see later function, would work actually, so we might rid of this case).
-%
-%\item the relation is anti-symmetric
-%\item the transitive closure does not break anti-symmetry (this can happen, cosider the set $\{a,b,c\}$ with $aRb, bRc, cRa$. Anti-symmetry is lost when closing transitively).
-%\end{itemize}
-%
-%\begin{code}
-%-- transitive closure can break anti-symmetry, so case was added
-%closurePoSet :: Ord a => OrderedSet a -> OrderedSet a
-%closurePoSet os
-% | not (checkRelationWellDef os) = error "relation isn't well-defined"
-% | not (checkAntiSym os)  = error "relation isn't anti-symmetric"
-% | not (checkAntiSym $ closureTrans os) = error "relation looses anti-symmetry when transitively closed"
-% | otherwise = closureTrans $ closureRefl os
-%\end{code}
-
-
 \subsection{Forcing Antisymmetry}
 
-For the same reason as before, given an object of type \texttt{OrderedSet a }, the relation need not to be antisymmetric. But it is not possible to just "close" a relation under antisymmetry, as all the symmetric couples whose elements are different from each other need to be somehow eliminated. Therefore we shall define some functions to do just that.
+Here some caveats must come in. Note that it is not possible to just "close" a relation under antisymmetry, as all the symmetric couples whose elements are different from each other need to be somehow eliminated. We're dealing with a ``reduction" rather than a closure. Furthermore, note that there is no unique way to obtain a reduction as we'd desire. Dually to a closure, we'd want a reduction of $R$ w.r.t a property $Q$ to be the greatest $R' \subseteq R$ for which $R'$ satisfies $Q$. But there is not such set! For a given symmetric pair $(x,y),(y,x) \in R$, the smallest change is removing one. But there's two ways to do so. So an anti-symmetric reduction is not unique.
 
+We shall look at two approaches to force anti-symmtery regarldess.
+
+
+
+%%--------------------------------------------------------------------------- CONTINUE HERE------------------------------------------
 Moreover we shall define some functions that given an object of type \texttt{OrderedSet a }, will check whether the relation is antisymmetric.
 
 There are two ways, among others, to force anti-symmetry on a relational structure $(P,R)$: the first consists in eliminating all symmetric pairs from the relation $R$, the second instead creates a quotient of $P$ based on the clusters of symmetric pairs of $R$.
@@ -398,7 +365,8 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 
 
 
-\subsection{Printing machinery}
+\subsection{Printing machinery}\label{sec:posetprinting}
+
 
  
 
