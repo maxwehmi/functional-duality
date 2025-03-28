@@ -25,8 +25,10 @@ parseSetLine = do
 
 parseOrderLine :: Parser [(String, String)]
 parseOrderLine = do
+
   void $ string "LatOrder:" <* spaces
   pair `sepBy` symbol ","
+
 
 symbol :: String -> Parser String
 symbol s = try (spaces *> string s <* spaces)

@@ -6,6 +6,7 @@ We will now use the library form Section \ref{sec:Basics} in a program.
 module Main where
 
 import Basics
+import Poset
 import DL
 import Priestley
 import Representation
