@@ -371,7 +371,7 @@ functionMorphism l1  l2 f
                     s1 = set $ carrier l1
                     s2 = set $ carrier l2                         
 \end{code}
-\section{Printing machinery}
+\subsection{Printing machinery}
 \begin{code}
 showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
 showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))) Xlib

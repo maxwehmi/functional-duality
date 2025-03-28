@@ -207,7 +207,7 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
     firsts = Set.map fst $ Set.cartesianProduct s s `Set.difference` r
 \end{code}
 
-\section{Printing machinery}
+\subsection{Printing machinery}
 
 When we say that we print a Priestley space, we mean that we print the underlying relation. This can be done with the functions from Poset:
 

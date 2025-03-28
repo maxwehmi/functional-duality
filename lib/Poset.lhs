@@ -397,7 +397,7 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 
 
 
-\section{Printing machinery}
+\subsection{Printing machinery}
 \begin{code}
 
 
