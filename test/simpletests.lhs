@@ -32,9 +32,9 @@ main = hspec $ do
     it "All arbitrary Lattices should be distributive Lattices (for now the tests just use Ordered Sets on Integers, but the type does not really matter)" $
       property $ \ l -> checkDL (l :: Lattice Int)
     it "The dual of the dual of a Priestley Space should be isomorphic to the original space" $
-      property $ \ ps -> checkRepresentationPSfast ps
+      property $ \ ps -> checkRepresentationPSfast (ps :: PriestleySpace Int)
     it "The dual of the dual of a distributive lattice should be isomorphic to the original lattice" $
-      property $ \ l -> checkRepresentationDLfast l
+      property $ \ l -> checkRepresentationDLfast (l :: Lattice Int)
     it "All arbitrary Priestley Spaces should be Priestley Spaces (for now the tests just use Ordered Sets on Integers, but the type does not really matter)" $
       property $ \ ps -> checkPriestley (ps :: PriestleySpace Int)
 \end{code}
