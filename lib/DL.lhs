@@ -259,7 +259,7 @@ instance (Arbitrary a, Ord a) => Arbitrary (Lattice a) where
     arbitrary = sized randomPS where
         randomPS :: (Arbitrary a, Ord a) => Int -> Gen (Lattice a)
         randomPS n = do
-            o <- resize (max n 1) arbitrary
+            o <- resize (max n 2) arbitrary
             let l = fixLattice $ fixTopBottom o
             return $ makeLattice l 
 
@@ -315,7 +315,7 @@ fixDistributivity (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r)
     (\ (x,y) o' -> case () of 
         _ | any distrFailN (set o') -> collapseElements (Set.fromList [x,y]) o'
           | otherwise -> o' where
-            distrFailN z = calculateMeet (calculateJoin x y) (calculateJoin x z) /= calculateJoin x (calculateMeet y z) && x < z && y < z
+            distrFailN z = calculateMeet (calculateJoin x y) (calculateJoin x z) /= calculateJoin x (calculateMeet y z) -- && x < z && y < z
             calculateMeet g h = Set.elemAt 0 $ calculateMeets o' g h
             calculateJoin g h = Set.elemAt 0 $ calculateJoins o' g h
             ) 
@@ -410,11 +410,14 @@ myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2)
 
 % Put this somewhere where its used 
 
-\begin{code}
-simplifyPS :: Ord a => Lattice a -> Lattice Int
-simplifyPS l = makeLattice (OS s' r') where
-    s = (set . carrier) l
+When we will test representation later, we will get lattices, whose elements are sets themselves. To prevent a blow-up in size (espcially, when dualizing twice), we introduce a function, which creates a new lattice out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster. With the new space, we also return a map, so we can still access the elements in a certain way by looking to which number a set gets mapped.
+
+\begin{code}        
+simplifyDL :: Ord a => Lattice a -> (Lattice Int, Map a Int)
+simplifyDL l = (makeLattice (OS s' r'), mapping) where
+    s = (set . carrier) l 
     s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
     r' = Set.fromList [(x,y) | 
         x <- Set.toList s', 
         y <- Set.toList s', 

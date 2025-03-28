@@ -157,8 +157,10 @@ Assuming bijectivity (by laziness of \&\&), to check that the given map is a Hom
 \begin{code}
 checkHomeomorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
 checkHomeomorphism ta tb mapping = 
-    mapTop mapping ta `Set.isSubsetOf` tb
-    && premapTop mapping tb `Set.isSubsetOf` ta
+    all (\x -> Set.map (getImage mapping) x `elem` tb) ta 
+    && all (\ x -> Set.map (getPreimage mapping) x `elem` ta) tb
+    --mapTop mapping ta `Set.isSubsetOf` tb
+    -- && premapTop mapping tb `Set.isSubsetOf` ta
 \end{code}
 
 To apply the map to every open and thus every element of every open, we have to nest \verb:Set.map: twice. Again, we deal similarly with the preimages.
@@ -252,9 +254,11 @@ showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrde
 
 % Put this somewhere where its used 
 
+When we will test representation later, we will get Priestley spaces, whose elements are sets themselves. To prevent a blow-up in size (espcially, when dualizing twice), we introduce a function, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster. With the new space, we also return a map, so we can still access the elements in a certain way by looking to which number a set gets mapped.
+
 \begin{code}
-simplifyPS :: Ord a => PriestleySpace a -> PriestleySpace Int
-simplifyPS (PS s t r) = PS s' t' r' where
+simplifyPS :: Ord a => PriestleySpace a -> (PriestleySpace Int, Map a Int)
+simplifyPS (PS s t r) = (PS s' t' r', mapping) where
     s' = Set.fromList $ take (Set.size s) [0..]
     mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
     t' = mapTop mapping t 
