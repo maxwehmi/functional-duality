@@ -426,7 +426,7 @@ The following two functions are crucial to the visualization of the structures. 
 
 \begin{itemize}
 
-\item \texttt{toGraphRel'} uses \texttt{mapM_} to transform an object \texttt{r}of type \textt{Relation a} into a  monadic action, in particular an instance of of the type \texttt{Dot a}. 
+\item \texttt{toGraphRel'} uses \texttt{mapM\_} to transform an object \texttt{r}of type \texttt{Relation a} into a  monadic action, in particular an instance of of the type \texttt{Dot a}. 
 
 \item \texttt{toGraphRel} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}.
 \end{itemize}

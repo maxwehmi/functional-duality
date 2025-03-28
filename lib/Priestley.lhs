@@ -116,7 +116,7 @@ We make use of some secondary helper functions:
 Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
  implies $y\in S$.  \newline
  This function makes use of the "upClosure" function, which computes the upwards-closure of any given set with respect to the given order.
- 
+\end{enumerate} 
 
 
 The output of those is then fed to the "checkPSA" function, which then ensures the validity of the Priestley separation axiom for all points in $X$ not related by $\leq$.
