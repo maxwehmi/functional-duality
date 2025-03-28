@@ -5,7 +5,7 @@ We introduce the main data types of this section.
 \begin{code}
 
 module Priestley where
-    
+
 
 import Data.GraphViz.Commands
 import Data.GraphViz.Printing
@@ -254,17 +254,11 @@ showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrde
 
 % Put this somewhere where its used 
 
-\begin{code}
-simplifyPS :: Ord a => PriestleySpace a -> PriestleySpace Int
-simplifyPS (PS s t r) = PS s' t' r' where
-    s' = Set.fromList $ take (Set.size s) [0..]
-    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
-    t' = mapTop mapping t 
-    r' = mapRel mapping r
+When we will test representation later, we will get Priestley spaces, whose elements are sets themselves. To prevent a blow-up in size (espcially, when dualizing twice), we introduce a function, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster. With the new space, we also return a map, so we can still access the elements in a certain way by looking to which number a set gets mapped.
 
-    
-simplifyPSwMap :: Ord a => PriestleySpace a -> (PriestleySpace Int, Map a Int)
-simplifyPSwMap (PS s t r) = (PS s' t' r', mapping) where
+\begin{code}
+simplifyPS :: Ord a => PriestleySpace a -> (PriestleySpace Int, Map a Int)
+simplifyPS (PS s t r) = (PS s' t' r', mapping) where
     s' = Set.fromList $ take (Set.size s) [0..]
     mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
     t' = mapTop mapping t 
