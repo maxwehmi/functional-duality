@@ -116,7 +116,7 @@ We make use of some secondary helper functions:
 Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
  implies $y\in S$.  \newline
  This function makes use of the "upClosure" function, which computes the upwards-closure of any given set with respect to the given order.
- 
+\end{enumerate} 
 
 
 The output of those is then fed to the "checkPSA" function, which then ensures the validity of the Priestley separation axiom for all points in $X$ not related by $\leq$.
@@ -219,7 +219,7 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
     firsts = Set.map fst $ Set.cartesianProduct s s `Set.difference` r
 \end{code}
 
-\section{Printing machinery}
+\subsection{Printing machinery}
 
 When we say that we print a Priestley space, we mean that we print the underlying relation. This can be done with the functions from Poset:
 
@@ -246,4 +246,17 @@ toDot (DotSet s) =
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
 
 showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
+\end{code}
+
+
+
+% Put this somewhere where its used 
+
+\begin{code}
+simplifyPS :: Ord a => PriestleySpace a -> PriestleySpace Int
+simplifyPS (PS s t r) = PS s' t' r' where
+    s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
+    t' = mapTop mapping t 
+    r' = mapRel mapping r
 \end{code}

@@ -367,7 +367,7 @@ functionMorphism l1  l2 f
                     s1 = set $ carrier l1
                     s2 = set $ carrier l2                         
 \end{code}
-\section{Printing machinery}
+\subsection{Printing machinery}
 \begin{code}
 showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
 showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))) Xlib
@@ -406,3 +406,17 @@ myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2)
 % realLeast :: Ord a => OrderedSet a -> Set.Set a -> a
 % realLeast os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (x , y ) `Set.member` rel os ) s) s
 % \end{code}
+
+
+% Put this somewhere where its used 
+
+\begin{code}
+simplifyPS :: Ord a => Lattice a -> Lattice Int
+simplifyPS l = makeLattice (OS s' r') where
+    s = (set . carrier) l
+    s' = Set.fromList $ take (Set.size s) [0..]
+    r' = Set.fromList [(x,y) | 
+        x <- Set.toList s', 
+        y <- Set.toList s', 
+        (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
+\end{code}
