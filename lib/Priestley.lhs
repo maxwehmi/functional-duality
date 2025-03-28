@@ -231,7 +231,7 @@ When we say that we print a Priestley space, we mean that we print the underlyin
 
 
 showPriestley :: (Ord a, PrintDot a) => PriestleySpace a -> IO ()
-showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
+showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet $ simplifyPS p) Xlib 
 \end{code}
 
 

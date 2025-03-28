@@ -370,7 +370,7 @@ functionMorphism l1  l2 f
 \subsection{Printing machinery}
 \begin{code}
 showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
-showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))) Xlib
+showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier (simplifyDL l)))) Xlib
 
 myos1 :: OrderedSet Int
 myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
@@ -411,8 +411,8 @@ myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2)
 % Put this somewhere where its used 
 
 \begin{code}
-simplifyPS :: Ord a => Lattice a -> Lattice Int
-simplifyPS l = makeLattice (OS s' r') where
+simplifyDL :: Ord a => Lattice a -> Lattice Int
+simplifyDL l = makeLattice (OS s' r') where
     s = (set . carrier) l
     s' = Set.fromList $ take (Set.size s) [0..]
     r' = Set.fromList [(x,y) | 

@@ -57,8 +57,8 @@ snelliusPS = PS (Set.fromList [0.. 5]) (Set.powerSet (Set.fromList [0.. 5])) (Se
 -- No instance for (PrintDot (Filter Int))
 --   arising from a use of `showPriestley'
 -- In the expression: showPriestley (priesMap myLattice1)
--- In an equation for `it_a1R1R':
---     it_a1R1R = showPriestley (priesMap myLattice1)
+-- In an equation for `it_atFT':
+--     it_atFT = showPriestley (priesMap myLattice1)
 
 
 --- >>> showLattice myLattice1
