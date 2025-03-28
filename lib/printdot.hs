@@ -56,7 +56,7 @@ snelliusPS = PS (Set.fromList [0.. 5]) (Set.powerSet (Set.fromList [0.. 5])) (Se
 --- >>> showPriestley (simplifyPS(priesMap myLattice1))
  
 
- --- >>> priesMap myLattice1
+--- >>> priesMap myLattice1
 
 
 --- >>> showLattice myLattice1
