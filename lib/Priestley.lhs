@@ -14,6 +14,7 @@ import Data.Bifunctor (bimap)
 import Test.QuickCheck
 import Poset
 import Basics
+import Data.GraphViz.Attributes.Colors.X11 (x11Colour)
 
 \end{code}
 
@@ -245,7 +246,7 @@ toDot (DotSet s) =
 
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
 
-showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
+showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTransPS $ getOrderedSet p) Xlib 
 \end{code}
 
 
@@ -259,4 +260,15 @@ simplifyPS (PS s t r) = PS s' t' r' where
     mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
     t' = mapTop mapping t 
     r' = mapRel mapping r
+
+
+fromReflexivePS::Ord a => OrderedSet a -> OrderedSet a
+fromReflexivePS (OS s r) = OS s k where
+   k = Set.difference r (Set.fromList [(x,y) | (x,y) <- Set.toList r,
+                        x==y,
+                        not (any (\z -> z /= x &&  (Set.member (z,x) r || Set.member (x,z) r) ) (tuplesUnfold r))])
+
+fromReflTransPS :: Ord a => OrderedSet a -> OrderedSet a 
+fromReflTransPS = fromTransitive . fromReflexivePS
+
 \end{code}

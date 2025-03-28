@@ -464,3 +464,9 @@ showOrdSet p = runGraphvizCanvas' (toGraphRel $ rel (fromReflTrans p)) Xlib
 
 \end{code}
 
+\begin{code}
+
+instance PrintDot a => PrintDot (Set.Set a)
+unqtDot x = Data.GraphViz.Printing.unqtDot (head (Set.toList x))
+
+\end{code}
