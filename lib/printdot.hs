@@ -40,7 +40,7 @@ mySpace :: PriestleySpace (Filter Int)
 mySpace = priesMap myLattice1
 
 snelliusOS :: OrderedSet Int 
-snelliusOS = OS (Set.fromList [0.. 10]) (Set.fromList [(0,1), (0,2),(1,3),(1,5),(2,4),(2,5),(3,6),(4,7),(6,8),(7,8),(8,9),(9,10)]) 
+snelliusOS = OS (Set.fromList [0.. 10]) (Set.fromList [(0,1), (0,2),(1,3),(1,5),(2,4),(2,5),(3,6),(5,6),(5,7),(4,7),(6,8),(7,8),(8,9),(9,10)]) 
 
 
 snelliusDL :: Lattice Int 
@@ -53,12 +53,10 @@ snelliusPS = PS (Set.fromList [0.. 5]) (Set.powerSet (Set.fromList [0.. 5])) (Se
 
 
 
---- >>> showPriestley (priesMap myLattice1)
--- No instance for (PrintDot (Filter Int))
---   arising from a use of `showPriestley'
--- In the expression: showPriestley (priesMap myLattice1)
--- In an equation for `it_atFT':
---     it_atFT = showPriestley (priesMap myLattice1)
+--- >>> showPriestley (simplifyPS(priesMap myLattice1))
+ 
+
+ --- >>> priesMap myLattice1
 
 
 --- >>> showLattice myLattice1
