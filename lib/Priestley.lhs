@@ -215,3 +215,16 @@ When we say that we print a Priestley space, we mean that we print the underlyin
 showPriestley ::(Ord a, Data.GraphViz.PrintDot a) => PriestleySpace a -> IO ()
 showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
 \end{code}
+
+
+
+% Put this somewhere where its used 
+
+\begin{code}
+simplifyPS :: Ord a => PriestleySpace a -> PriestleySpace Int
+simplifyPS (PS s t r) = PS s' t' r' where
+    s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
+    t' = mapTop mapping t 
+    r' = mapRel mapping r
+\end{code}

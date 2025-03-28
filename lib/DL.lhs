@@ -407,3 +407,17 @@ showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))
 % realLeast :: Ord a => OrderedSet a -> Set.Set a -> a
 % realLeast os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (x , y ) `Set.member` rel os ) s) s
 % \end{code}
+
+
+% Put this somewhere where its used 
+
+\begin{code}
+simplifyPS :: Ord a => Lattice a -> Lattice Int
+simplifyPS l = makeLattice (OS s' r') where
+    s = (set . carrier) l
+    s' = Set.fromList $ take (Set.size s) [0..]
+    r' = Set.fromList [(x,y) | 
+        x <- Set.toList s', 
+        y <- Set.toList s', 
+        (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
+\end{code}
