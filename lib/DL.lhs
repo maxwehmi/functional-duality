@@ -315,7 +315,7 @@ fixDistributivity (OS s r) = loop (s `Set.cartesianProduct` s) (OS s r)
     (\ (x,y) o' -> case () of 
         _ | any distrFailN (set o') -> collapseElements (Set.fromList [x,y]) o'
           | otherwise -> o' where
-            distrFailN z = calculateMeet (calculateJoin x y) (calculateJoin x z) /= calculateJoin x (calculateMeet y z) && x < z && y < z
+            distrFailN z = calculateMeet (calculateJoin x y) (calculateJoin x z) /= calculateJoin x (calculateMeet y z) -- && x < z && y < z
             calculateMeet g h = Set.elemAt 0 $ calculateMeets o' g h
             calculateJoin g h = Set.elemAt 0 $ calculateJoins o' g h
             ) 
