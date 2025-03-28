@@ -50,9 +50,6 @@ snelliusPS :: PriestleySpace Int
 snelliusPS = PS (Set.fromList [0.. 5]) (Set.powerSet (Set.fromList [0.. 5])) (Set.fromList [(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(1,1),(1,2),(1,3),(1,4),(1,5),(2,2),(2,4),(3,3),(3,5),(4,4),(5,5)])
 
 
-instance PrintDot a => PrintDot (Set.Set a) where 
-    toDot x = listToDot (Set.toList x) 
-
 
 
 
@@ -60,12 +57,11 @@ instance PrintDot a => PrintDot (Set.Set a) where
 -- No instance for (PrintDot (Filter Int))
 --   arising from a use of `showPriestley'
 -- In the expression: showPriestley (priesMap myLattice1)
--- In an equation for `it_a12kN':
---     it_a12kN = showPriestley (priesMap myLattice1)
+-- In an equation for `it_a1R1R':
+--     it_a1R1R = showPriestley (priesMap myLattice1)
 
 
 --- >>> showLattice myLattice1
--- Error running utility program: Unable to call the command  dot  with the arguments: " -Txlib " because of:  dot: runInteractiveProcess: posix_spawnp: does not exist (No such file or directory)
 
 --- >>> showOrdSet myOS5
 

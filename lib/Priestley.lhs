@@ -3,6 +3,7 @@
 We introduce the main data types of this section.
 
 \begin{code}
+{-# LANGUAGE OverloadedStrings #-}
 module Priestley where
 
 import Data.GraphViz
@@ -12,6 +13,8 @@ import Test.QuickCheck
 
 import Poset
 import Basics
+import qualified Data.GraphViz.Attributes as A
+import qualified Data.GraphViz.Attributes.Complete as A
 \end{code}
 
 In the definition of the types, we keep it as close as possible to their mathematical counterparts: 
@@ -212,6 +215,11 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 When we say that we print a Priestley space, we mean that we print the underlying relation. This can be done with the functions from Poset:
 
 \begin{code}
-showPriestley ::(Ord a, Data.GraphViz.PrintDot a) => PriestleySpace a -> IO ()
+
+
+-- PrintDot instance using String-based node IDs
+
+
+showPriestley :: (Ord a, PrintDot a) => PriestleySpace a -> IO ()
 showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
 \end{code}
