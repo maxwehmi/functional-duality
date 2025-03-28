@@ -5,7 +5,7 @@ We introduce the main data types of this section.
 \begin{code}
 
 module Priestley where
-
+    
 
 import Data.GraphViz.Commands
 import Data.GraphViz.Printing
@@ -157,8 +157,10 @@ Assuming bijectivity (by laziness of \&\&), to check that the given map is a Hom
 \begin{code}
 checkHomeomorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
 checkHomeomorphism ta tb mapping = 
-    mapTop mapping ta `Set.isSubsetOf` tb
-    && premapTop mapping tb `Set.isSubsetOf` ta
+    all (\x -> Set.map (getImage mapping) x `elem` tb) ta 
+    && all (\ x -> Set.map (getPreimage mapping) x `elem` ta) tb
+    --mapTop mapping ta `Set.isSubsetOf` tb
+    -- && premapTop mapping tb `Set.isSubsetOf` ta
 \end{code}
 
 To apply the map to every open and thus every element of every open, we have to nest \verb:Set.map: twice. Again, we deal similarly with the preimages.
@@ -255,6 +257,14 @@ showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrde
 \begin{code}
 simplifyPS :: Ord a => PriestleySpace a -> PriestleySpace Int
 simplifyPS (PS s t r) = PS s' t' r' where
+    s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
+    t' = mapTop mapping t 
+    r' = mapRel mapping r
+
+    
+simplifyPSwMap :: Ord a => PriestleySpace a -> (PriestleySpace Int, Map a Int)
+simplifyPSwMap (PS s t r) = (PS s' t' r', mapping) where
     s' = Set.fromList $ take (Set.size s) [0..]
     mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
     t' = mapTop mapping t 

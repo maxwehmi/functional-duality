@@ -78,6 +78,12 @@ priestleyTopology x = let phimap = Set.map (phi x) (set (carrier x))
                                     
 priesMap :: (Eq a, Ord a) => Lattice a -> PriestleySpace (Filter a)
 priesMap lattice = PS (findPrimeFilters lattice) (priestleyTopology lattice) (inclusionOrder (findPrimeFilters lattice))
+
+fastPriesMap :: Ord a => Lattice a -> (PriestleySpace (Filter a), PriestleySpace Int, Map (Filter a) Int)
+fastPriesMap l = (p, fst sp, snd sp) where 
+        p = PS pfs (Set.powerSet pfs) (inclusionOrder pfs) 
+        pfs = findPrimeFilters l
+        sp = simplifyPSwMap p
 \end{code}
 
 
@@ -98,14 +104,47 @@ clopMap  ps = do
               let result = makeLattice $  OS (clopUp ps) (inclusionOrder (clopUp ps)) 
               if checkDL result then result else error "104!"
 
+fastClopMap :: Ord a => PriestleySpace a -> (Lattice (Set.Set a), Lattice Int, Map (Set.Set a) Int)
+fastClopMap p = (l, fst sl, snd sl) where
+        l = clopMap p
+        sl = simplifyDLwMap l
 \end{code}
 
 
 \begin{code}
 calculateEpsilon :: Ord a => PriestleySpace a -> Map a (Filter (Set.Set a))
 calculateEpsilon ps = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps] where
-                eps a = Set.fromList [ u | u <- (Set.toList . set . carrier .clopMap) ps, a `elem` u]
+                eps a = Set.fromList [ u | u <- (Set.toList . set . carrier . clopMap) ps, a `elem` u]
+
+calculateFastEps :: Ord a => PriestleySpace a -> Map a Int 
+calculateFastEps ps = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps] where
+        (l,sl,m1) = fastClopMap ps
+        (_,_,map2) = fastPriesMap sl
+        eps a = getImage map2 (clopensOf a)
+        clopensOf b = Set.fromList [getImage m1 u | u <- (Set.toList . set . carrier) l, b `elem` u]
 
 calculatePhi :: Ord a => Lattice a -> Map a (Set.Set (Filter a))
 calculatePhi l = Set.fromList [(x, phi l x) | x <- (Set.toList . set . carrier) l] 
+
+checkRepresentationPS :: Ord a => PriestleySpace a -> Bool
+checkRepresentationPS ps = checkIso ps (priesMap (clopMap ps)) (calculateEpsilon ps)
+
+checkRepresentationPSfast :: Ord a => PriestleySpace a -> Bool
+checkRepresentationPSfast ps = checkIso ps ps' mapping where
+        (l,sl,m1) = fastClopMap ps
+        (_,ps',map2) = fastPriesMap sl
+        eps a = getImage map2 (clopensOf a)
+        clopensOf b = Set.fromList [getImage m1 u | u <- (Set.toList . set . carrier) l, b `elem` u]
+        mapping = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps]
+
+checkRepresentationDL :: Ord a => Lattice a -> Bool
+checkRepresentationDL l = functionMorphism l (clopMap (priesMap l)) (calculatePhi l)
+
+checkRepresentationDLfast :: Ord a => Lattice a -> Bool 
+checkRepresentationDLfast l = functionMorphism l l' mapping where
+        (p,sp,map1) = fastPriesMap l 
+        (_,l',map2) = fastClopMap sp 
+        vphi a = getImage map2 (filtersOf a)
+        filtersOf b = Set.fromList [getImage map1 u | u <- (Set.toList . setPS) p, b `elem` u]
+        mapping = Set.fromList [(x, vphi x) | x <- (Set.toList . set . carrier) l]
 \end{code}

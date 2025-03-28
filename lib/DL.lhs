@@ -259,7 +259,7 @@ instance (Arbitrary a, Ord a) => Arbitrary (Lattice a) where
     arbitrary = sized randomPS where
         randomPS :: (Arbitrary a, Ord a) => Int -> Gen (Lattice a)
         randomPS n = do
-            o <- resize (max n 1) arbitrary
+            o <- resize (max n 2) arbitrary
             let l = fixLattice $ fixTopBottom o
             return $ makeLattice l 
 
@@ -411,10 +411,21 @@ myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2)
 % Put this somewhere where its used 
 
 \begin{code}
-simplifyPS :: Ord a => Lattice a -> Lattice Int
-simplifyPS l = makeLattice (OS s' r') where
+simplifyDL :: Ord a => Lattice a -> Lattice Int
+simplifyDL l = makeLattice (OS s' r') where
     s = (set . carrier) l
     s' = Set.fromList $ take (Set.size s) [0..]
+    r' = Set.fromList [(x,y) | 
+        x <- Set.toList s', 
+        y <- Set.toList s', 
+        (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
+
+        
+simplifyDLwMap :: Ord a => Lattice a -> (Lattice Int, Map a Int)
+simplifyDLwMap l = (makeLattice (OS s' r'), mapping) where
+    s = (set . carrier) l 
+    s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
     r' = Set.fromList [(x,y) | 
         x <- Set.toList s', 
         y <- Set.toList s', 
