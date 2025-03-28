@@ -6,32 +6,15 @@ We introduce the main data types of this section.
 
 module Priestley where
 
-import Data.Monoid
-import Data.GraphViz.Types.Monadic
-import Data.GraphViz.Types.Generalised
-import Data.GraphViz.Attributes
-import Data.GraphViz.Attributes.Colors
-
-import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
-import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
 
 import Data.GraphViz.Commands
-
-
-import qualified Data.GraphViz.Attributes.Complete as A
-import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
 import Data.GraphViz.Printing
-
-
-
-import Data.GraphViz
 import qualified Data.Set as Set 
 import Data.Bifunctor (bimap)
 import Test.QuickCheck
-
 import Poset
 import Basics
-import Data.Foldable (Foldable(toList))
+
 \end{code}
 
 In the definition of the types, we keep it as close as possible to their mathematical counterparts: 
@@ -102,14 +85,14 @@ It is assumed that the input is finite. In case the input does not respect the c
 
 \begin{code}
 checkTopology :: Ord a => TopoSpace a -> Bool
-checkTopology (TS space t) = Set.member space t 
+checkTopology (TS space1 t) = Set.member space1 t 
     && Set.member Set.empty t 
     && all (\u -> all (\v -> (u `Set.union` v) `elem` t) t) t
     && all (\u -> all (\v -> (u `Set.intersection` v) `elem` t) t) t
     
 fixTopology :: Ord a => TopoSpace a -> TopoSpace a
-fixTopology (TS space t) = TS space fixedTop  where 
-    fixedTop  = Set.fromList [space, Set.empty] `Set.union` unionClosure (intersectionClosure t)
+fixTopology (TS space2 t) = TS space2 fixedTop  where 
+    fixedTop  = Set.fromList [space2, Set.empty] `Set.union` unionClosure (intersectionClosure t)
 \end{code}
 
 The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order.
@@ -143,13 +126,13 @@ checkPriestley :: (Eq a, Ord a) => PriestleySpace a -> Bool
 checkPriestley p = checkTopology (getTopoSpace p) && checkPoset (getOrderedSet p) && checkPSA p 
 
 checkPSA :: (Eq a, Ord a) => PriestleySpace a -> Bool
-checkPSA (PS space t order) = all (\ pair -> 
+checkPSA (PS space3 t order) = all (\ pair -> 
  implies (pair `notElem` order) (any (\ open -> elem (fst pair) open 
-   && notElem (snd pair) open) (clopUp (PS space t order)) )) $ Set.cartesianProduct space space 
+   && notElem (snd pair) open) (clopUp (PS space3 t order)) )) $ Set.cartesianProduct space3 space3 
 
 clopUp :: Ord a => PriestleySpace a -> Topology a
-clopUp (PS space t ord) = Set.intersection (clopens t) (upsets t) where 
-        clopens = Set.filter (\ x -> Set.difference space x `elem` t)  
+clopUp (PS space4 t ord) = Set.intersection (clopens t) (upsets t) where 
+        clopens = Set.filter (\ x -> Set.difference space4 x `elem` t)  
         upsets = Set.filter (\ y -> y == upClosure y ord)
 
 upClosure :: (Eq a, Ord a) => Set.Set a -> Relation a -> Set.Set a 
