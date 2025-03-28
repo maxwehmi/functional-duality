@@ -15,6 +15,7 @@ import Test.QuickCheck
 import Poset
 import Basics
 
+
 \end{code}
 
 In the definition of the types, we keep it as close as possible to their mathematical counterparts: 
@@ -226,20 +227,7 @@ When we say that we print a Priestley space, we mean that we print the underlyin
 \begin{code}
 
 
-{-instance Data.GraphViz.Printing.PrintDot a => Data.GraphViz.Printing.PrintDot(Set.Set a) where 
-    unqtDot x = unqtDot (Set.elemAt 0 x)
-    toDot = unqtDot 
-    unqtListToDot = list . mapM unqtDot
-    listToDot = dquotes . unqtListToDot-}
-{-instance (Show a) => PrintDot (Set.Set a) where
-    toDot s = toDot (DotNode "node" [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1])-}
 
-{-newtype DotSet a = DotSet (Set.Set a)
-
--- Define a PrintDot instance for the wrapped Set
-toDot (DotSet s) = 
-    let nodeId = "node_" ++ show (hash s)  -- Unique identifier
-    in Data.GraphViz.Printing.toDot (DotNode nodeId [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1])-}
 
 
 
