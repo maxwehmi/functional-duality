@@ -447,7 +447,7 @@ toGraphOrd r = digraph' $ do
   
   edgeAttrs [A.Dir A.NoDir]
   nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
-  graphAttrs [A.RankDir A.FromBottom]
+  graphAttrs [A.RankDir A.FromBottom, A.NodeSep 1.0]
   toGraphRel $ rel r
 
 \end{code}
