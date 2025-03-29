@@ -60,20 +60,7 @@ checkRelationWellDef (OS s r) = tuplesUnfold r `Set.isSubsetOf` s
 
 Moreover if the relation is not well-defined relation, we might want to force it to be. The following function takes care of this:
 
-%For this we first need to define the following helper function, which given two sets $a,b$ gives us back the set $c$ of all elements not in $a$ and in $b$.
-%
-%
-%\begin{code}
-%unsharedElements :: Ord a => Set.Set a -> Set.Set a -> Set.Set a
-%unsharedElements x y = (x `Set.union` y) `Set.difference`  (x `Set.intersection` y)
-%\end{code}
-%
-%
-%Now we can use \texttt{unsharedElements} to remove from the relation all the tuples whose first or second element is not in the carrier set. 
-%
-
 \begin{code}
--- this maybe could've been done more simply, but idk it seems to work like this
 forceRelation :: Ord a => OrderedSet a -> OrderedSet a
 forceRelation (OS s r) 
  | checkRelationWellDef (OS s r) = OS s r
@@ -84,10 +71,6 @@ forceRelation (OS s r)
                                                        )
                     )
 \end{code}
-
-
-
-
 
 
 \subsection{Closures}
@@ -132,9 +115,6 @@ transStep :: Ord a => OrderedSet a -> OrderedSet a
 transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z (OS s r)])
 \end{code}
 
-%Since this only adds "one-step" transtivity, we need to recurse the process until it is idempotent, i.e. the relation is fully transitive. Then we have obtained our transitive closure. This might be a bit hacky, perhaps there is a more straighforward way, similar to reflexive closure, but again it did not come to me.
-
-
 Now that with \texttt{transStep} we have enlarged our relation, new pairs which satisfy \texttt{transPair} might arise. Therefore in order to fully close the relation under transitivity we need to "recursively" apply the \texttt{transStep} function to our object $(P,R)$ of type \texttt{OrderedSet a} until we reach a $"tr"(P,R)$ such that \texttt{transStep tr(P,R) == tr(P,R)}. 
 
 \texttt{closureTrans} is the function that does exaxtly this: 
@@ -156,27 +136,6 @@ checkTrans :: Ord a => OrderedSet a -> Bool
 checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
 \end{code}
 
-%
-%We can now make certain objects of type  \texttt{OrderedSet a} into posets. In particular ones where:
-%
-%\begin{itemize}
-%\item the relation is a subset of the cartesian product of the carrier set. 
-%
-%%(though perhaps forcing the relation to be well defined, see later function, would work actually, so we might rid of this case).
-%
-%\item the relation is anti-symmetric
-%\item the transitive closure does not break anti-symmetry (this can happen, cosider the set $\{a,b,c\}$ with $aRb, bRc, cRa$. Anti-symmetry is lost when closing transitively).
-%\end{itemize}
-%
-%\begin{code}
-%-- transitive closure can break anti-symmetry, so case was added
-%closurePoSet :: Ord a => OrderedSet a -> OrderedSet a
-%closurePoSet os
-% | not (checkRelationWellDef os) = error "relation isn't well-defined"
-% | not (checkAntiSym os)  = error "relation isn't anti-symmetric"
-% | not (checkAntiSym $ closureTrans os) = error "relation looses anti-symmetry when transitively closed"
-% | otherwise = closureTrans $ closureRefl os
-%\end{code}
 
 
 \subsection{Forcing Antisymmetry}
@@ -193,10 +152,6 @@ We shall implement both as both have some advatages and some disadvantages to th
 
 
 Given an object $(P,R)$ of type \texttt{OrderedSet a}, we eliminate all the symmetric pairs in $R$. That is we construct a new relation $R^* \subseteq R$ such that if $x \neq y$ and $(x,y) \in R$ and $(y,x) \in R$, then $\neg((x,y), (y,x) \in R^*)$. 
-
-
-
-
  
 \begin{code}
 forceAntiSym :: Ord a => OrderedSet a -> OrderedSet a
@@ -253,12 +208,6 @@ forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
  \end{itemize}
 \end{itemize}
 
-%To obtain it from a set wrt to a relation, we compute the quotientSet wrt to anti-symmetry: remove from s the bigger x that appears in a symmetric pair. This is a cheeky trick to select one of the two elements, based on the fact that we have \texttt{Ord a}. Without that I think it would be a real pain. So for any symmetric pair, we keep the smallest element in that pair as our cluster rapresentative. 
-
-%Then we just let such quotient set be the new carrier set, and force the relation to be well-defined, just as sanity check.
-
-
-
 \subparagraph{Preservation of properties}
 
 We need to make sure that forcing anti-symmetry in our two implementation does not make us loose an existing property of the relations. While it is immediate that the second implementation does so, this is not the case for the first implementation.
@@ -306,11 +255,6 @@ checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 
 
 
-
-
-
-% NOTE: I Added the package for cancel in latexmarcos.tex, but in case it doesn't work still, for the record, \cancel is meant to function like \not, just prettier when you do it on big things like R^\dagger. Modify with that, or just using \neg if needed.
-%
 %\emph{Proof}:
 %Suppose $R$ is any relation. We know the transitive closure  $R^{+}$ transitive. Let $R^{\dagger}$ be the antisymmetric "closure" of $R^{+}$.
 %
@@ -393,14 +337,17 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 
  
 
-This is dedicated to the visualization of the structures we have discussed, namely posets (a similar section will be present at the end of each section introducing a new mathematical structure).
+This section is dedicated to the visualization of the structures we have discussed, namely posets, via what are called in mathematics \textit{Hasse diagrams} (a similar section will be present at the end of each section introducing a new mathematical structure the implementation will be similar in every case, but the function are displaced according to the module-dependencies).
 
-In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. In particular all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. Since there is no standard instance for the type \texttt{Set a}, we heve to define our own:
+In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. If the reader wishes to visualize the graph, they should both install \textit{graphViz} and \textit{Xlib} on their machines.
+If you (hypothetical reader, hello,) are running Ubuntu, you can run \textit{sudo apt-get install libx11-dev graphviz} on bash to install the required.
 
-\begin{code}
+It should be noted that all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. This causes some difficulties when it comes to representation since Data.Set
+does not have an original instance of PrintDot (Set a) and, since the Set module is imported, all homebrew instances we defined (although working) were "orphan" instances, and thus triggered a Wall warning. \newline 
+In our specific case, the orphan instance would not be a problem per se, but to avoid the warning we decided to always run the isomorphism defned above (simplifyDL1, simplifyPS1) to obtain an isomorphic copy of our poset defined on the type INT. Other solution would have required rewriting every instance of "Set" as a Newtype, or rewriting the Set module in one of our own module and add the instance there. Both solutions seemed a bit excessive and thus we settled for the more economical one of always taking an isomorphic copy on INT. \newline 
 
+As far as the style of the diagrams go, we stuck with the mathematical convention of having unlabeled nodes, since we are in any case interested in classes of posets "up to isomorphism". If the user wishes to label their node, this can easily be done modifying the GraphAttributes (those wrapped in square brackets) in "toGraphOrd". \newline 
 
-\end{code}
 
 
 
@@ -422,13 +369,14 @@ fromReflTrans  = fromTransitive.fromReflexive
 
 \end{code}
 
-The following two functions are crucial to the visualization of the structures. They only rely on the types \texttt{Relation a} and \texttt{RoderedSet a} and therefore will be called also in the other sections.  
+The following two functions are crucial to the visualization of the structures. They only rely on the types \texttt{Relation a} and \texttt{OrderedSet a} and therefore will be called also in the other sections.  
 
 \begin{itemize}
 
 \item \texttt{toGraphRel'} uses \texttt{mapM\_} to transform an object \texttt{r}of type \texttt{Relation a} into a  monadic action, in particular an instance of of the type \texttt{Dot a}. 
 
 \item \texttt{toGraphRel} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}. The carrier set of the object of type \texttt{OrderedSet a} will be the used to generate the points and the underlying relation of the object of type \texttt{OrderedSet a} will be the used to generate the edges of the graph. 
+Notice that, although no Lattice has "isolated points", many Priestley space do which means that we could have nodes in the space which only have one reflexive arrow. If we only ran the second part of the function, and just mapped "-->" over the relations, we would either lose those isolated points, or we would ahve to print every time all the reflexive arrows of the graph. Thus it is important that we both print nodes out of the elements of the carrier set, and then construct edges using the relations. 
 \end{itemize}
 
 \begin{code}
