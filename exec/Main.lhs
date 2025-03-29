@@ -15,6 +15,7 @@ import Text.Parsec (parse)
 import Text.Parsec.String (Parser)
 import Text.Read (readMaybe)
 import Data.Set as Set
+import Test.QuickCheck (Arbitrary, arbitrary, generate, Gen)
 
 getUserInput :: IO Int
 getUserInput = do
@@ -104,16 +105,22 @@ main = do
     2 -> do 
       os <- getOS
       if checkAntiSym $ os then putStr "This is a Priestley space \n" else putStr "sad nee \n"
-      --show os
+      showOrdSet os
+    3 -> do
+      lattice <- generate (arbitrary :: Gen (Lattice Int))
+      showLattice lattice
+    4 -> do
+      space <- generate (arbitrary :: Gen (PriestleySpace Int))
+      showPriestley space
     5 -> do 
       lattice <- getApprovedDL
       putStr "good lattice, translate now"
-      -- TODO: show $ priesMap lattice
+      showPriestley $ priesMap lattice
     6 -> do 
       os <- getApprovedOS
       let space = PS (set os) (Set.powerSet $ set os) (rel os)
       putStr "good space, translate now"
-      -- TODO: show $ clopMap space
+      showLattice $ clopMap space
     _ -> putStr "error, run again"
 
 
