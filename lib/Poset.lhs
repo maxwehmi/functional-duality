@@ -22,8 +22,18 @@ import qualified Data.Set as Set
 import Test.QuickCheck
 type Relation a = Set.Set (a,a)
 
-data OrderedSet a = OS {set :: Set.Set a, rel :: Relation a} 
-    deriving (Eq, Ord,Show)
+data OrderedSet a = OS {set :: Set.Set a, 
+                        rel :: Relation a} 
+    deriving (Eq, Ord)
+
+
+instance Show a => Show (OrderedSet a) where
+    show (OS s r) = "{Set: " ++ show (Set.toList s) ++ ",\n "
+                        ++ "Rel " ++ show (Set.toList r) ++ "}" 
+
+
+
+
 \end{code}
 
 
