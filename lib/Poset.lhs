@@ -404,6 +404,18 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 
 This is dedicated to the visualization of the structures we have discussed, namely posets (a similar section will be present at the end of each section introducing a new mathematical structure).
 
+In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. In particular all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. Since there is no standard instance for the type \texttt{Set a}, we heve to define our own:
+
+\begin{code}
+
+instance PrintDot a => PrintDot (Set.Set a) where 
+    unqtDot x = unqtDot (head (Set.toList x))
+
+
+\end{code}
+
+
+
 Our primary concern is for the picture to be clear and readable. To this end we shall remove all transitive and reflexive edges which might occur in the structure. Since posets are part of the underlying structure of both lattices and priestley spaces,and its type is used to construct the types of the latter two, we define these helper function in this section.
 
 \begin{code}
@@ -447,16 +459,7 @@ toGraphOrd r = digraph' $ do
   graphAttrs [A.RankDir A.FromBottom]
   toGraphRel $ rel r
 
-
 \end{code}
-
-
-
-
-
-
-
-
 
 
 The following function actually outputs the picture of the ordered set. 
