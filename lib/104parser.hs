@@ -99,7 +99,7 @@ threeexample :: IO ()
 threeexample = do
   putStr "Enter OrderedSet (e.g., 'Set: a, b, c LatOrder: (a,b), (b,c)'): "
   hFlush stdout
-  input <- getLine  -- Read single-line input
+  input <- getLine  
   case parse parseOrderedSet "" input of
     Left err -> print err
     Right os -> showOrdSet os

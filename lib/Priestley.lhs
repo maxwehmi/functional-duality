@@ -226,12 +226,17 @@ When we say that we print a Priestley space, we mean that we print the underlyin
 
 \begin{code}
 
-
+instance PrintDot a => PrintDot (Set.Set a) where 
+    unqtDot x = unqtDot (head (Set.toList x))
 
 
 
 
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
 
-showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
+showPriestley p = runGraphvizCanvas' (toGraphRel $ fromReflTrans $ getOrderedSet p) Xlib 
+
+
+
+
 \end{code}

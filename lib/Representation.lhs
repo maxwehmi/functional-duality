@@ -108,4 +108,52 @@ calculateEpsilon ps = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps] wh
 
 calculatePhi :: Ord a => Lattice a -> Map a (Set.Set (Filter a))
 calculatePhi l = Set.fromList [(x, phi l x) | x <- (Set.toList . set . carrier) l] 
+
+
+
+
+
+myos1 :: OrderedSet Int
+myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
+
+
+
+myOS5:: OrderedSet Int
+myOS5 = OS (Set.fromList [0,1,2,3]) (Set.fromList [(0,1), (0,2), (1,3), (1,3), (2,3)])
+
+myPoset1:: OrderedSet Int
+myPoset1 = closurePoSet myOS5
+
+myLattice1:: Lattice Int 
+myLattice1 = makeLattice myPoset1
+
+
+snelliusOS :: OrderedSet Int 
+snelliusOS = OS (Set.fromList [0.. 10]) (Set.fromList [(0,1), (0,2),(1,3),(1,5),(2,4),(2,5),(3,6),(5,6),(5,7),(4,7),(6,8),(7,8),(8,9),(9,10)]) 
+
+
+snelliusDL :: Lattice Int 
+snelliusDL = makeLattice (forcePoSet snelliusOS)
+
+
+
+
+
+
+
+
+
+
+
+
+--- >>> showLattice myLattice1
+
+--- >>> showOrdSet myOS5
+
+--- >>> showPriestley mySpace
+
+--- >>> generate arbitrary :: IO (Lattice Int)
+
+--- >>> showLattice (generate arbitrary :: IO (Lattice Int))
+
 \end{code}
