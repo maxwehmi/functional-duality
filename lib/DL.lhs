@@ -250,7 +250,7 @@ makeLattice os = L os (\x y -> M.fromJust $ findMeet preLattice x y) (\x y -> M.
 
 \end{code}
 
-When, at later stages, we will construct a distributive lattices from Priestely spaces, we will get structures whose elements are sets themselves. To prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new lattice out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
+When, at later stages, we will construct distributive lattices from Priestely spaces, we will get structures whose elements are sets themselves. To prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new lattice out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
 
 The first returns, with the new space, also a map, and is meant to be used when we care about the old elements (the map allows to reconstruct them); the second does not return a map and it is meant to be used when we do not care about the old elements.
 
@@ -408,34 +408,3 @@ showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
 showLattice l = runGraphvizCanvas' (toGraphOrd (fromReflTrans $ carrier l)) Xlib
 
 \end{code}
-
-% \begin{code}
-%-- helper functions that redfine previous function to not have Maybe... type, for ease of typechecking ----------------
-% realTop:: Ord a => Lattice a -> a
-% realTop l 
-%     | M.isNothing (top l) = error "there's no top"
-%     | otherwise =  Set.elemAt 0 (Set.filter ( isTop l ) ( set $ carrier l ))
-
-
-% realBot:: Ord a => Lattice a -> a
-% realBot l 
-%     | M.isNothing (bot l) = error "there's no bot"
-%     | otherwise =  Set.elemAt 0 (Set.filter ( isBot l ) ( set $ carrier l ))
-
-% realJoin :: Ord a => Lattice a -> a -> a -> a
-% realJoin l x y
-%     | not (checkLattice l) = error "not a lattice"
-%     | otherwise = realLeast ( carrier l ) ( upperBounds ( carrier l ) x y )
-
-
-% realMeet :: Ord a => Lattice a -> a -> a -> a
-% realMeet l x y
-%     | not (checkLattice l) = error "not a lattice"
-%     | otherwise = realGreatest ( carrier l ) ( lowerBounds ( carrier l ) x y )
-
-% realGreatest :: Ord a => OrderedSet a -> Set.Set a -> a
-% realGreatest os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (y , x ) `Set.member` rel os) s ) s
-
-% realLeast :: Ord a => OrderedSet a -> Set.Set a -> a
-% realLeast os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (x , y ) `Set.member` rel os ) s) s
-% \end{code}
