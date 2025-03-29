@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+module Parser where
 import qualified Data.Set as Set
 import Text.Parsec
 import Poset
