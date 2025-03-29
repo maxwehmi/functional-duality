@@ -15,18 +15,9 @@ An object $(P, R)$ of type \texttt {OrderedSet a}, is not necessarily a partiall
 module Poset where
 import Data.GraphViz.Types.Monadic
 import Data.GraphViz.Types.Generalised
-import Data.GraphViz.Attributes
-import Data.GraphViz.Attributes.Colors
-
-import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
-import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
-
 import Data.GraphViz.Commands
-
 import qualified Data.GraphViz.Attributes.Complete as A
-import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
 import Data.GraphViz.Printing
-
 import qualified Data.Set as Set
 import Test.QuickCheck
 type Relation a = Set.Set (a,a)
@@ -377,7 +368,7 @@ forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
 
 \end{code}
 
-To use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. It is called an arbitrary ordered set, but in fact it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
+To use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. It is called an arbitrary ordered set, but in fact it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introduced functions:
 
 \begin{code}
 instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
@@ -401,19 +392,39 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 
 
 
-\section{Printing machinery}
+\subsection{Printing machinery}
 
  
 
 This is dedicated to the visualization of the structures we have discussed, namely posets (a similar section will be present at the end of each section introducing a new mathematical structure).
 
-Our primary concern is for the picture to be clear and readable. To this end we shall remove all transitive and reflexive endges which might occur in the structure. Since posets are part of the underlying structure of both lattices and priestley spaces,and its type is used to construct the types of the latter two, we define these helper function in this section.
+In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. In particular all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. Since there is no standard instance for the type \texttt{Set a}, we heve to define our own:
+
+\begin{code}
+
+
+{-newtype PrintSet a = PrintSet (Set.Set a)
+    deriving (Eq, Show) 
+
+
+instance PrintDot a => PrintDot (PrintSet a) where
+    unqtDot (PrintSet s) = unqtDot ( head $ Set.toList s) -}
+
+instance PrintDot a => PrintDot (Set.Set a) where 
+    unqtDot x = unqtDot (head (Set.toList x))
+
+
+\end{code}
+
+
+
+Our primary concern is for the picture to be clear and readable. To this end we shall remove all transitive and reflexive edges which might occur in the structure. Since posets are part of the underlying structure of both lattices and priestley spaces,and its type is used to construct the types of the latter two, we define these helper function in this section.
 
 \begin{code}
 
 fromTransitive::Ord a => OrderedSet a -> OrderedSet a
 fromTransitive (OS s r) = OS s k where
-              k = Set.difference r (Set.fromList [(x,y)| (x,y) <- Set.toList r,   any (\z -> Set.member (x,z)  r && Set.member (z,y) r ) s   ])
+              k = Set.difference r (Set.fromList [(x,y)| (x,y) <- Set.toList r,   any (\z -> z /= x  && Set.member (x,z)  r && Set.member (z,y) r ) s   ])
 
 
 fromReflexive::Ord a => OrderedSet a -> OrderedSet a
@@ -425,36 +436,32 @@ fromReflTrans  = fromTransitive.fromReflexive
 
 \end{code}
 
-The following two functions are crucial to the visualization of the structures. It only relies on the type \texttt{Relation a}, and therefore will be called also in other sections.  
+The following two functions are crucial to the visualization of the structures. They only rely on the types \texttt{Relation a} and \texttt{RoderedSet a} and therefore will be called also in the other sections.  
 
 \begin{itemize}
 
-\item \texttt{toGraphRel'} uses \texttt{mapM_} to transform an object \texttt{r}of type \textt{Relation a} into a  monadic action, in particular an instance of of the type \texttt{Dot a}. 
+\item \texttt{toGraphRel'} uses \texttt{mapM\_} to transform an object \texttt{r}of type \texttt{Relation a} into a  monadic action, in particular an instance of of the type \texttt{Dot a}. 
 
-\item \texttt{toGraphRel} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}.
+\item \texttt{toGraphRel} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}. The carrier set of the object of type \texttt{OrderedSet a} will be the used to generate the points and the underlying relation of the object of type \texttt{OrderedSet a} will be the used to generate the edges of the graph. 
 \end{itemize}
 
 \begin{code}
 
-toGraphRel' :: Relation a -> Dot a
-toGraphRel'  =  mapM_ (uncurry (-->)) 
+toGraphRel :: Relation a -> Dot a
+toGraphRel  =  mapM_ (uncurry (-->)) 
 
-toGraphRel:: Relation a -> DotGraph a
-toGraphRel r = digraph' $  do 
-                        edgeAttrs [A.Dir A.NoDir]
-                        nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
-                        graphAttrs[A.RankDir A.FromBottom]
-                        toGraphRel' r 
+toGraphOrd :: (Ord a,PrintDot a) => OrderedSet a -> DotGraph a
+toGraphOrd r = digraph' $ do
+ 
+  mapM_ (`node` [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] )(Set.toList $ set r )
+
+  
+  edgeAttrs [A.Dir A.NoDir]
+  nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
+  graphAttrs [A.RankDir A.FromBottom]
+  toGraphRel $ rel r
 
 \end{code}
-
-
-
-
-
-
-
-
 
 
 The following function actually outputs the picture of the ordered set. 
@@ -462,7 +469,7 @@ The following function actually outputs the picture of the ordered set.
 \begin{code}
 
 showOrdSet ::(Ord a, Data.GraphViz.Printing.PrintDot a) => OrderedSet a -> IO ()
-showOrdSet p = runGraphvizCanvas' (toGraphRel $ rel (fromReflTrans p)) Xlib
+showOrdSet p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans p) Xlib
 
 
 \end{code}

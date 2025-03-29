@@ -10,7 +10,7 @@ import Poset
 import DL
 import Priestley
 import Representation
-import Parser
+import ParsingStuff
 import Text.Parsec (parse)
 import Text.Parsec.String (Parser)
 import Text.Read (readMaybe)
