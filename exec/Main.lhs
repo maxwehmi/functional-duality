@@ -164,20 +164,20 @@ userDualizeDL lattice = do
 userDualizePS :: (PriestleySpace a) -> IO ()
 userDualizePS space = do
   putStr "Would you like to translate this Priestley to its dual lattice? y/n: "
-    answer <- getLine
-    case answer of
-      "y" -> do 
-        putStrLn "Dual algebra: \n" ++ show lattice ++ "\n" 
-        showLattice $ simplifyDL1 $ clopMap space
-        putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
-        answer <- getLine
-        case answer of
-          "y" -> do
-              putStrLn "Dual space: \n" ++ show lattice ++ "\n"
-              showPriestley $ simplifyPS1 $ priesMap $ clopMap space
-              putStrLn "Like expected, it's the same space we started with!"
-              putStrLn "Enough duality for today!"
-          _  -> putStrLn "No problem! Glad we could help you :) \n"
+  answer <- getLine
+  case answer of
+    "y" -> do 
+      putStrLn "Dual algebra: \n" ++ show lattice ++ "\n" 
+      showLattice $ simplifyDL1 $ clopMap space
+      putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
+      answer <- getLine
+      case answer of
+        "y" -> do
+            putStrLn "Dual space: \n" ++ show lattice ++ "\n"
+            showPriestley $ simplifyPS1 $ priesMap $ clopMap space
+            putStrLn "Like expected, it's the same space we started with!"
+            putStrLn "Enough duality for today!"
+        _  -> putStrLn "No problem! Glad we could help you :) \n"
       _  -> putStrLn "No problem! Glad we could help you :)"
 \end{code}
 
