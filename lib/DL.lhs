@@ -370,7 +370,7 @@ functionMorphism l1  l2 f
 \subsection{Printing machinery}
 \begin{code}
 showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
-showLattice l = runGraphvizCanvas' (toGraphRel (fromReflTrans $ carrier l)) Xlib
+showLattice l = runGraphvizCanvas' (toGraphOrd (fromReflTrans $ carrier l)) Xlib
 
 
 
