@@ -8,13 +8,16 @@ import Text.Parsec.String (Parser)
 import Control.Monad (void)
 
 import Priestley (PriestleySpace (PS), showPriestley)
+import System.IO
 
 -----The intended input is Set: x, y, z, k ... LatOrder: (x,y), (k,z), ...
 
 parseOrderedSet :: Parser (OrderedSet String)
 parseOrderedSet = do
   elements <- parseSetLine
+  spaces
   relations <- parseOrderLine
+  spaces 
   eof
   return $ OS (Set.fromList elements) (Set.fromList relations)
 
@@ -57,7 +60,9 @@ oneexample = do
 parsePSSpace :: Parser (PriestleySpace String)
 parsePSSpace = do
   base <- parseBase
+  spaces
   topology <- parseTopology
+  spaces 
   order <- parseOrder
   eof
   return $ PS (Set.fromList base) (Set.fromList topology) (Set.fromList order)
@@ -89,3 +94,12 @@ twoexample = do
   case parse parsePSSpace "" input of
     Left err -> print err
     Right os -> showPriestley os
+
+threeexample :: IO ()
+threeexample = do
+  putStr "Enter OrderedSet (e.g., 'Set: a, b, c LatOrder: (a,b), (b,c)'): "
+  hFlush stdout
+  input <- getLine  
+  case parse parseOrderedSet "" input of
+    Left err -> print err
+    Right os -> showOrdSet os

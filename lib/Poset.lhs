@@ -410,7 +410,7 @@ Our primary concern is for the picture to be clear and readable. To this end we 
 
 fromTransitive::Ord a => OrderedSet a -> OrderedSet a
 fromTransitive (OS s r) = OS s k where
-              k = Set.difference r (Set.fromList [(x,y)| (x,y) <- Set.toList r,   any (\z -> Set.member (x,z)  r && Set.member (z,y) r ) s   ])
+              k = Set.difference r (Set.fromList [(x,y)| (x,y) <- Set.toList r,   any (\z -> z /= x  && Set.member (x,z)  r && Set.member (z,y) r ) s   ])
 
 
 fromReflexive::Ord a => OrderedSet a -> OrderedSet a
@@ -436,12 +436,17 @@ The following two functions are crucial to the visualization of the structures. 
 toGraphRel' :: Relation a -> Dot a
 toGraphRel'  =  mapM_ (uncurry (-->)) 
 
-toGraphRel:: Relation a -> DotGraph a
-toGraphRel r = digraph' $  do 
-                        edgeAttrs [A.Dir A.NoDir]
-                        nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
-                        graphAttrs[A.RankDir A.FromBottom]
-                        toGraphRel' r 
+toGraphRel :: (Ord a,PrintDot a) => OrderedSet a -> DotGraph a
+toGraphRel r = digraph' $ do
+ 
+  mapM_ (flip node [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] )(Set.toList $ set r )
+
+  
+  edgeAttrs [A.Dir A.NoDir]
+  nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
+  graphAttrs [A.RankDir A.FromBottom]
+  toGraphRel' $ rel r
+
 
 \end{code}
 
@@ -459,7 +464,7 @@ The following function actually outputs the picture of the ordered set.
 \begin{code}
 
 showOrdSet ::(Ord a, Data.GraphViz.Printing.PrintDot a) => OrderedSet a -> IO ()
-showOrdSet p = runGraphvizCanvas' (toGraphRel $ rel (fromReflTrans p)) Xlib
+showOrdSet p = runGraphvizCanvas' (toGraphRel $ fromReflTrans p) Xlib
 
 
 \end{code}
