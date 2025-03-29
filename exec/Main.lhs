@@ -5,14 +5,12 @@ We will now use the library form Section \ref{sec:Basics} in a program.
 \begin{code}
 module Main where
 
-import Basics
 import Poset
 import DL
 import Priestley
 import Representation
 import ParsingStuff
 import Text.Parsec (parse)
-import Text.Parsec.String (Parser)
 import Text.Read (readMaybe)
 import Data.Set as Set
 import Test.QuickCheck (arbitrary, generate, Gen)
@@ -70,9 +68,9 @@ main = do
           putStrLn $ show space
           showPriestley space
           userDualizePS space
-        False -> 
+        False -> do
           putStrLn "This is not a Priestley Space \n"
-          putStrLn $ show space
+          putStrLn $ show os
 
     3 -> do
       putStrLn "------------ Translate Distributive Lattice -------------"
