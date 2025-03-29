@@ -374,7 +374,7 @@ forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
 
 \end{code}
 
-To use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. It is called an arbitrary ordered set, but in fact it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
+To use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. It is called an arbitrary ordered set, but in fact it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introduced functions:
 
 \begin{code}
 instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
