@@ -46,8 +46,6 @@ instance Show a => Show (TopoSpace a) where
                         
                         ++ "Top:" ++ show (map Set.toList (Set.toList t)) ++ "}" 
 
-                        ++ "Top;" ++ show (Set.toList t) ++ "}" 
-
 data PriestleySpace a = PS {
     setPS :: Set.Set a,
     topologyPS :: Topology a,
