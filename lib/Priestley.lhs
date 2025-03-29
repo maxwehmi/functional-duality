@@ -224,15 +224,10 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 
 \subsection{Printing machinery}
 
-When we say that we print a Priestley space, we mean that we print the underlying relation. This can be done with the functions from Poset:
+
+Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space.
 
 \begin{code}
-
-instance PrintDot a => PrintDot (Set.Set a) where 
-    unqtDot x = unqtDot (head (Set.toList x))
-
-
-
 
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
 
@@ -247,7 +242,10 @@ showPriestley p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans $ getOrderedSet
 
 % Put this somewhere where its used 
 
-When we will test representation later, we will get Priestley spaces, whose elements are sets themselves. To prevent a blow-up in size (espcially, when dualizing twice), we introduce a function, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster. With the new space, we also return a map, so we can still access the elements in a certain way by looking to which number a set gets mapped.
+
+When, at later stages, we will construct Priestley spaces from distributive lattices, we will get structures whose elements are sets themselves. Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
+
+The use of the functions is analogous to their distributive lattice counterparts.
 
 \begin{code}
 simplifyPS :: Ord a => PriestleySpace a -> (PriestleySpace Int, Map a Int)
