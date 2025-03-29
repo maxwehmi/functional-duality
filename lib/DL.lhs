@@ -41,7 +41,7 @@ data Lattice a = L {
     }
 
 instance (Ord a, Show a) => Show (Lattice a) where
-    show l = show (carrier l) ++ ";\n Meet: " ++ show ( [(x,y, meet l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))])  ++ ";\n Join: " ++ show ([(x,y, join l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))]) 
+    show l = "(" ++ show (carrier l) ++ ";\n Meet: " ++ show ( [(x,y, meet l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))])  ++ ";\n Join: " ++ show ([(x,y, join l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))]) ++ ")" 
 
 \end{code}
 

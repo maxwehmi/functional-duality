@@ -44,7 +44,7 @@ data TopoSpace a = TS {
 instance Show a => Show (TopoSpace a) where
     show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
                         
-                        ++ "Top:" ++ show (Set.toList t) ++ "}" 
+                        ++ "Top:" ++ show (map Set.toList (Set.toList t)) ++ "}" 
 
 
 
@@ -58,7 +58,7 @@ data PriestleySpace a = PS {
 
 instance Show a => Show (PriestleySpace a) where
     show (PS s t r ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
-                        ++ "Top: " ++ show (Set.toList t) ++ ";\n"
+                        ++ "Top: " ++ show (map Set.toList (Set.toList t)) ++ ";\n"
                         ++ "Rel: " ++ show (Set.toList r) ++ "}" 
 
 
