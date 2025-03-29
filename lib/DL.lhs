@@ -4,25 +4,12 @@
 
 \begin{code}
 module DL where
-import Data.GraphViz.Types.Monadic
-import Data.GraphViz.Types.Generalised
-import Data.GraphViz.Attributes
-import Data.GraphViz.Attributes.Colors
-
-import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
-import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
 
 import Data.GraphViz.Commands
-
-import qualified Data.GraphViz.Attributes.Complete as A
-import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
 import Data.GraphViz.Printing
-
-
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
 import Test.QuickCheck
-
 import Poset
 import Basics
 \end{code}
