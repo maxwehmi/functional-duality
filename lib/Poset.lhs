@@ -399,9 +399,6 @@ In order to print all these structures, we import the \texttt{graphViz} library,
 
 \begin{code}
 
-instance PrintDot a => PrintDot (Set.Set a) where 
-    unqtDot x = unqtDot (head (Set.toList x))
-
 
 \end{code}
 
