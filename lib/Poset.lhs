@@ -296,6 +296,9 @@ For an object of type \texttt{OrderedSet a} to be a poset it suffices to first t
 
 \begin{code}
 
+makePoSet :: Ord a => OrderedSet a -> OrderedSet a
+makePoSet  = closureRefl .  closureTrans 
+
 forcePoSet :: Ord a => OrderedSet a -> OrderedSet a
 forcePoSet  = closureRefl .  forceAntiSym .  closureTrans . forceRelation
 
