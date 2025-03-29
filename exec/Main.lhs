@@ -75,14 +75,14 @@ main = do
     3 -> do
       putStrLn "------------ Translate Distributive Lattice -------------"
       lattice <- generate (arbitrary :: Gen (Lattice Int))
-      putStrLn $ show lattice
+      putStrLn $ (show lattice) ++ "\n"
       showLattice lattice
       userDualizeDL lattice
 
     4 -> do
       putStrLn "------------ Translate Priestley Space -------------"
       space <- generate (arbitrary :: Gen (PriestleySpace Int))
-      putStrLn $ show space
+      putStrLn $ (show space) ++ "\n"
       showPriestley space
       userDualizePS space
         
@@ -191,7 +191,8 @@ userDualizePS space = do
       let dualDL = simplifyDL1 $ clopMap space
       putStrLn $ "Dual algebra: \n" ++ show dualDL ++ "\n" 
       showLattice dualDL
-      putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
+      putStr "Now that we're at it, want to translate back to a Priestley space \n\ 
+      \Warning! This translation could be very computationally heavy. y/n: "
       answer2 <- getLine
       case answer2 of
         "y" -> do
