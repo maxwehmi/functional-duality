@@ -148,11 +148,25 @@ calculateEpsilon :: Ord a => PriestleySpace a -> Map a (Filter (Set.Set a))
 calculateEpsilon ps = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps] where
                 eps a = Set.fromList [ u | u <- (Set.toList . set . carrier . clopMap) ps, a `elem` u]
 \end{code}
+
+We can use this again to check representation. Similar to above, we have implemented a "proper" version and a fast version:
+
 \begin{code}
+checkRepresentationPS :: Ord a => PriestleySpace a -> Bool
+checkRepresentationPS ps = checkIso ps (priesMap (clopMap ps)) (calculateEpsilon ps)
 
+checkRepresentationPSfast :: Ord a => PriestleySpace a -> Bool
+checkRepresentationPSfast ps = checkIso ps ps' mapping where
+        (l,sl,m1) = fastClopMap ps
+        (_,ps',map2) = fastPriesMap sl
+        eps a = getImage map2 (clopensOf a)
+        clopensOf b = Set.fromList [getImage m1 u | u <- (Set.toList . set . carrier) l, b `elem` u]
+        mapping = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps]
 
-
-
+\end{code}
+\subsection{Some tests}
+Here are some test cases to play with.
+\begin{code}
 myos1 :: OrderedSet Int
 myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
 
@@ -174,20 +188,4 @@ snelliusOS = OS (Set.fromList [0.. 10]) (Set.fromList [(0,1), (0,2),(1,3),(1,5),
 
 snelliusDL :: Lattice Int 
 snelliusDL = makeLattice (forcePoSet snelliusOS)
-
-\end{code}
-We can use this again to check representation. Similar to above, we have implemented a "proper" version and a fast version:
-
-\begin{code}
-checkRepresentationPS :: Ord a => PriestleySpace a -> Bool
-checkRepresentationPS ps = checkIso ps (priesMap (clopMap ps)) (calculateEpsilon ps)
-
-checkRepresentationPSfast :: Ord a => PriestleySpace a -> Bool
-checkRepresentationPSfast ps = checkIso ps ps' mapping where
-        (l,sl,m1) = fastClopMap ps
-        (_,ps',map2) = fastPriesMap sl
-        eps a = getImage map2 (clopensOf a)
-        clopensOf b = Set.fromList [getImage m1 u | u <- (Set.toList . set . carrier) l, b `elem` u]
-        mapping = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps]
-
 \end{code}
