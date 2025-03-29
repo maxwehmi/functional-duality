@@ -399,6 +399,14 @@ In order to print all these structures, we import the \texttt{graphViz} library,
 
 \begin{code}
 
+
+{-newtype PrintSet a = PrintSet (Set.Set a)
+    deriving (Eq, Show) 
+
+
+instance PrintDot a => PrintDot (PrintSet a) where
+    unqtDot (PrintSet s) = unqtDot ( head $ Set.toList s) -}
+
 instance PrintDot a => PrintDot (Set.Set a) where 
     unqtDot x = unqtDot (head (Set.toList x))
 
@@ -443,8 +451,6 @@ toGraphOrd :: (Ord a,PrintDot a) => OrderedSet a -> DotGraph a
 toGraphOrd r = digraph' $ do
  
   mapM_ (flip node [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] )(Set.toList $ set r )
-
-  
   edgeAttrs [A.Dir A.NoDir]
   nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
   graphAttrs [A.RankDir A.FromBottom]
