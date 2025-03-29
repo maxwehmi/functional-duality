@@ -424,4 +424,16 @@ simplifyDL l = (makeLattice (OS s' r'), mapping) where
         x <- Set.toList s', 
         y <- Set.toList s', 
         (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
+
+
+
+
+simplifyDL1 :: Ord a => Lattice a -> Lattice Int
+simplifyDL1 l = (makeLattice (OS s' r')) where
+    s = (set . carrier) l 
+    s' = Set.fromList $ take (Set.size s) [0..]
+    r' = Set.fromList [(x,y) | 
+        x <- Set.toList s', 
+        y <- Set.toList s', 
+        (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
 \end{code}
