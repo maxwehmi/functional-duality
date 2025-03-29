@@ -17,97 +17,6 @@ import Text.Read (readMaybe)
 import Data.Set as Set
 import Test.QuickCheck (Arbitrary, arbitrary, generate, Gen)
 
-getUserInput :: IO Int
-getUserInput = do
-  number <- getLine
-  case readMaybe number :: Maybe Int of
-    Nothing -> do
-      putStrLn "Sorry, that is not a valid input. Please give a number from 1 to 7."
-      getUserInput
-    Just n -> 
-      if ((n < 8) && (n > 0)) then return n else do
-      putStrLn "Sorry, that is not a valid input. Please give a number from 1 to 7."
-      getUserInput
-
-getDL :: IO (Lattice String)
-getDL = do
-  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... \n\
-  \You may give the minimal relation, and we shall take the minimal poset for your input.\n"
-  inputOS <- getLine
-  case parse parseOrderedSet "" inputOS of
-    Left err -> do
-          print err
-          putStr "Incorrect input, please try again.\n\n"
-          getDL
-      -- also tell user whehter antisymmetry has been forced?
-    Right os -> return (makeLattice $ makePoSet os)
-
-getOS :: IO (OrderedSet String)
-getOS = do
-  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... \n\
-  \You may give the minimal relation, and we shall take the minimal poset for your input.\n\
-  \We are assuming the discrete topology as we are working with finite Priestley spaces.\n"
-  inputOS <- getLine
-  case parse parseOrderedSet "" inputOS of
-    Left err -> do
-          print err
-          putStr "Incorrect input, please try again.\n"
-          getOS
-      -- also tell user whehter antisymmetry has been forced?
-    Right os -> return (makePoSet os)
-  
-getApprovedDL :: IO (Lattice String)
-getApprovedDL = do
-  lattice <- getDL
-  case checkDL lattice of
-    True  -> return lattice
-    False -> do
-      putStrLn "This is not a distributive lattice, please try again."
-      getApprovedDL
-
-getApprovedOS :: IO (OrderedSet String)
-getApprovedOS = do
-    os <- getOS
-    case checkPoset os of
-      True -> return os
-      False -> do
-          putStr "The input is not a poset (breaks antisymmetry), please try again. \n"
-          getApprovedOS
-
-userDualizeDL :: (Lattice a) -> IO ()
-userDualizeDL lattice = do
-  putStr "Would you like to translate this lattice to its dual Priestley Space? y/n: "  
-    answer <- getLine
-    case answer of
-      "y" -> do 
-        showPriestley $ simplifyPS1 $ priesMap lattice
-        putStr "Now that we're at it, want to translate back to a lattice? y/n: "
-        answer <- getLine
-        case answer of
-          "y" -> do 
-              showLattice $ simplifyDL1 $ clopMap $ priesMap lattice
-              putStrLn "Like expected, it's the same lattice we started with!"
-              putStrLn "Enough duality for today!"
-          _  -> putStrLn "No problem! Glad we could help you :)"
-      _  -> putStrLn "No problem! Glad we could help you :)"
-
-userDualizeDL :: (PriestleySpace a) -> IO ()
-userDualizeDL space = do
-  putStr "Would you like to translate this Priestley to its dual lattice? y/n: "
-    answer <- getLine
-    case answer of
-      "y" -> do 
-        showLattice $ simplifyDL1 $ clopMap space
-        putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
-        answer <- getLine
-        case answer of
-          "y" -> do
-              showPriestley $ simplifyPS1 $ priesMap $ clopMap space
-              putStrLn "Like expected, it's the same space we started with!"
-              putStrLn "Enough duality for today!"
-          _  -> putStrLn "No problem! Glad we could help you :) \n"
-      _  -> putStrLn "No problem! Glad we could help you :)"
-
 main :: IO ()
 main = do
   putStrLn "Welcome to our MSL program! \n\
@@ -128,40 +37,148 @@ main = do
   putStrLn $ "\nYou selected option " ++ show userInput ++ "\n"
   case userInput of 
     1 -> do
-      putStrLn "------------ Check Lattice -------------"
+      putStrLn "------------ Check Distributive Lattice -------------"
       lattice <- getDL
       if checkDL lattice then putStrLn "This is a lattice! \n" else putStrLn "This is not a lattice \n"
+      putStrLn $ show lattice
       showLattice lattice
+      userDualizeDL lattice
 
     2 -> do 
       putStrLn "------------ Check Priestley Space -------------"
       os <- getOS
       if checkAntiSym $ os then putStrLn "This is a Priestley space \n" else putStrLn "This is not a Priestley Space \n"
-      showOrdSet os
+      let space = PS (set os) (Set.powerSet $ set os) (rel os)
+      putStrLn $ show space
+      showPriestley space
+      userDualizePS space
 
     3 -> do
+      putStrLn "------------ Translate Distributive Lattice -------------"
       lattice <- generate (arbitrary :: Gen (Lattice Int))
+      putStrLn $ show lattice
       showLattice lattice
       userDualizeDL lattice
 
     4 -> do
+      "------------ Translate Priestley Space -------------"
       space <- generate (arbitrary :: Gen (PriestleySpace Int))
+      putStrLn $ show space
       showPriestley space
       userDualizePS space
         
     5 -> do 
+      putStrLn "------------ Arbitrary Distributive Lattice -------------"
       lattice <- getApprovedDL
       putStrLn "This is a valid lattice, we can now translate it!"
+      showLattice lattice
       showPriestley $ simplifyPS1 $ priesMap lattice
+      userDualizeDL lattice
 
     6 -> do 
+      putStrLn "------------ Arbitrary Priestley Space -------------"
       os <- getApprovedOS
       let space = PS (set os) (Set.powerSet $ set os) (rel os)
       putStrLn "This is a valid Priestley space, we can now translate!"
+      showPriestley space
       showLattice $ simplifyDL1 $ clopMap space
+      userDualizePS space
+
     _ -> putStrLn "error, run again"
 
 
+getUserInput :: IO Int
+getUserInput = do
+  number <- getLine
+  case readMaybe number :: Maybe Int of
+    Nothing -> do
+      putStrLn "Sorry, that is not a valid input. Please give a number from 1 to 7."
+      getUserInput
+    Just n -> 
+      if ((n < 7) && (n > 0)) then return n else do
+      putStrLn "Sorry, that is not a valid input. Please give a number from 1 to 7."
+      getUserInput
+
+getDL :: IO (Lattice String)
+getDL = do
+  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... \n\
+  \You may give the minimal relation, and we shall close take the minimal poset containing your input.\n"
+  inputOS <- getLine
+  case parse parseOrderedSet "" inputOS of
+    Left err -> do
+          print err
+          putStr "Incorrect input, please try again.\n\n"
+          getDL
+    Right os -> return (makeLattice $ makePoSet os)
+
+getOS :: IO (OrderedSet String)
+getOS = do
+  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... \n\
+  \You may give the minimal relation, and we shall take the minimal poset for your input.\n\
+  \We are assuming the discrete topology as we are working with finite Priestley spaces.\n"
+  inputOS <- getLine
+  case parse parseOrderedSet "" inputOS of
+    Left err -> do
+          print err
+          putStr "Incorrect input, please try again.\n"
+          getOS
+    Right os -> return (makePoSet os)
+  
+getApprovedDL :: IO (Lattice String)
+getApprovedDL = do
+  lattice <- getDL
+  case (checkDL lattice && checkPoset $ lattice carrier) of
+    True  -> return lattice
+    False -> do
+      putStrLn "This is not a distributive lattice, please try again."
+      getApprovedDL
+
+getApprovedOS :: IO (OrderedSet String)
+getApprovedOS = do
+  os <- getOS
+  case (checkPoset os && checkPoset $ lattice carrier) of
+    True -> return os
+    False -> do
+      putStr "The input is not a poset (breaks antisymmetry), please try again. \n"
+      getApprovedOS
+
+userDualizeDL :: (Lattice a) -> IO ()
+userDualizeDL lattice = do
+  putStr "Would you like to translate this lattice to its dual Priestley Space? y/n: "  
+  answer <- getLine
+  case answer of
+    "y" -> do 
+      putStrLn "Dual space: \n" ++ show lattice ++ "\n"
+      showPriestley $ simplifyPS1 $ priesMap lattice
+      putStr "Now that we're at it, want to translate back to a lattice? y/n: "
+      answer <- getLine
+      case answer of
+        "y" -> do 
+            putStrLn "Dual algebra: \n" ++ show lattice ++ "\n" 
+            showLattice $ simplifyDL1 $ clopMap $ priesMap lattice
+            putStrLn "Like expected, it's the same lattice we started with!"
+            putStrLn "Enough duality for today!"
+        _  -> putStrLn "No problem! Glad we could help you :)"
+    _  -> putStrLn "No problem! Glad we could help you :)"
+
+userDualizePS :: (PriestleySpace a) -> IO ()
+userDualizePS space = do
+  putStr "Would you like to translate this Priestley to its dual lattice? y/n: "
+    answer <- getLine
+    case answer of
+      "y" -> do 
+        putStrLn "Dual algebra: \n" ++ show lattice ++ "\n" 
+        showLattice $ simplifyDL1 $ clopMap space
+        putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
+        answer <- getLine
+        case answer of
+          "y" -> do
+              putStrLn "Dual space: \n" ++ show lattice ++ "\n"
+              showPriestley $ simplifyPS1 $ priesMap $ clopMap space
+              putStrLn "Like expected, it's the same space we started with!"
+              putStrLn "Enough duality for today!"
+          _  -> putStrLn "No problem! Glad we could help you :) \n"
+      _  -> putStrLn "No problem! Glad we could help you :)"
 \end{code}
 
 \begin{verbatim}
