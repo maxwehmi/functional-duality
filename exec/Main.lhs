@@ -23,7 +23,10 @@ the user can directly choose to translate a lattice or space, and then again wil
 get the dual, and the dual of the dual.
 \\
 \\
-When using the program, the lattices will pop up in a window, and will be printed in the terminal.
+When using the program, the lattices will pop up in a window using 
+\textit{graphviz} and \textit{libx11}, and the mathematical aspects will be printed in the terminal. \\
+Especially option number (4) gives interesting spaces and dual lattices, as the size and complexity of the lattice 
+can become much greater than the space.
 \begin{code}
 
 main :: IO ()
@@ -73,21 +76,21 @@ main = do
           putStrLn $ show os
 
     3 -> do
-      putStrLn "------------ Translate Distributive Lattice -------------"
+      putStrLn "------------ Arbitrary Distributive Lattice -------------"
       lattice <- generate (arbitrary :: Gen (Lattice Int))
       putStrLn $ (show lattice) ++ "\n"
       showLattice lattice
       userDualizeDL lattice
 
     4 -> do
-      putStrLn "------------ Translate Priestley Space -------------"
+      putStrLn "------------ Arbitrary Priestley Space -------------"
       space <- generate (arbitrary :: Gen (PriestleySpace Int))
       putStrLn $ (show space) ++ "\n"
       showPriestley space
       userDualizePS space
         
     5 -> do 
-      putStrLn "------------ Arbitrary Distributive Lattice -------------"
+      putStrLn "------------ Translate Distributive Lattice -------------"
       lattice <- getApprovedDL
       putStrLn "This is a valid lattice, we can now translate it!"
       showLattice lattice
@@ -95,7 +98,7 @@ main = do
       userDualizeDL lattice
 
     6 -> do 
-      putStrLn "------------ Arbitrary Priestley Space -------------"
+      putStrLn "------------ Translate Priestley Space -------------"
       os <- getApprovedOS
       let space = PS (set os) (Set.powerSet $ set os) (rel os)
       putStrLn "This is a valid Priestley space, we can now translate!"
@@ -118,9 +121,18 @@ getUserInput = do
       putStrLn "Sorry, that is not a valid input. Please give a number from 1 to 7."
       getUserInput
 
+\end{code}
+
+The functions below, 'getDL' and 'getOS' will ask for a set and an order and take the transitive and 
+reflexive closure. A parser is used to help parsing the user input. 
+
+The 
+
+\begin{code}
+
 getDL :: IO (Lattice String)
 getDL = do
-  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... \n\
+  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... (the elements should be letters) \n\
   \You may give the minimal relation, and we shall close take the minimal poset containing your input.\n"
   inputOS <- getLine
   case parse parseOrderedSet "" inputOS of
@@ -132,7 +144,7 @@ getDL = do
 
 getOS :: IO (OrderedSet String)
 getOS = do
-  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... \n\
+  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... (the elements should be letters) \n\
   \You may give the minimal relation, and we shall take the minimal poset for your input.\n\
   \We are assuming the discrete topology as we are working with finite Priestley spaces.\n"
   inputOS <- getLine
