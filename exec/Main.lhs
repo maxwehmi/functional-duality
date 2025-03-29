@@ -123,13 +123,13 @@ getUserInput = do
 
 \end{code}
 
-The functions below, 'getDL' and 'getOS' will ask for a set and an order and take the transitive and 
+The functions below, \texttt{getDL}and \texttt{getOS} will ask for a set and an order and take the transitive and 
 reflexive closure. A parser is used to help parsing the user input. 
 
-Furthermore, the functions 'getApprovedDL' and 'getApprovedOS' will prompt the user to give an input
+Furthermore, the functions \texttt{getApprovedDL} and \texttt{getApprovedOS} will prompt the user to give an input
 untill that input is a correct distributive lattice or ordered set respectively. 
 
-Lastly, the functions 'userDualizeDL' and 'userDualizePS' will take in a lattice or spacce and prompt
+Lastly, the functions \texttt{userDualizeDL} and \texttt{userDualizePS} will take in a lattice or spacce and prompt
 the user to take the dual and the dual of the dual. 
 
 \begin{code}
