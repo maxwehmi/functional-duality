@@ -15,7 +15,18 @@ import Text.Parsec (parse)
 import Text.Parsec.String (Parser)
 import Text.Read (readMaybe)
 import Data.Set as Set
-import Test.QuickCheck (Arbitrary, arbitrary, generate, Gen)
+import Test.QuickCheck (arbitrary, generate, Gen)
+
+\end{code}
+When excecuting the program, we want to give the user 6 options. The first two check whether some input
+is a distributive and Priestley space respectively. The second two will generate arbitrary instances,
+furthermore, the user will be prompted to get the dual and the dual of the dual. In the last two options,
+the user can directly choose to translate a lattice or space, and then again will be given the option to 
+get the dual, and the dual of the dual.
+\\
+\\
+When using the program, the lattices will pop up in a window, and will be printed in the terminal.
+\begin{code}
 
 main :: IO ()
 main = do
@@ -39,19 +50,29 @@ main = do
     1 -> do
       putStrLn "------------ Check Distributive Lattice -------------"
       lattice <- getDL
-      if checkDL lattice then putStrLn "This is a lattice! \n" else putStrLn "This is not a lattice \n"
-      putStrLn $ show lattice
-      showLattice lattice
-      userDualizeDL lattice
+      case checkDL lattice of 
+        True -> do 
+          putStrLn "This is a lattice! \n"
+          putStrLn $ show lattice
+          showLattice lattice
+          userDualizeDL lattice
+        False -> do
+          putStrLn "This is not a lattice: \n"
+          putStrLn $ show lattice
 
     2 -> do 
       putStrLn "------------ Check Priestley Space -------------"
       os <- getOS
-      if checkAntiSym $ os then putStrLn "This is a Priestley space \n" else putStrLn "This is not a Priestley Space \n"
-      let space = PS (set os) (Set.powerSet $ set os) (rel os)
-      putStrLn $ show space
-      showPriestley space
-      userDualizePS space
+      case (checkAntiSym $ os) of
+        True -> do
+          putStrLn "This is a Priestley space \n"
+          let space = PS (set os) (Set.powerSet $ set os) (rel os)
+          putStrLn $ show space
+          showPriestley space
+          userDualizePS space
+        False -> 
+          putStrLn "This is not a Priestley Space \n"
+          putStrLn $ show space
 
     3 -> do
       putStrLn "------------ Translate Distributive Lattice -------------"
@@ -152,8 +173,8 @@ userDualizeDL lattice = do
       putStrLn $ "Dual space: \n" ++ show dualPS ++ "\n"
       showPriestley dualPS
       putStr "Now that we're at it, want to translate back to a lattice? y/n: "
-      answer <- getLine
-      case answer of
+      answer2 <- getLine
+      case answer2 of
         "y" -> do 
             let dualdualDL = simplifyDL1 $ clopMap $ priesMap lattice
             putStrLn $ "Dual algebra: \n" ++ show dualdualDL ++ "\n" 
@@ -173,8 +194,8 @@ userDualizePS space = do
       putStrLn $ "Dual algebra: \n" ++ show dualDL ++ "\n" 
       showLattice dualDL
       putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
-      answer <- getLine
-      case answer of
+      answer2 <- getLine
+      case answer2 of
         "y" -> do
             let dualdualPS = simplifyPS1 $ priesMap $ clopMap space
             putStrLn $ "Dual space: \n" ++ show dualdualPS ++ "\n"
