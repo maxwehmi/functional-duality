@@ -184,8 +184,6 @@ checkHomeomorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> B
 checkHomeomorphism ta tb mapping = 
     all (\x -> Set.map (getImage mapping) x `elem` tb) ta 
     && all (\ x -> Set.map (getPreimage mapping) x `elem` ta) tb
-    --mapTop mapping ta `Set.isSubsetOf` tb
-    -- && premapTop mapping tb `Set.isSubsetOf` ta
 \end{code}
 
 To apply the map to every open and thus every element of every open, we have to nest \verb:Set.map: twice. Again, we deal similarly with the preimages.
