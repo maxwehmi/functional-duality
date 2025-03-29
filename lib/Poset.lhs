@@ -2,9 +2,6 @@
 \section{Partially ordered sets}
 \label{posets}
 
-
-\subsection*{Irrelevants}
-
 This first ugly block of import is unfortunatelly necessary for some pretty printing. We'll see more about it in the dedicated \hyperref[sec:posetprinting]{subsection}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
 
 
@@ -113,7 +110,7 @@ checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 
 
 
-\subsubsection{Closure under transitivity}
+\subsubsection{Transitivity}
 The transitive closure requires a little more working: let $(P,R)$ be an object of type \texttt{OrderedSet a }. 
 
 Firstly, we define the helper function \texttt{transPair}, to check if, given any $x,z$, there is a $y$ such that $x R y \wedge y R z$.
