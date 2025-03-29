@@ -101,11 +101,13 @@ main = do
       lattice <- getDL
       if checkDL lattice then putStrLn "This is a lattice! \n" else putStrLn "This is not a lattice \n"
       showLattice lattice
+
     2 -> do 
       putStrLn "------------ Check Priestley Space -------------"
       os <- getOS
       if checkAntiSym $ os then putStrLn "This is a Priestley space \n" else putStrLn "This is not a Priestley Space \n"
       showOrdSet os
+
     3 -> do
       lattice <- generate (arbitrary :: Gen (Lattice Int))
       showLattice lattice
@@ -113,7 +115,7 @@ main = do
       putStr "Would you like to translate this lattice to its dual Priestley Space? y/n: "
       answer <- getLine
       case answer of
-        "y" -> showPriestley $ priesMap lattice
+        "y" -> showPriestley $ simplifyPS1 $ priesMap lattice
         _  -> putStrLn "No problem! Glad we could help you :)"
 
       putStr "Now that we're at it, want to translate back to a lattice? y/n: "
@@ -132,7 +134,7 @@ main = do
       putStr "Would you like to translate this Priestley to its dual lattice? y/n: "
       answer <- getLine
       case answer of
-        "y" -> showLattice $ clopMap space
+        "y" -> showLattice $ simplifyDL1 $ clopMap space
         _  -> putStrLn "No problem! Glad we could help you :)"
         
       putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
@@ -147,12 +149,13 @@ main = do
     5 -> do 
       lattice <- getApprovedDL
       putStrLn "This is a valid lattice, we can now translate it!"
-      showPriestley $ priesMap lattice
+      showPriestley $ simplifyPS1 $ priesMap lattice
+
     6 -> do 
       os <- getApprovedOS
       let space = PS (set os) (Set.powerSet $ set os) (rel os)
       putStrLn "This is a valid Priestley space, we can now translate!"
-      showLattice $ clopMap space
+      showLattice $ simplifyDL1 $ clopMap space
     _ -> putStrLn "error, run again"
 
 
