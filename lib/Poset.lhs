@@ -22,8 +22,18 @@ import qualified Data.Set as Set
 import Test.QuickCheck
 type Relation a = Set.Set (a,a)
 
-data OrderedSet a = OS {set :: Set.Set a, rel :: Relation a} 
-    deriving (Eq, Ord,Show)
+data OrderedSet a = OS {set :: Set.Set a, 
+                        rel :: Relation a} 
+    deriving (Eq, Ord)
+
+
+instance Show a => Show (OrderedSet a) where
+    show (OS s r) = "{Set: " ++ show (Set.toList s) ++ ",\n "
+                        ++ "Rel " ++ show (Set.toList r) ++ "}" 
+
+
+
+
 \end{code}
 
 
@@ -342,9 +352,11 @@ This section is dedicated to the visualization of the structures we have discuss
 In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. If the reader wishes to visualize the graph, they should both install \textit{graphViz} and \textit{Xlib} on their machines.
 If you (hypothetical reader, hello,) are running Ubuntu, you can run \textit{sudo apt-get install libx11-dev graphviz} on bash to install the required.
 
+
 It should be noted that all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. This causes some difficulties when it comes to representation since Data.Set
 does not have an original instance of PrintDot (Set a) and, since the Set module is imported, all homebrew instances we defined (although working) were "orphan" instances, and thus triggered a Wall warning. \newline 
 In our specific case, the orphan instance would not be a problem per se, but to avoid the warning we decided to always run the isomorphism defned above (simplifyDL1, simplifyPS1) to obtain an isomorphic copy of our poset defined on the type INT. Other solution would have required rewriting every instance of "Set" as a Newtype, or rewriting the Set module in one of our own module and add the instance there. Both solutions seemed a bit excessive and thus we settled for the more economical one of always taking an isomorphic copy on INT. \newline 
+
 
 As far as the style of the diagrams go, we stuck with the mathematical convention of having unlabeled nodes, since we are in any case interested in classes of posets "up to isomorphism". If the user wishes to label their node, this can easily be done modifying the GraphAttributes (those wrapped in square brackets) in "toGraphOrd". \newline 
 
