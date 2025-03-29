@@ -17,11 +17,11 @@ composed of different subordinate parsers which function in a similar way, but l
 \subsection{Syntax}
 \begin{itemize}
 
-\item[Lattices:] For lattices, the intended syntax is $$Set: <elements of the set, separated by a comma> \,\, LatOrder: <ordered pairs, separated by a comma>$$
-E.g. \textit{Set: x, y, z, k ... LatOrder: (x,y), (k,z), ...} is a valid input instance.  
+\item[Lattices:] For lattices, the intended syntax is $$Set: <elements of the set, separated by a comma> \,\,Order: <ordered pairs, separated by a comma>$$
+E.g. \textit{Set: x, y, z, k ... Order: (x,y), (k,z), ...} is a valid input instance.  
 
-\item[P. Spaces:]For Priestley spaces, the intended syntax is $$Space: <elements of the set, separated by a comma> \,\, Topology: <lists of elements, separated by a comma>\,\,SpaceOrder:<ordered pairs, separated by a comma>$$
-E.g. \textit{-- encoding for Topological (Priestley) spaces should be Space: x, y, z... Topology: [a, b, ...],  [d, b. ...],... SpaceOrder: (a,b), (c,d), ...} is a valid input instance.
+\item[P. Spaces:]For Priestley spaces, the intended syntax is $$Space: <elements of the set, separated by a comma> \,\, Topology: <lists of elements, separated by a comma>\,\,Order:<ordered pairs, separated by a comma>$$
+E.g. \textit{-- encoding for Topological (Priestley) spaces should be Space: x, y, z... Topology: [a, b, ...],  [d, b. ...],... Order: (a,b), (c,d), ...} is a valid input instance.
 
 
 \end{itemize}
@@ -47,7 +47,7 @@ parseSetLine = do
 
 parseOrderLine :: Parser [(String, String)]
 parseOrderLine = do
-  void $ string "LatOrder:" <* spaces
+  void $ string "Order:" <* spaces
   pair `sepBy` symbol ","
 
 
@@ -81,7 +81,7 @@ parseBase = do
 
 parseOrder :: Parser [(String, String)]
 parseOrder = do
-  void $ string "SpaceOrder:" <* spaces
+  void $ string "Order:" <* spaces
   pair `sepBy` symbol ","
 
 parseTopology :: Parser [Set.Set String]
@@ -102,21 +102,21 @@ Last, we have some rudimentary test cases, the last of which mimics parts of the
   -- (Lattice)
 oneexample :: IO ()
 oneexample = do
-  let input = "Set: a, b, c\nLatOrder: (a, b), (b, c)"
+  let input = "Set: a, b, c\nOrder: (a, b), (b, c)"
   case parse parseOrderedSet "" input of
     Left err -> print err
     Right os -> showOrdSet os
 --PriestleySpace
 twoexample :: IO ()
 twoexample = do
-  let input = "Space: a, b, c\nTopology: [], [a], [a,b] \nSpaceOrder: (a,b), (b,c)"
+  let input = "Space: a, b, c\nTopology: [], [a], [a,b] \nOrder: (a,b), (b,c)"
   case parse parsePSSpace "" input of
     Left err -> print err
     Right os -> showPriestley os
 
 threeexample :: IO ()
 threeexample = do
-  putStr "Enter OrderedSet (e.g., 'Set: a, b, c LatOrder: (a,b), (b,c)'): "
+  putStr "Enter OrderedSet (e.g., 'Set: a, b, c  Order: (a,b), (b,c)'): "
   hFlush stdout
   input <- getLine  
   case parse parseOrderedSet "" input of
