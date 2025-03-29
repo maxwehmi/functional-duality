@@ -442,7 +442,7 @@ toGraphRel  =  mapM_ (uncurry (-->))
 toGraphOrd :: (Ord a,PrintDot a) => OrderedSet a -> DotGraph a
 toGraphOrd r = digraph' $ do
  
-  mapM_ (flip node [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] )(Set.toList $ set r )
+  mapM_ (`node` [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] )(Set.toList $ set r )
 
   
   edgeAttrs [A.Dir A.NoDir]
