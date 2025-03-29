@@ -43,7 +43,6 @@ We import the standard library for sets, Data.Set, in order to be able to work w
 
 An object $(P, R)$ of type \texttt {OrderedSet a}, is not necessarily a partially ordered set, therefore we need some helper functions in order to transform $R$ in to a partial order.
 
-
 For our structures, we define a relation as a set of tuples, as is standard. Then, an \texttt{OrderedSet} (ordset) is our notion of our set embued with a relation (of any kind).
 
 \begin{code}
@@ -154,19 +153,11 @@ checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y
 
 Here some caveats must come in. Note that it is not possible to just "close" a relation under antisymmetry, as all the symmetric couples whose elements are different from each other need to be somehow eliminated. We're dealing with a ``reduction" rather than a closure. Furthermore, note that there is no unique way to obtain a reduction as we'd desire. Dually to a closure, we'd want a reduction of $R$ w.r.t a property $Q$ to be the greatest $R' \subseteq R$ for which $R'$ satisfies $Q$. But there is not such set! For a given symmetric pair $(x,y),(y,x) \in R$, the smallest change is removing one. But there's two ways to do so. So an anti-symmetric reduction is not unique.
 
-We shall look at two approaches to force anti-symmtery regarldess.
+There two ways, among others, stand out as elegant in forcing anti-symmetry regardless. The first consists in eliminating all symmetric pairs from the relation $R$, the second is to quotient of $P$ based on the clusters of symmetric pairs of $R$. We'll look at both in detail, and implement both as each has their advatages and disadvantages to them. One may be preferable to the other depending on the situation at hand.
 
+Laslty, we shall again also define some functions that given an object of type \texttt{OrderedSet }, will check whether the relation is antisymmetric.
 
-
-%%--------------------------------------------------------------------------- CONTINUE HERE------------------------------------------
-Moreover we shall define some functions that given an object of type \texttt{OrderedSet a }, will check whether the relation is antisymmetric.
-
-There are two ways, among others, to force anti-symmetry on a relational structure $(P,R)$: the first consists in eliminating all symmetric pairs from the relation $R$, the second instead creates a quotient of $P$ based on the clusters of symmetric pairs of $R$.
-
-We shall implement both as both have some advatages and some disadvantages to them and one may be preferable to the other depending on the situation at hand.
-
-\paragraph{First implementation}
-
+\subsubsection{First implementation}
 
 Given an object $(P,R)$ of type \texttt{OrderedSet a}, we eliminate all the symmetric pairs in $R$. That is we construct a new relation $R^* \subseteq R$ such that if $x \neq y$ and $(x,y) \in R$ and $(y,x) \in R$, then $\neg((x,y), (y,x) \in R^*)$. 
 
@@ -186,16 +177,10 @@ forceAntiSym (OS s r)
 
 
  
-\begin{itemize}
-\item Advantages: it does not modify the carrier set (eg \texttt{Set.size}, the cardinality, will remain the same after the procedure).
 
-\item Disadvantages: it could significantly reduce the numbers of pairs in the relation: in particular every (non-reflexive) cycle is eliminated from the relation.
- 
-\end{itemize}
+One the upside, this approach does not modify the carrier set. We only modify the relation, and leave the carrier set untouched. This is surely more in the ``spirit" of a closure-like operation.
 
-
-
-
+A worry, is that, closing under transitivity and then anti-symmterically it could significantly reduce the numbers of pairs \emph{in the relation}: in particular every (non-reflexive) cycle is eliminated from the relation.
 
 
 \paragraph{Second Implementation}
@@ -211,40 +196,32 @@ quotientAntiSym s r = s `Set.difference` Set.fromList [x| (x,y) <- Set.toList r,
 forceAntiSymAlt :: Ord a => OrderedSet a -> OrderedSet a
 forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
 
+
 \end{code}
 
+Note that the condition \texttt{y < x} is a little trick we have to use as a means picking which elements to remove, and which to keep as the rappresentative of the equivalence class; leveraging the fact that we have \texttt{Ord} instance.
+
+The advantage of this approach, is that it preserve logical properties (in particular, there is a $p$-morphism to the quotiented set). Since our topic at hand involves excatly defining logic over mathematical structures, this is certainly a nice feature.
 
 
-\begin{itemize}
-\item Advantages: this does preserve logical properties (in particular, there is a p-morphism to the quotiented set).
+On the other hand, this does change the carrier set: from $P$ we go to $P/s$, the quotient of $P$ under the equivalence relation based on symmetry \footnote{Note, due to Haskell's implementation, we cannot deem this as "the same set anyways", arguing it is just a matter of names referring to the same object. While in set theory, the set, $\{a,b \}$ as syntactically specified, may well be the same set as $\{a\}$, simply by virtue of $b$ semantically reffering to the same name as $a$ (i.e. $a=b$), in Haskell's \texttt{Data.Set}, named elements are the objects. This is evident from the fact that \texttt{Set.size} returns a value without us needing to specify what equalities hold between the objects.}
 
 
-
-\item Disadvantages:
- \begin{itemize}
-
-   \item this does change the carrier set: from $P$ we go to $P/s$, the quotient of $P$ under the equivalence relation based on symmetry. 
-
-    \item  this operation may shrink significatly the size of the carrier set,in particular if done after taking its transitive closure.
- \end{itemize}
-\end{itemize}
-
-%To obtain it from a set wrt to a relation, we compute the quotientSet wrt to anti-symmetry: remove from s the bigger x that appears in a symmetric pair. This is a cheeky trick to select one of the two elements, based on the fact that we have \texttt{Ord a}. Without that I think it would be a real pain. So for any symmetric pair, we keep the smallest element in that pair as our cluster rapresentative. 
-
-%Then we just let such quotient set be the new carrier set, and force the relation to be well-defined, just as sanity check.
+Furthermore, closing under transitivity and then anti-symmterically may shrink significatly the size of the \emph{carrier set}, in particular every cycle will collapse to a single point.
 
 
 
-\subparagraph{Preservation of properties}
+\subsubsection{Preservation of properties}
 
-We need to make sure that forcing anti-symmetry in our two implementation does not make us loose an existing property of the relations. While it is immediate that the second implementation does so, this is not the case for the first implementation.
+Since we'll want transtive, reflexive closures together with the anti-symmetric forcing, we need to make sure that our two implementation does not make us loose these properties in a relation. This is fairly obvius for the second implementation. But we want do need a small argument for the first implementation:
 
-Of course the first implementation preserves reflexivity: only couples $(x,y)$ such that $x \neq y$ are removed. The non trivial preservation concerns transitivity: we shall therefore prove the following proposition.
+Reflexivity is still quick: by the very clause of anti-symmetry, only couples $(x,y)$ such that $x \neq y$ are removed. The non trivial preservation concerns transitivity: we shall therefore prove the following proposition.
 
 %\textbf{Proposition}: \verb:forceAntiSymm $ transClosure:, where \verb:forceAntiSym: of a relation $R$, call it $R^{\dagger}$ is defined by: 
 %
 
-\textbf{Proposition}: Let $P$ be any set and $R \subseteq P \times P$ any relation defined on that set.  For any relation $R$, we define the antisymmetric forcing of $R$, $R^\dagger$ as:
+\begin{prop} 
+Let $P$ be any set and $R \subseteq P \times P$ any relation defined on that set.  For any relation $R$, we define the antisymmetric forcing of $R$, $R^\dagger$ as:
 
 $$
 R^{\dagger} = \begin{cases}
@@ -252,28 +229,24 @@ R^{\dagger} = \begin{cases}
     R \setminus \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}  & \text{ otherwise}\end{cases}
 $$
 
+Then, if $R$ was transitive, so must be $R^\dagger$.
+\end{prop}
 
+\begin{proof} 
+Let that $R \subseteq P \times P$ be any transitive  relation on some fixed but arbitrary set $P$.
 
-%(which should mirror what the Haskell definition is doing) Is transitive.
-
-Then, if $R$ is transitive also $R^\dagger$ is transitive.
-
-\begin{itemize}
- \item \emph{Proof}: Let that $R \subseteq P \times P$ be any transitive  relation on some fixed but arbitrary set $P$.
-
-   Let $R^\dagger$ be as in the above definition. Take now any $x,y,z \in P$ such that $x R^\dagger y \wedge y R^\dagger z$. We need to show that $x R^\dagger z$.
+   Let $R^\dagger$ be as in the above definition. Now, take any $x,y,z \in P$ such that $x R^\dagger y \wedge y R^\dagger z$. We need to show that $x R^\dagger z$.
 
    Now since $R^\dagger \subseteq R$ by definition, $x R y \wedge y R z$. So by the transitivity of $R$, we have $x R z$. Suppose now towards contradiction that $(x,z)\cancel{\in} R^\dagger$. Therefore $z R x$ and $z\neq x$. But then, since $y R z$, by transitivity of $R$, $y R x$. 
 
    Clearly, since we assumed $y R^\dagger z$ and $(x,z)\cancel{\in} R^\dagger$, $y \neq x$. But then, by definition of $R^\dagger$,  $(x,y)\cancel{\in} R^\dagger$, which is a contradiction to our assumpion. Therefore  $(x,z)\in R^\dagger$, which is what we had to show.
+\end{proof}
 
-\end{itemize}
-
-Now since the definition of \texttt{forceAntiSym} corresponds to that of $R^\dagger$, we can conclude that, given any \texttt{OS s r} of type \texttt{OrderedSet a}, if we denote by \texttt{OS s' r'} the result of \texttt{forceAntiSym  transClosure (OS s r)}, \texttt{r'} is transitive. 
-
+Now since our implementation of \texttt{forceAntiSym} corresponds to our definition of $R^\dagger$, we can conclude that, given any \texttt{OS s r} of type \texttt{OrderedSet a}, in the result of \texttt{forceAntiSym  transClosure (OS s r)}, say \texttt{(OS s r')}, \texttt{r'} is transitive. 
 
 
-Finally, we define the following function in order to chek for any given an object of type \texttt{OrderedSet a}, whether its relation is antisymmetric.
+
+Lastly, we define the following function in order to check for any given an object of type \texttt{OrderedSet a}, whether its relation is antisymmetric.
 
 \begin{code}
 checkAntiSym :: Ord a => OrderedSet a -> Bool
@@ -281,40 +254,11 @@ checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 \end{code}
 
 
-
-
-
-
-% NOTE: I Added the package for cancel in latexmarcos.tex, but in case it doesn't work still, for the record, \cancel is meant to function like \not, just prettier when you do it on big things like R^\dagger. Modify with that, or just using \neg if needed.
-%
-%\emph{Proof}:
-%Suppose $R$ is any relation. We know the transitive closure  $R^{+}$ transitive. Let $R^{\dagger}$ be the antisymmetric "closure" of $R^{+}$.
-%
-%Suppose $xR^{\dagger}y$ and $yR^{\dagger}z$ (for distinct $x,y,z$, the cases where either of them is equal are quick). Since $R^{\dagger}$ is generated only by removing points from $R^{+}$, we must've also have $xR^{+}y , yR^{+}z$. So by transitivity $xR^{+}z$.
-%
-%If $x=y$ we're quickly done, since then $xR^{\dagger}z$. Likewise if $y=z$. So suppose they aren't equal to each other.
-%
-%Now suppose for contradiction $x \cancel{R^{\dagger}} z$. 
-%Again by how $R^{\dagger}$ was defined, we must've had $zR^{+}x$. (If we didn't, then $(x,z) \notin \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, and so we'd have $(x,z) \in R^{+} \setminus \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$).
-%
-%But then by transitivity of $R^{+}$ we'd have $yR^{+}x$. But then $(x,y) \in \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, so by definition $(x,y) \notin R^{\dagger}$, i.e. $x\cancel{R^{\dagger}} y$, contradicting our assumption that $xR^{\dagger}y$.
-%
-%
-%
-
-
-
 \subsection{From ordered sets to posets}
 
 Finally, given all the passages we have gone through in this section, we are able to define functions that given any object of type \texttt{OrderedSet a}, will transform it into a poset and check whether it is indeed a poset.
 
-For the first task we take two approaches: 
-
-\paragraph{closurePoset}
-
-%We define here a function that checks whether an object of type \texttt{OrderedSet a} 
-
-%ATTENTION this function may not work: closed under transitivity may tamper with antisymmetry (cycles): we need to apply again the forcing of antisymmetry, therefore it is redundant. I am only putting it for now to avoid clashes with import files
+For the first task we take two approaches: in case everything "is behaving well", we can take the less controversial reflexive transitive closures, and obtain a poset closure without anti-symmetry caveats. The code is self explanatory here
 
 \begin{code}
 closurePoSet :: Ord a => OrderedSet a -> OrderedSet a
@@ -325,10 +269,8 @@ closurePoSet os
  | otherwise = closureTrans $ closureRefl os
 \end{code}
 
+In most cases however, we will need to engage with anti-symmetric forcing. Thus we have two poset forcing functions, using our two approaches \footnote{making sure to first take the transitive closure, and the the antisymmetric closure. We proved this preserve transitivity, whereas note that the opposite wouldn't do: considering for example $1 < 2 < 3 < 1$, this releation is already anti-symmteric, so our forcing function would leave it as is. But taking it's transitive closure clearly leaves us with symmetric couples. In general any cycle will result in such a problem.}
 
-\paragraph{Forcing the poset}
-
-For an object of type \texttt{OrderedSet a} to be a poset it suffices to first take the reflexive closure of its relation, then its transitive closure and then force antisymmetry on this new relation. That is it suffices to apply to such object, the following function:
 
 \begin{code}
 
@@ -341,7 +283,16 @@ forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
 
 \end{code}
 
-To use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. It is called an arbitrary ordered set, but in fact it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
+In order to check if an object of type \texttt{OrderedSet a} is indeed a poset, we define the following function:
+
+\begin{code}
+checkPoset :: Ord a => OrderedSet a -> Bool
+checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWellDef x
+\end{code}
+
+
+
+Lastly, to use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. We do this by generating an arbitrary \texttt{OrderedSet a}, then it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
 
 \begin{code}
 instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
@@ -352,16 +303,6 @@ instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
             r <- Set.fromList . take n <$> sublistOf (Set.toList $ Set.cartesianProduct s s)
             return $ forcePoSet $ OS s r
 \end{code}
-
-\paragraph{Checking the poset}
-
-In order to check if an object of type \texttt{OrderedSet a} is indeed a poset, we define the following function: 
-\begin{code}
-
-checkPoset :: Ord a => OrderedSet a -> Bool
-checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWellDef x
-\end{code}
-
 
 
 
