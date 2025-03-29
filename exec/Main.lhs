@@ -120,7 +120,7 @@ main = do
       answer <- getLine
       case answer of
         "y" -> do 
-            showLattice $ clopMap $ simplifyPS1 $ priesMap lattice
+            showLattice $ simplifyDL1 $ clopMap $ priesMap lattice
             putStrLn "Like expected, it's the same lattice we started with!"
             putStrLn "Enough duality for today!"
         _  -> putStrLn "No problem! Glad we could help you :)"
@@ -139,7 +139,7 @@ main = do
       answer <- getLine
       case answer of
         "y" -> do
-            showPriestley $ priesMap $ simplifyDL1 $ clopMap space
+            showPriestley $ simplifyPS1 $ priesMap $ clopMap space
             putStrLn "Like expected, it's the same space we started with!"
             putStrLn "Enough duality for today!"
         _  -> putStrLn "No problem! Glad we could help you :) \n"
