@@ -265,10 +265,38 @@ simplifyPS (PS s t r) = PS s' t' r' where
 fromReflexivePS::Ord a => OrderedSet a -> OrderedSet a
 fromReflexivePS (OS s r) = OS s k where
    k = Set.difference r (Set.fromList [(x,y) | (x,y) <- Set.toList r,
-                        x==y,
+                        x==y &&
                         not (any (\z -> z /= x &&  (Set.member (z,x) r || Set.member (x,z) r) ) (tuplesUnfold r))])
 
 fromReflTransPS :: Ord a => OrderedSet a -> OrderedSet a 
 fromReflTransPS = fromTransitive . fromReflexivePS
+
+
+
+snelliusPS :: PriestleySpace Int
+snelliusPS = PS (Set.fromList [0.. 5]) (Set.powerSet (Set.fromList [0.. 5])) (Set.fromList [(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(1,1),(1,2),(1,3),(1,4),(1,5),(2,2),(2,4),(3,3),(3,5),(4,4),(5,5)])
+
+
+
+
+
+
+
+
+
+
+
+
+--- >>> showLattice myLattice1
+
+--- >>> showOrdSet myOS5
+
+--- >>> showPriestley mySpace
+
+--- >>> generate arbitrary :: IO (Lattice Int)
+
+--- >>> showLattice (generate arbitrary :: IO (Lattice Int))
+
+
 
 \end{code}
