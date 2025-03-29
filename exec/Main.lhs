@@ -31,7 +31,6 @@ getUserInput = do
 
 getDL :: IO (Lattice String)
 getDL = do
-  putStrLn "------------ Check Lattice -------------"
   putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... \n\
   \You may give the minimal relation, and we shall take the minimal poset for your input.\n"
   inputOS <- getLine
@@ -45,7 +44,6 @@ getDL = do
 
 getOS :: IO (OrderedSet String)
 getOS = do
-  putStrLn "------------ Check Priestley Space -------------"
   putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... \n\
   \You may give the minimal relation, and we shall take the minimal poset for your input.\n\
   \We are assuming the discrete topology as we are working with finite Priestley spaces.\n"
@@ -99,39 +97,66 @@ main = do
   putStrLn $ "\nYou selected option " ++ show userInput ++ "\n"
   case userInput of 
     1 -> do
+      putStrLn "------------ Check Lattice -------------"
       lattice <- getDL
-      if checkDL lattice then putStr "This is a lattice! \n" else putStr "This is not a lattice \n"
+      if checkDL lattice then putStrLn "This is a lattice! \n" else putStrLn "This is not a lattice \n"
       showLattice lattice
     2 -> do 
+      putStrLn "------------ Check Priestley Space -------------"
       os <- getOS
-      if checkAntiSym $ os then putStr "This is a Priestley space \n" else putStr "sad nee \n"
+      if checkAntiSym $ os then putStrLn "This is a Priestley space \n" else putStrLn "This is not a Priestley Space \n"
       showOrdSet os
     3 -> do
       lattice <- generate (arbitrary :: Gen (Lattice Int))
       showLattice lattice
+
+      putStr "Would you like to translate this lattice to its dual Priestley Space? y/n: "
+      answer <- getLine
+      case answer of
+        "y" -> showPriestley $ priesMap lattice
+        _  -> putStrLn "No problem! Glad we could help you :)"
+
+      putStr "Now that we're at it, want to translate back to a lattice? y/n: "
+      answer <- getLine
+      case answer of
+        "y" -> do 
+            showLattice $ clopMap $ simplifyPS1 $ priesMap lattice
+            putStrLn "Like expected, it's the same lattice we started with!"
+            putStrLn "Enough duality for today!"
+        _  -> putStrLn "No problem! Glad we could help you :)"
+
     4 -> do
       space <- generate (arbitrary :: Gen (PriestleySpace Int))
       showPriestley space
+
+      putStr "Would you like to translate this Priestley to its dual lattice? y/n: "
+      answer <- getLine
+      case answer of
+        "y" -> showLattice $ clopMap space
+        _  -> putStrLn "No problem! Glad we could help you :)"
+        
+      putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
+      answer <- getLine
+      case answer of
+        "y" -> do
+            showPriestley $ priesMap $ simplifyDL1 $ clopMap space
+            putStrLn "Like expected, it's the same space we started with!"
+            putStrLn "Enough duality for today!"
+        _  -> putStrLn "No problem! Glad we could help you :) \n"
+        
     5 -> do 
       lattice <- getApprovedDL
-      putStr "good lattice, translate now"
+      putStrLn "This is a valid lattice, we can now translate it!"
       showPriestley $ priesMap lattice
     6 -> do 
       os <- getApprovedOS
       let space = PS (set os) (Set.powerSet $ set os) (rel os)
-      putStr "good space, translate now"
+      putStrLn "This is a valid Priestley space, we can now translate!"
       showLattice $ clopMap space
-    _ -> putStr "error, run again"
+    _ -> putStrLn "error, run again"
 
 
 \end{code}
-
-    2 -> checkPS getPS
-    3 ->
-    4 ->
-    5 ->
-    6 ->
-    7 ->
 
 \begin{verbatim}
 stack build
