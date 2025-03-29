@@ -140,6 +140,30 @@ upClosure :: (Eq a, Ord a) => Set.Set a -> Relation a -> Set.Set a
 upClosure set1 relation = Set.map snd (Set.filter (\ x -> fst x `elem` set1 ) relation) `Set.union` set1 
 \end{code}
 
+
+When, at later stages, we will construct Priestley spaces from distributive lattices, we will get structures whose elements are sets themselves. Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
+
+The use of the functions is analogous to their distributive lattice counterparts.
+
+\begin{code}
+simplifyPS :: Ord a => PriestleySpace a -> (PriestleySpace Int, Map a Int)
+simplifyPS (PS s t r) = (PS s' t' r', mapping) where
+    s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
+    t' = mapTop mapping t 
+    r' = mapRel mapping r
+
+
+simplifyPS1 :: Ord a => PriestleySpace a -> PriestleySpace Int
+simplifyPS1 (PS s t r) = (PS s' t' r') where
+    s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
+    t' = mapTop mapping t 
+    r' = mapRel mapping r
+\end{code}
+
+
+
 \subsection{Isomorphisms}
 
 When working with Priestley Space, we want to be able to check if two given ones are "similar enough", i.e. isomorphic. This will become important when we want to confirm that a Priestley Space is isomorphic to the dual of its dual. \\
@@ -240,26 +264,3 @@ showPriestley p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans $ getOrderedSet
 
 
 
-% Put this somewhere where its used 
-
-
-When, at later stages, we will construct Priestley spaces from distributive lattices, we will get structures whose elements are sets themselves. Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
-
-The use of the functions is analogous to their distributive lattice counterparts.
-
-\begin{code}
-simplifyPS :: Ord a => PriestleySpace a -> (PriestleySpace Int, Map a Int)
-simplifyPS (PS s t r) = (PS s' t' r', mapping) where
-    s' = Set.fromList $ take (Set.size s) [0..]
-    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
-    t' = mapTop mapping t 
-    r' = mapRel mapping r
-
-
-simplifyPS1 :: Ord a => PriestleySpace a -> PriestleySpace Int
-simplifyPS1 (PS s t r) = (PS s' t' r') where
-    s' = Set.fromList $ take (Set.size s) [0..]
-    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
-    t' = mapTop mapping t 
-    r' = mapRel mapping r
-\end{code}
