@@ -404,7 +404,7 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 
 This is dedicated to the visualization of the structures we have discussed, namely posets (a similar section will be present at the end of each section introducing a new mathematical structure).
 
-Our primary concern is for the picture to be clear and readable. To this end we shall remove all transitive and reflexive endges which might occur in the structure. Since posets are part of the underlying structure of both lattices and priestley spaces,and its type is used to construct the types of the latter two, we define these helper function in this section.
+Our primary concern is for the picture to be clear and readable. To this end we shall remove all transitive and reflexive edges which might occur in the structure. Since posets are part of the underlying structure of both lattices and priestley spaces,and its type is used to construct the types of the latter two, we define these helper function in this section.
 
 \begin{code}
 
@@ -422,22 +422,22 @@ fromReflTrans  = fromTransitive.fromReflexive
 
 \end{code}
 
-The following two functions are crucial to the visualization of the structures. It only relies on the type \texttt{Relation a}, and therefore will be called also in other sections.  
+The following two functions are crucial to the visualization of the structures. They only rely on the types \texttt{Relation a} and \texttt{RoderedSet a} and therefore will be called also in the other sections.  
 
 \begin{itemize}
 
 \item \texttt{toGraphRel'} uses \texttt{mapM\_} to transform an object \texttt{r}of type \texttt{Relation a} into a  monadic action, in particular an instance of of the type \texttt{Dot a}. 
 
-\item \texttt{toGraphRel} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}.
+\item \texttt{toGraphRel} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}. The carrier set of the object of type \texttt{OrderedSet a} will be the used to generate the points and the underlying relation of the object of type \texttt{OrderedSet a} will be the used to generate the edges of the graph. 
 \end{itemize}
 
 \begin{code}
 
-toGraphRel' :: Relation a -> Dot a
-toGraphRel'  =  mapM_ (uncurry (-->)) 
+toGraphRel :: Relation a -> Dot a
+toGraphRel  =  mapM_ (uncurry (-->)) 
 
-toGraphRel :: (Ord a,PrintDot a) => OrderedSet a -> DotGraph a
-toGraphRel r = digraph' $ do
+toGraphOrd :: (Ord a,PrintDot a) => OrderedSet a -> DotGraph a
+toGraphOrd r = digraph' $ do
  
   mapM_ (flip node [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] )(Set.toList $ set r )
 
@@ -445,7 +445,7 @@ toGraphRel r = digraph' $ do
   edgeAttrs [A.Dir A.NoDir]
   nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
   graphAttrs [A.RankDir A.FromBottom]
-  toGraphRel' $ rel r
+  toGraphRel $ rel r
 
 
 \end{code}
@@ -464,7 +464,7 @@ The following function actually outputs the picture of the ordered set.
 \begin{code}
 
 showOrdSet ::(Ord a, Data.GraphViz.Printing.PrintDot a) => OrderedSet a -> IO ()
-showOrdSet p = runGraphvizCanvas' (toGraphRel $ fromReflTrans p) Xlib
+showOrdSet p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans p) Xlib
 
 
 \end{code}

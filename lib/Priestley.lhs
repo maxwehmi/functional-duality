@@ -236,7 +236,7 @@ instance PrintDot a => PrintDot (Set.Set a) where
 
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
 
-showPriestley p = runGraphvizCanvas' (toGraphRel $ fromReflTrans $ getOrderedSet p) Xlib 
+showPriestley p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans $ getOrderedSet p) Xlib 
 
 
 
