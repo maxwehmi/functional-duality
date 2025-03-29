@@ -122,7 +122,6 @@ Next, we define a function to check whether a given Space really is a Priestley 
 We make use of some secondary helper functions:
 
 \begin{enumerate}
-\item the implementation for "implies" is routine,
 
 \item the "clopUpset" function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
 
