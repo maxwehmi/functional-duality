@@ -29,7 +29,7 @@ data OrderedSet a = OS {set :: Set.Set a,
 
 instance Show a => Show (OrderedSet a) where
     show (OS s r) = "{Set: " ++ show (Set.toList s) ++ ",\n "
-                        ++ "Rel " ++ show (Set.toList r) ++ "}" 
+                        ++ "Rel: " ++ show (Set.toList r) ++ "}" 
 
 
 
@@ -37,7 +37,7 @@ instance Show a => Show (OrderedSet a) where
 \end{code}
 
 
-
+5BB3-C9E6
 
 \subsection{Well-definedness}
 
@@ -265,20 +265,6 @@ checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 
 
 
-%\emph{Proof}:
-%Suppose $R$ is any relation. We know the transitive closure  $R^{+}$ transitive. Let $R^{\dagger}$ be the antisymmetric "closure" of $R^{+}$.
-%
-%Suppose $xR^{\dagger}y$ and $yR^{\dagger}z$ (for distinct $x,y,z$, the cases where either of them is equal are quick). Since $R^{\dagger}$ is generated only by removing points from $R^{+}$, we must've also have $xR^{+}y , yR^{+}z$. So by transitivity $xR^{+}z$.
-%
-%If $x=y$ we're quickly done, since then $xR^{\dagger}z$. Likewise if $y=z$. So suppose they aren't equal to each other.
-%
-%Now suppose for contradiction $x \cancel{R^{\dagger}} z$. 
-%Again by how $R^{\dagger}$ was defined, we must've had $zR^{+}x$. (If we didn't, then $(x,z) \notin \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, and so we'd have $(x,z) \in R^{+} \setminus \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$).
-%
-%But then by transitivity of $R^{+}$ we'd have $yR^{+}x$. But then $(x,y) \in \{(x,y) \mid  (x,y) \in R \wedge (y,x) \in R \wedge x \neq y\}$, so by definition $(x,y) \notin R^{\dagger}$, i.e. $x\cancel{R^{\dagger}} y$, contradicting our assumption that $xR^{\dagger}y$.
-%
-%
-%
 
 
 

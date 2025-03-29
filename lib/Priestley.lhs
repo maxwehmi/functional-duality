@@ -42,9 +42,11 @@ data TopoSpace a = TS {
 }
     deriving (Eq, Ord)
 instance Show a => Show (TopoSpace a) where
-    show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ "\n;"
+    show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
                         
+
                         ++ "Top;" ++ show (Set.toList t) ++ "}" 
+
 data PriestleySpace a = PS {
     setPS :: Set.Set a,
     topologyPS :: Topology a,
@@ -53,8 +55,10 @@ data PriestleySpace a = PS {
     deriving (Eq, Ord)
 instance Show a => Show (PriestleySpace a) where
     show (PS s t r ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
+
                         ++ "Top " ++ show (Set.toList t) ++ ";\n"
                         ++ "Rel " ++ show (Set.toList r) ++ "}" 
+
 \end{code}
 
 
