@@ -155,7 +155,7 @@ simplifyPS (PS s t r) = (PS s' t' r', mapping) where
 
 
 simplifyPS1 :: Ord a => PriestleySpace a -> PriestleySpace Int
-simplifyPS1 (PS s t r) = (PS s' t' r') where
+simplifyPS1 (PS s t r) = PS s' t' r' where
     s' = Set.fromList $ take (Set.size s) [0..]
     mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
     t' = mapTop mapping t 
