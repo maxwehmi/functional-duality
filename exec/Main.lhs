@@ -61,7 +61,7 @@ main = do
       userDualizeDL lattice
 
     4 -> do
-      "------------ Translate Priestley Space -------------"
+      putStrLn "------------ Translate Priestley Space -------------"
       space <- generate (arbitrary :: Gen (PriestleySpace Int))
       putStrLn $ show space
       showPriestley space
@@ -127,7 +127,7 @@ getOS = do
 getApprovedDL :: IO (Lattice String)
 getApprovedDL = do
   lattice <- getDL
-  case (checkDL lattice && checkPoset $ lattice carrier) of
+  case (checkDL lattice && (checkPoset $ carrier lattice)) of
     True  -> return lattice
     False -> do
       putStrLn "This is not a distributive lattice, please try again."
@@ -136,49 +136,53 @@ getApprovedDL = do
 getApprovedOS :: IO (OrderedSet String)
 getApprovedOS = do
   os <- getOS
-  case (checkPoset os && checkPoset $ lattice carrier) of
+  case (checkPoset os && checkPoset os) of
     True -> return os
     False -> do
       putStr "The input is not a poset (breaks antisymmetry), please try again. \n"
       getApprovedOS
 
-userDualizeDL :: (Lattice a) -> IO ()
+userDualizeDL :: Ord a => (Lattice a) -> IO ()
 userDualizeDL lattice = do
   putStr "Would you like to translate this lattice to its dual Priestley Space? y/n: "  
   answer <- getLine
   case answer of
     "y" -> do 
-      putStrLn "Dual space: \n" ++ show lattice ++ "\n"
-      showPriestley $ simplifyPS1 $ priesMap lattice
+      let dualPS = simplifyPS1 $ priesMap lattice
+      putStrLn $ "Dual space: \n" ++ show dualPS ++ "\n"
+      showPriestley dualPS
       putStr "Now that we're at it, want to translate back to a lattice? y/n: "
       answer <- getLine
       case answer of
         "y" -> do 
-            putStrLn "Dual algebra: \n" ++ show lattice ++ "\n" 
-            showLattice $ simplifyDL1 $ clopMap $ priesMap lattice
+            let dualdualDL = simplifyDL1 $ clopMap $ priesMap lattice
+            putStrLn $ "Dual algebra: \n" ++ show dualdualDL ++ "\n" 
+            showLattice dualdualDL
             putStrLn "Like expected, it's the same lattice we started with!"
             putStrLn "Enough duality for today!"
         _  -> putStrLn "No problem! Glad we could help you :)"
     _  -> putStrLn "No problem! Glad we could help you :)"
 
-userDualizePS :: (PriestleySpace a) -> IO ()
+userDualizePS :: Ord a => (PriestleySpace a) -> IO ()
 userDualizePS space = do
   putStr "Would you like to translate this Priestley to its dual lattice? y/n: "
   answer <- getLine
   case answer of
     "y" -> do 
-      putStrLn "Dual algebra: \n" ++ show lattice ++ "\n" 
-      showLattice $ simplifyDL1 $ clopMap space
+      let dualDL = simplifyDL1 $ clopMap space
+      putStrLn $ "Dual algebra: \n" ++ show dualDL ++ "\n" 
+      showLattice dualDL
       putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
       answer <- getLine
       case answer of
         "y" -> do
-            putStrLn "Dual space: \n" ++ show lattice ++ "\n"
-            showPriestley $ simplifyPS1 $ priesMap $ clopMap space
+            let dualdualPS = simplifyPS1 $ priesMap $ clopMap space
+            putStrLn $ "Dual space: \n" ++ show dualdualPS ++ "\n"
+            showPriestley dualdualPS
             putStrLn "Like expected, it's the same space we started with!"
             putStrLn "Enough duality for today!"
         _  -> putStrLn "No problem! Glad we could help you :) \n"
-      _  -> putStrLn "No problem! Glad we could help you :)"
+    _  -> putStrLn "No problem! Glad we could help you :)"
 \end{code}
 
 \begin{verbatim}
