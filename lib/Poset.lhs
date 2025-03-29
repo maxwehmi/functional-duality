@@ -410,8 +410,6 @@ In order to print all these structures, we import the \texttt{graphViz} library,
 instance PrintDot a => PrintDot (PrintSet a) where
     unqtDot (PrintSet s) = unqtDot ( head $ Set.toList s) -}
 
-instance PrintDot a => PrintDot (Set.Set a) where 
-    unqtDot x = unqtDot (head (Set.toList x))
 
 
 \end{code}
