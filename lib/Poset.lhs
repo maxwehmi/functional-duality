@@ -29,7 +29,7 @@ data OrderedSet a = OS {set :: Set.Set a,
 
 instance Show a => Show (OrderedSet a) where
     show (OS s r) = "{Set: " ++ show (Set.toList s) ++ ",\n "
-                        ++ "Rel " ++ show (Set.toList r) ++ "}" 
+                        ++ "Rel: " ++ show (Set.toList r) ++ "}" 
 
 
 
