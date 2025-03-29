@@ -1,5 +1,7 @@
 \documentclass[12pt,a4paper]{article}
 \input{latex/latexmacros.tex}
+\microtypesetup{expansion=false} %this is needed for me to not get an error on \clearpage. If it creates problem for others, remove it. -Marco
+
 
 \title{A Haskell implementation of translations between Distributive Lattices and Priestley Spaces}
 \author{Giacomo de Antonelllis, \and Estel Koole, \and Marco de Mayda, \and  Edoardo Menorello, \and  Max Wehmeier}
@@ -55,7 +57,9 @@ The repository of the project can be found at https://github.com/maxwehmi/functi
 
 \input{test/simpletests.lhs}
 
+
 \input{intro-conclusion/Conclusion.tex}
+
 
 \addcontentsline{toc}{section}{Bibliography}
 \bibliographystyle{alpha}

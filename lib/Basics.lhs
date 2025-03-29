@@ -1,6 +1,8 @@
 \section{Basics}\label{sec:Basics}
 
-In this section, we introduce the basics for our project. For the most part, this is concerned with maps between spaces and some other helper functions. These will be imported in all other modules. 
+In this section, we introduce the basics for our project. For the most part, this is concerned with maps between spaces and some other helper functions. These will be imported in all other modules.
+
+Firstly, we import the \texttt{Data.Set} package. This will allow us to very closely mirror ``everyday" mathematical language in our definitions.
 
 \begin{code}
 module Basics where
@@ -20,10 +22,10 @@ Of course, we also want to evalutate maps and get preimages. For images, we are 
 
 \begin{code}
 getImages :: (Ord a, Ord b) => Map a b -> a -> Set.Set b
-getImages mapping x = Set.map snd $ Set.filter (\ (y,_) -> x == y) mapping
+getImages f x = Set.map snd $ Set.filter (\ (y,_) -> x == y) f
 
 getPreimages :: (Ord a, Ord b) => Map a b -> b -> Set.Set a
-getPreimages mapping y = Set.map fst $ Set.filter (\ (_,z) -> z == y) mapping
+getPreimages f y = Set.map fst $ Set.filter (\ (_,z) -> z == y) f
 \end{code}
 
 Using these functions, we can check if a given set of pairs is actually a map, i.e. every element in its domain has exactly one image. Similarly, we can check bijectivity by confirming that the preimage of every element in the range is a singleton. 
@@ -48,7 +50,9 @@ getPreimage mapping y | Set.size (getPreimages mapping y) == 1 = Set.elemAt 0 (g
                       | otherwise = error "Either no or too many preimages"
 \end{code}
 
-\subsection{Helpful functions}
+Then, these allow us to read \texttt{getImages f x} as a usual $f(x)$ for a given mapping.
+
+\subsection{Other Helpful functions}
 
 Some known functions are nice to have as abbreviations. Here we implement boolean implication:
 
