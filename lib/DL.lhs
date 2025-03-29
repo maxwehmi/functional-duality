@@ -150,24 +150,19 @@ input elements.
 
 \begin{code}
 
--- Helper functions for checkClosedMeetJoin
--- finds meet & join in lattice, independant of 
 findMeet :: Ord a => Lattice a -> a -> a -> Maybe a
 findJoin :: Ord a => Lattice a -> a -> a -> Maybe a
--- find all lower bounds, and take the maximum
+
 findMeet l x y = findGreatest (carrier l) (lowerBounds (carrier l) x y)
 findJoin l x y = findLeast (carrier l) (upperBounds (carrier l) x y)
 
--- For some ordered set (X, <=), find the greatest element of some subset S of X
+
 findGreatest :: Ord a => OrderedSet a -> Set.Set a -> Maybe a
--- findGreatest (OS s r) s = if all (\x -> (x, greatest) `Set.member` r) (Set.toList s) then Just greatest else Nothing
-                    -- where greatest = foldr (\new old -> (if (old, new) `Set.member` r then new else old)) (head $ Set.toList s) s
 findGreatest os s = Set.lookupMax $ Set.filter (\x -> all (\y -> (y, x) `Set.member` rel os) s) s
 
 findLeast :: Ord a => OrderedSet a -> Set.Set a -> Maybe a
 findLeast os s = Set.lookupMax $ Set.filter (\x -> all (\y -> (x, y) `Set.member` rel os) s) s
 
--- set of elements above a1 and a2
 upperBounds :: Ord a => OrderedSet a -> a -> a -> Set.Set a
 upperBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (a1, c) `Set.member` rel os && 
                                                            (a2, c) `Set.member` rel os]
@@ -233,13 +228,13 @@ lattice and the functions for 'meet' and 'join' are added.
 
 makeLattice :: Ord a => OrderedSet a -> Lattice a 
 makeLattice os = L os (\x y -> M.fromJust $ findMeet preLattice x y) (\x y -> M.fromJust $ findJoin preLattice x y)
-                where preLattice = L os const const -- give it two mock functions
+                where preLattice = L os const const 
 
 \end{code}
 
 When, at later stages, we will construct distributive lattices from Priestely spaces, we will get structures whose elements are sets themselves. To prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new lattice out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
 
-The first returns, with the new space, also a map, and is meant to be used when we care about the old elements (the map allows to reconstruct them); the second does not return a map and it is meant to be used when we do not care about the old elements.
+The first returns, with the new space, also a map, and is meant to be used when we care about the old elements (the map allows to reconstruct them, for example we can check that the orignal and the simplifief lattices are indeed isomorphic). The second does not return a map and it is meant to be used when we do not care about the old elements, it is in particular useful for printing purposes, as we will see in due time.
 
 \begin{code}        
 simplifyDL :: Ord a => Lattice a -> (Lattice Int, Map a Int)
@@ -364,8 +359,8 @@ something l2 = M.fromJust $ top l2
 
 functionMorphism:: (Ord a, Ord b) => Lattice a -> Lattice b -> Map a b -> Bool
 functionMorphism l1  l2 f 
-    | not(checkLattice l1 && checkLattice l2) = error "not lattices"
-    | not (checkMapping s1 f) = error "not a mapping"
+    | not(checkLattice l1 && checkLattice l2) = error "The provided structures are not lattices."
+    | not (checkMapping s1 f) = error "The provided map is not a mapping."
     | otherwise = 
                 checkBijective s2 f 
                 &&
@@ -391,7 +386,7 @@ Analogously to its Poset-counterpart, this function actually prints the Lattice.
 
 \begin{code}
 
-showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
+showLattice ::(Ord a, PrintDot a) => Lattice a -> IO ()
 showLattice l = runGraphvizCanvas' (toGraphOrd (fromReflTrans $ carrier l)) Xlib
 
 \end{code}
