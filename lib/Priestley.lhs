@@ -266,10 +266,16 @@ fromReflexivePS::Ord a => OrderedSet a -> OrderedSet a
 fromReflexivePS (OS s r) = OS s k where
    k = Set.difference r (Set.fromList [(x,y) | (x,y) <- Set.toList r,
                         x==y &&
-                        not (any (\z -> z /= x &&  (Set.member (z,x) r || Set.member (x,z) r) ) (tuplesUnfold r))])
+                        any (\z -> z /= x &&  (Set.member (z,x) r || Set.member (x,z) r) ) s  ])
 
 fromReflTransPS :: Ord a => OrderedSet a -> OrderedSet a 
 fromReflTransPS = fromTransitive . fromReflexivePS
+
+
+
+myPries1 :: PriestleySpace Int
+myPries1 = PS (Set.fromList [0.. 1]) (Set.powerSet (Set.fromList [0.. 1])) (Set.fromList [(0,0),(1,1)])
+
 
 
 
@@ -298,5 +304,14 @@ snelliusPS = PS (Set.fromList [0.. 5]) (Set.powerSet (Set.fromList [0.. 5])) (Se
 --- >>> showLattice (generate arbitrary :: IO (Lattice Int))
 
 
+
+\end{code}
+
+
+
+\begin{code}
+
+instance PrintDot a => PrintDot (Set.Set a)
+unqtDot x = unqtListToDot  (Set.toList x)
 
 \end{code}
