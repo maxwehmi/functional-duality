@@ -113,17 +113,17 @@ main = do
       putStr "Would you like to translate this lattice to its dual Priestley Space? y/n"
       answer <- getLine
       case answer of
-      "y" -> showPriestley $ priesMap lattice
-       _  -> putStr "No problem! Glad we could help you :)"
+        "y" -> showPriestley $ priesMap lattice
+        _  -> putStr "No problem! Glad we could help you :)"
 
       putStr "Now that we're at it, want to translate back to a lattice? y/n"
       answer <- getLine
       case answer of
-      "y" -> do 
-          showLattice $ clopMap lattice
-          putStr "Like expected, it's the same lattice we started with!"
-          putStr "Enough duality for today!"
-       _  -> putStr "No problem! Glad we could help you :)"
+        "y" -> do 
+            showLattice $ clopMap $ priesMap lattice
+            putStr "Like expected, it's the same lattice we started with!"
+            putStr "Enough duality for today!"
+        _  -> putStr "No problem! Glad we could help you :)"
 
     4 -> do
       space <- generate (arbitrary :: Gen (PriestleySpace Int))
@@ -132,18 +132,18 @@ main = do
       putStr "Would you like to translate this Priestley to its dual lattice? y/n"
       answer <- getLine
       case answer of
-      "y" -> showLattice $ clopMap lattice
-       _  -> putStr "No problem! Glad we could help you :)"
-      
+        "y" -> showLattice $ clopMap space
+        _  -> putStr "No problem! Glad we could help you :)"
+        
       putStr "Now that we're at it, want to translate back to a Priestley space? y/n"
       answer <- getLine
       case answer of
-      "y" -> do
-          showPriestley $ priesMap lattice
-          putStr "Like expected, it's the same space we started with!"
-          putStr "Enough duality for today!"
-       _  -> putStr "No problem! Glad we could help you :)"
-      
+        "y" -> do
+            showPriestley $ priesMap $ clopMap space
+            putStr "Like expected, it's the same space we started with!"
+            putStr "Enough duality for today!"
+        _  -> putStr "No problem! Glad we could help you :)"
+        
     5 -> do 
       lattice <- getApprovedDL
       putStr "good lattice, translate now"
