@@ -122,10 +122,7 @@ main = do
     \(3) Generate arbitrary distributive lattice \n\
     \(4) Generate arbitrary Priestley Space \n\
     \(5) Translate from algebra to topology. \n\
-    \(6) Translate from topology to algebra \n\
-    \(7) Check Representation Theorem for a lattice \n\ 
-    \(8) Check Representation Theorem for a space \n"
-  -- might remove 7,8
+    \(6) Translate from topology to algebra \n"
 
   userInput <- getUserInput
   putStrLn $ "\nYou selected option " ++ show userInput ++ "\n"
