@@ -365,16 +365,16 @@ functionMorphism l1  l2 f
 \subsection{Printing machinery} \label{sec:dlprinting}
 
 
-\begin{code}
-showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
-showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))) Xlib
+% \begin{code}
+% showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
+% showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))) Xlib
 
-myos1 :: OrderedSet Int
-myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
-\end{code}
+% myos1 :: OrderedSet Int
+% myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
+% \end{code}
 
 
-\subsection{Printing machinery}
+% \subsection{Printing machinery}
 
 Analogously to its Poset-counterpart, this function actually prints the Lattice.
 

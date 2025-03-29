@@ -1,4 +1,3 @@
-
 \section{Partially ordered sets}
 \label{posets}
 
@@ -53,7 +52,7 @@ instance Show a => Show (OrderedSet a) where
 \end{code}
 
 
-5BB3-C9E6
+%5BB3-C9E6 %what is this?
 
 \subsection{Well-definedness}
 
