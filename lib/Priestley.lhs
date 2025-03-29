@@ -15,6 +15,7 @@ import Test.QuickCheck
 import Poset
 import Basics
 
+
 \end{code}
 
 In the definition of the types, we keep it as close as possible to their mathematical counterparts: 
@@ -24,10 +25,12 @@ In the definition of the types, we keep it as close as possible to their mathema
 In particular it is required that $X,\emptyset$ are elements of $\tau$, and $\tau$ is closed under finitary intersections and arbitrary unions. \newline 
 Notice that, since we are working with finite cases, finitary and arbitrary unions (and intersections) coincide.
 \item a Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set. Moreover, it satisfies the following Priestley Separation Axiom: \newline
-For any $x\not \leq y$, there is a clopen Upset $C$, such that $x \in C$ and $y \notin C$. \newline
-Intuitively, for any $x,\,y$ that are not related by $\leq$, there exists a upwards-closed set in the topology that separates them. Moreover, the complement of such set should also be in the topology. Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
+$$x \not \leq y \rightarrow \exists C (C \in \tau \land X\setminus C \in \tau \land C = \uparrow C \land x\in C \land y\notin C)$$
+Intuitively, for any $x,\,y$ such that  $x \not \leq y$, there exists a upwards-closed (w.r.t. $\leq$) set in the topology that contains $x$ but not $y$. Moreover, the complement of such set should also be in the topology. Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
 implies $y\in S$.
-Elements of $\tau$ such that their complement in $X$ also is in the topology are called "Clopen Sets".
+Elements of $\tau$ such that their complement in $X$ also is in the topology are called "Clopen Sets". \newline 
+
+We also add custom Show instances to print nicely our objects from the executable (beside their graphViz representation).
 \end{enumerate}
 
 \begin{code}
@@ -37,14 +40,23 @@ data TopoSpace a = TS {
     setTS :: Set.Set a,
     topologyTS :: Topology a
 }
-    deriving (Eq, Ord,Show)
+    deriving (Eq, Ord)
+instance Show a => Show (TopoSpace a) where
+    show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
+                        
+                        ++ "Top:" ++ show (map Set.toList (Set.toList t)) ++ "}" 
 
 data PriestleySpace a = PS {
     setPS :: Set.Set a,
     topologyPS :: Topology a,
     relationPS :: Relation a
 }
-    deriving (Eq, Ord,Show)
+    deriving (Eq, Ord)
+instance Show a => Show (PriestleySpace a) where
+    show (PS s t r ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
+                        ++ "Top: " ++ show (map Set.toList (Set.toList t)) ++ ";\n"
+                        ++ "Rel: " ++ show (Set.toList r) ++ "}" 
+
 
 \end{code}
 
@@ -95,7 +107,7 @@ fixTopology (TS space2 t) = TS space2 fixedTop  where
     fixedTop  = Set.fromList [space2, Set.empty] `Set.union` unionClosure (intersectionClosure t)
 \end{code}
 
-The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order.
+The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is usefule when it comes to printing via graphViz, since it allows to have one uniform instance for orderedSet which applies easily to Lattices and Priestley spaces.
 
 \begin{code}
 getTopoSpace :: PriestleySpace a -> TopoSpace a
@@ -110,11 +122,9 @@ Next, we define a function to check whether a given Space really is a Priestley 
 We make use of some secondary helper functions:
 
 \begin{enumerate}
-\item the implementation for "implies" is routine,
 
 \item the "clopUpset" function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
-Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
- implies $y\in S$.  \newline
+
  This function makes use of the "upClosure" function, which computes the upwards-closure of any given set with respect to the given order.
 \end{enumerate} 
 
@@ -127,8 +137,8 @@ checkPriestley p = checkTopology (getTopoSpace p) && checkPoset (getOrderedSet p
 
 checkPSA :: (Eq a, Ord a) => PriestleySpace a -> Bool
 checkPSA (PS space3 t order) = all (\ pair -> 
- implies (pair `notElem` order) (any (\ open -> elem (fst pair) open 
-   && notElem (snd pair) open) (clopUp (PS space3 t order)) )) $ Set.cartesianProduct space3 space3 
+ implies (pair `notElem` order) (any (\ clopupset -> elem (fst pair) clopupset 
+   && notElem (snd pair) clopupset) (clopUp (PS space3 t order)) )) $ Set.cartesianProduct space3 space3 
 
 clopUp :: Ord a => PriestleySpace a -> Topology a
 clopUp (PS space4 t ord) = Set.intersection (clopens t) (upsets t) where 
@@ -138,6 +148,30 @@ clopUp (PS space4 t ord) = Set.intersection (clopens t) (upsets t) where
 upClosure :: (Eq a, Ord a) => Set.Set a -> Relation a -> Set.Set a 
 upClosure set1 relation = Set.map snd (Set.filter (\ x -> fst x `elem` set1 ) relation) `Set.union` set1 
 \end{code}
+
+
+When, at later stages, we will construct Priestley spaces from distributive lattices, we will get structures whose elements are sets themselves. Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
+
+The use of the functions is analogous to their distributive lattice counterparts.
+
+\begin{code}
+simplifyPS :: Ord a => PriestleySpace a -> (PriestleySpace Int, Map a Int)
+simplifyPS (PS s t r) = (PS s' t' r', mapping) where
+    s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
+    t' = mapTop mapping t 
+    r' = mapRel mapping r
+
+
+simplifyPS1 :: Ord a => PriestleySpace a -> PriestleySpace Int
+simplifyPS1 (PS s t r) = PS s' t' r' where
+    s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
+    t' = mapTop mapping t 
+    r' = mapRel mapping r
+\end{code}
+
+
 
 \subsection{Isomorphisms}
 
@@ -157,8 +191,8 @@ Assuming bijectivity (by laziness of \&\&), to check that the given map is a Hom
 \begin{code}
 checkHomeomorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
 checkHomeomorphism ta tb mapping = 
-    mapTop mapping ta `Set.isSubsetOf` tb
-    && premapTop mapping tb `Set.isSubsetOf` ta
+    all (\x -> Set.map (getImage mapping) x `elem` tb) ta 
+    && all (\ x -> Set.map (getPreimage mapping) x `elem` ta) tb
 \end{code}
 
 To apply the map to every open and thus every element of every open, we have to nest \verb:Set.map: twice. Again, we deal similarly with the preimages.
@@ -205,7 +239,8 @@ instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
             return $ fixPS $ PS s t' r'
 \end{code}
 
-After generating a space, which might not fulfill all requirements yet, we have to make it into a Priestley space using helper functions. Since we already have the machinary to make a set of subsets into a topology, we just have to make sure that the Priestley Seperation axiom is satisfied. By adding all missing upsets, we make sure that it is definetely satisfied. 
+After generating a space, which might not fulfill all requirements yet, we have to make it into a Priestley space using helper functions. Since we already have the machinery to make a set of subsets into a topology, we just have to make sure that the Priestley Seperation axiom is satisfied. By adding all missing upsets, we make sure that it is definetely satisfied. \newline 
+To recover the missing clopen up-sets, since we are in the finite case, it suffices to add to the topology the point-generated upset from a given element of the poset. Unfortunately, there is no standard way to calculate a clopen upset given a collection of elements without first knowing the full topology over the space. This means both that this function is one of the few that (even in principle) would not be correct to use when dealing with infinite spaces, and also that finding a computationally feasible method to fill the missing clopen upset in the infinite case could be rather tricky.
 
 \begin{code}
 fixPS :: Ord a => PriestleySpace a -> PriestleySpace a
@@ -221,42 +256,19 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 
 \subsection{Printing machinery}
 
-When we say that we print a Priestley space, we mean that we print the underlying relation. This can be done with the functions from Poset:
+
+Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space.
 
 \begin{code}
-
-
-{-instance Data.GraphViz.Printing.PrintDot a => Data.GraphViz.Printing.PrintDot(Set.Set a) where 
-    unqtDot x = unqtDot (Set.elemAt 0 x)
-    toDot = unqtDot 
-    unqtListToDot = list . mapM unqtDot
-    listToDot = dquotes . unqtListToDot-}
-{-instance (Show a) => PrintDot (Set.Set a) where
-    toDot s = toDot (DotNode "node" [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1])-}
-
-{-newtype DotSet a = DotSet (Set.Set a)
-
--- Define a PrintDot instance for the wrapped Set
-toDot (DotSet s) = 
-    let nodeId = "node_" ++ show (hash s)  -- Unique identifier
-    in Data.GraphViz.Printing.toDot (DotNode nodeId [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1])-}
-
-
 
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
 
-showPriestley p = runGraphvizCanvas' (toGraphRel $ rel $ fromReflTrans $ getOrderedSet p) Xlib 
+showPriestley p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans $ getOrderedSet p) Xlib 
+
+
+
+
 \end{code}
 
 
 
-% Put this somewhere where its used 
-
-\begin{code}
-simplifyPS :: Ord a => PriestleySpace a -> PriestleySpace Int
-simplifyPS (PS s t r) = PS s' t' r' where
-    s' = Set.fromList $ take (Set.size s) [0..]
-    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
-    t' = mapTop mapping t 
-    r' = mapRel mapping r
-\end{code}

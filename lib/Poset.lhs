@@ -11,16 +11,8 @@ module Poset where
 
 import Data.GraphViz.Types.Monadic
 import Data.GraphViz.Types.Generalised
-import Data.GraphViz.Attributes
-import Data.GraphViz.Attributes.Colors
-
-import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
-import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
-
 import Data.GraphViz.Commands
-
 import qualified Data.GraphViz.Attributes.Complete as A
-import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
 import Data.GraphViz.Printing
 
 import Test.QuickCheck
@@ -47,10 +39,21 @@ import qualified Data.Set as Set
 
 type Relation a = Set.Set (a,a)
 
-data OrderedSet a = OS {set :: Set.Set a, rel :: Relation a} 
-    deriving (Eq, Ord,Show)
+data OrderedSet a = OS {set :: Set.Set a, 
+                        rel :: Relation a} 
+    deriving (Eq, Ord)
+
+instance Show a => Show (OrderedSet a) where
+    show (OS s r) = "{Set: " ++ show (Set.toList s) ++ ",\n "
+                        ++ "Rel: " ++ show (Set.toList r) ++ "}" 
+
+
+
+
 \end{code}
 
+
+5BB3-C9E6
 
 \subsection{Well-definedness}
 
@@ -78,6 +81,7 @@ checkRelationWellDef (OS s r) = tuplesUnfold r `Set.isSubsetOf` s
 
 Moreover if the relation is not well-defined relation, we might want to force it to be. The following function takes care of this by removing from a relation, set of elements in it, but not in the the carrier set.
 
+
 \begin{code}
 forceRelation :: Ord a => OrderedSet a -> OrderedSet a
 forceRelation (OS s r) 
@@ -91,7 +95,6 @@ forceRelation (OS s r)
 \end{code}
 
 
-
 \subsection{Checks and Closures}
 
 Secondly, given an object of type \texttt{OrderedSet a }, the relation need not to be reflexive, anti-symmetric and transitive, as, again, the implementation of \texttt{OrderedSet} does accept cases which are not of this sort. Therefore we shall define checks and closures for our desired properties.
@@ -99,6 +102,7 @@ Secondly, given an object of type \texttt{OrderedSet a }, the relation need not 
 \subsubsection{Reflexivity} 
 
 Both closures and checks are straightforwards, and well readable from the code implementation. We simply need add, or check the existance of, reflexive tuples.
+
 
 \begin{code}
 closureRefl :: Ord a => OrderedSet a -> OrderedSet a
@@ -129,6 +133,7 @@ transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s
 
 Of course this won't suffice. Now that we have enlarged our relation, new pairs which satisfy \texttt{transPair} might arise. Therefore in order to fully close the relation under transitivity, for any transitive chain, we need to recursively apply the \texttt{transStep} function to our object \texttt{os} of type \texttt{OrderedSet a} until it reaces a fixed point, i.e. until \texttt{transStep os == os}. The code should be self explanatory for this:
 
+
 \begin{code}
 closureTrans :: Ord a => OrderedSet a -> OrderedSet a
 closureTrans  currentSet = 
@@ -157,10 +162,6 @@ Laslty, we shall again also define some functions that given an object of type \
 \subsubsection{First implementation}
 
 Given an object $(P,R)$ of type \texttt{OrderedSet a}, we eliminate all the symmetric pairs in $R$. That is we construct a new relation $R^* \subseteq R$ such that if $x \neq y$ and $(x,y) \in R$ and $(y,x) \in R$, then $\neg((x,y), (y,x) \in R^*)$. 
-
-
-
-
  
 \begin{code}
 forceAntiSym :: Ord a => OrderedSet a -> OrderedSet a
@@ -251,6 +252,7 @@ checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 \end{code}
 
 
+
 \subsection{From ordered sets to posets}
 
 Finally, given all the passages we have gone through in this section, we are able to define functions that given any object of type \texttt{OrderedSet a}, will transform it into a poset and check whether it is indeed a poset.
@@ -271,6 +273,9 @@ In most cases however, we will need to engage with anti-symmetric forcing. Thus 
 
 \begin{code}
 
+makePoSet :: Ord a => OrderedSet a -> OrderedSet a
+makePoSet  = closureRefl .  closureTrans 
+
 forcePoSet :: Ord a => OrderedSet a -> OrderedSet a
 forcePoSet  = closureRefl .  forceAntiSym .  closureTrans . forceRelation
 
@@ -279,6 +284,7 @@ forcePosetAlt :: Ord a => OrderedSet a -> OrderedSet a
 forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
 
 \end{code}
+
 
 In order to check if an object of type \texttt{OrderedSet a} is indeed a poset, we define the following function:
 
@@ -290,6 +296,7 @@ checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWel
 
 
 Lastly, to use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. We do this by generating an arbitrary \texttt{OrderedSet a}, then it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
+
 
 \begin{code}
 instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
@@ -308,15 +315,29 @@ instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
 
  
 
-This is dedicated to the visualization of the structures we have discussed, namely posets (a similar section will be present at the end of each section introducing a new mathematical structure).
+This section is dedicated to the visualization of the structures we have discussed, namely posets, via what are called in mathematics \textit{Hasse diagrams} (a similar section will be present at the end of each section introducing a new mathematical structure the implementation will be similar in every case, but the function are displaced according to the module-dependencies).
 
-Our primary concern is for the picture to be clear and readable. To this end we shall remove all transitive and reflexive endges which might occur in the structure. Since posets are part of the underlying structure of both lattices and priestley spaces,and its type is used to construct the types of the latter two, we define these helper function in this section.
+In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. If the reader wishes to visualize the graph, they should both install \textit{graphViz} and \textit{Xlib} on their machines.
+If you (hypothetical reader, hello,) are running Ubuntu, you can run \textit{sudo apt-get install libx11-dev graphviz} on bash to install the required.
+
+
+It should be noted that all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. This causes some difficulties when it comes to representation since Data.Set
+does not have an original instance of PrintDot (Set a) and, since the Set module is imported, all homebrew instances we defined (although working) were "orphan" instances, and thus triggered a Wall warning. \newline 
+In our specific case, the orphan instance would not be a problem per se, but to avoid the warning we decided to always run the isomorphism defned above (simplifyDL1, simplifyPS1) to obtain an isomorphic copy of our poset defined on the type INT. Other solution would have required rewriting every instance of "Set" as a Newtype, or rewriting the Set module in one of our own module and add the instance there. Both solutions seemed a bit excessive and thus we settled for the more economical one of always taking an isomorphic copy on INT. \newline 
+
+
+As far as the style of the diagrams go, we stuck with the mathematical convention of having unlabeled nodes, since we are in any case interested in classes of posets "up to isomorphism". If the user wishes to label their node, this can easily be done modifying the GraphAttributes (those wrapped in square brackets) in "toGraphOrd". \newline 
+
+
+
+
+Our primary concern is for the picture to be clear and readable. To this end we shall remove all transitive and reflexive edges which might occur in the structure. Since posets are part of the underlying structure of both lattices and priestley spaces,and its type is used to construct the types of the latter two, we define these helper function in this section.
 
 \begin{code}
 
 fromTransitive::Ord a => OrderedSet a -> OrderedSet a
 fromTransitive (OS s r) = OS s k where
-              k = Set.difference r (Set.fromList [(x,y)| (x,y) <- Set.toList r,   any (\z -> Set.member (x,z)  r && Set.member (z,y) r ) s   ])
+              k = Set.difference r (Set.fromList [(x,y)| (x,y) <- Set.toList r,   any (\z -> z /= x  && Set.member (x,z)  r && Set.member (z,y) r ) s   ])
 
 
 fromReflexive::Ord a => OrderedSet a -> OrderedSet a
@@ -328,36 +349,33 @@ fromReflTrans  = fromTransitive.fromReflexive
 
 \end{code}
 
-The following two functions are crucial to the visualization of the structures. It only relies on the type \texttt{Relation a}, and therefore will be called also in other sections.  
+The following two functions are crucial to the visualization of the structures. They only rely on the types \texttt{Relation a} and \texttt{OrderedSet a} and therefore will be called also in the other sections.  
 
 \begin{itemize}
 
 \item \texttt{toGraphRel'} uses \texttt{mapM\_} to transform an object \texttt{r}of type \texttt{Relation a} into a  monadic action, in particular an instance of of the type \texttt{Dot a}. 
 
-\item \texttt{toGraphRel} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}.
+\item \texttt{toGraphRel} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}. The carrier set of the object of type \texttt{OrderedSet a} will be the used to generate the points and the underlying relation of the object of type \texttt{OrderedSet a} will be the used to generate the edges of the graph. 
+Notice that, although no Lattice has "isolated points", many Priestley space do which means that we could have nodes in the space which only have one reflexive arrow. If we only ran the second part of the function, and just mapped "-->" over the relations, we would either lose those isolated points, or we would ahve to print every time all the reflexive arrows of the graph. Thus it is important that we both print nodes out of the elements of the carrier set, and then construct edges using the relations. 
 \end{itemize}
 
 \begin{code}
 
-toGraphRel' :: Relation a -> Dot a
-toGraphRel'  =  mapM_ (uncurry (-->)) 
+toGraphRel :: Relation a -> Dot a
+toGraphRel  =  mapM_ (uncurry (-->)) 
 
-toGraphRel:: Relation a -> DotGraph a
-toGraphRel r = digraph' $  do 
-                        edgeAttrs [A.Dir A.NoDir]
-                        nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
-                        graphAttrs[A.RankDir A.FromBottom]
-                        toGraphRel' r 
+toGraphOrd :: (Ord a,PrintDot a) => OrderedSet a -> DotGraph a
+toGraphOrd r = digraph' $ do
+ 
+  mapM_ (`node` [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] )(Set.toList $ set r )
+
+  
+  edgeAttrs [A.Dir A.NoDir]
+  nodeAttrs [A.Shape A.PointShape, A.FontSize 0.0, A.Width 0.1] 
+  graphAttrs [A.RankDir A.FromBottom, A.NodeSep 1.0]
+  toGraphRel $ rel r
 
 \end{code}
-
-
-
-
-
-
-
-
 
 
 The following function actually outputs the picture of the ordered set. 
@@ -365,7 +383,7 @@ The following function actually outputs the picture of the ordered set.
 \begin{code}
 
 showOrdSet ::(Ord a, Data.GraphViz.Printing.PrintDot a) => OrderedSet a -> IO ()
-showOrdSet p = runGraphvizCanvas' (toGraphRel $ rel (fromReflTrans p)) Xlib
+showOrdSet p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans p) Xlib
 
 
 \end{code}
