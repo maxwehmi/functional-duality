@@ -4,25 +4,12 @@
 
 \begin{code}
 module DL where
-import Data.GraphViz.Types.Monadic
-import Data.GraphViz.Types.Generalised
-import Data.GraphViz.Attributes
-import Data.GraphViz.Attributes.Colors
-
-import Data.GraphViz.Attributes.Complete (RankDir(FromBottom))
-import qualified Data.GraphViz.Attributes.Complete as Data.GraphViz.Attributes
 
 import Data.GraphViz.Commands
-
-import qualified Data.GraphViz.Attributes.Complete as A
-import Data.GraphViz.Attributes.Colors.SVG (SVGColor(Teal))
 import Data.GraphViz.Printing
-
-
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
 import Test.QuickCheck
-
 import Poset
 import Basics
 \end{code}
@@ -250,6 +237,36 @@ makeLattice os = L os (\x y -> M.fromJust $ findMeet preLattice x y) (\x y -> M.
 
 \end{code}
 
+When, at later stages, we will construct distributive lattices from Priestely spaces, we will get structures whose elements are sets themselves. To prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new lattice out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
+
+The first returns, with the new space, also a map, and is meant to be used when we care about the old elements (the map allows to reconstruct them); the second does not return a map and it is meant to be used when we do not care about the old elements.
+
+\begin{code}        
+simplifyDL :: Ord a => Lattice a -> (Lattice Int, Map a Int)
+simplifyDL l = (makeLattice (OS s' r'), mapping) where
+    s = (set . carrier) l 
+    s' = Set.fromList $ take (Set.size s) [0..]
+    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
+    r' = Set.fromList [(x,y) | 
+        x <- Set.toList s', 
+        y <- Set.toList s', 
+        (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
+
+
+
+
+simplifyDL1 :: Ord a => Lattice a -> Lattice Int
+simplifyDL1 l = (makeLattice (OS s' r')) where
+    s = (set . carrier) l 
+    s' = Set.fromList $ take (Set.size s) [0..]
+    r' = Set.fromList [(x,y) | 
+        x <- Set.toList s', 
+        y <- Set.toList s', 
+        (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
+\end{code}
+
+
+
 \subsection{Generating arbitrary lattices}
 
 To use QuickTests in our project, we shall generate arbitrary instances for distributive lattices. 
@@ -332,7 +349,7 @@ cleanUp :: Eq a => OrderedSet a -> OrderedSet a
 cleanUp (OS s r) = OS s (Set.filter (\ (x,y) -> x `elem` s && y `elem` s) r)
 \end{code}
 
-\subsection{Morphisms}
+\subsection{Morphisms} 
 
 We want to check wether two Lattices are isomorphic. This means checking that, under some function between them, 
 images preserve bottom, top, and all meets and joins. 
@@ -367,73 +384,14 @@ functionMorphism l1  l2 f
                     s1 = set $ carrier l1
                     s2 = set $ carrier l2                         
 \end{code}
+
 \subsection{Printing machinery}
+
+Analogously to its Poset-counterpart, this function actually prints the Lattice.
+
 \begin{code}
+
 showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
-showLattice l = runGraphvizCanvas' (toGraphRel (fromReflTrans $ carrier l)) Xlib
+showLattice l = runGraphvizCanvas' (toGraphOrd (fromReflTrans $ carrier l)) Xlib
 
-
-
-
-
-\end{code}
-
-% \begin{code}
-%-- helper functions that redfine previous function to not have Maybe... type, for ease of typechecking ----------------
-% realTop:: Ord a => Lattice a -> a
-% realTop l 
-%     | M.isNothing (top l) = error "there's no top"
-%     | otherwise =  Set.elemAt 0 (Set.filter ( isTop l ) ( set $ carrier l ))
-
-
-% realBot:: Ord a => Lattice a -> a
-% realBot l 
-%     | M.isNothing (bot l) = error "there's no bot"
-%     | otherwise =  Set.elemAt 0 (Set.filter ( isBot l ) ( set $ carrier l ))
-
-% realJoin :: Ord a => Lattice a -> a -> a -> a
-% realJoin l x y
-%     | not (checkLattice l) = error "not a lattice"
-%     | otherwise = realLeast ( carrier l ) ( upperBounds ( carrier l ) x y )
-
-
-% realMeet :: Ord a => Lattice a -> a -> a -> a
-% realMeet l x y
-%     | not (checkLattice l) = error "not a lattice"
-%     | otherwise = realGreatest ( carrier l ) ( lowerBounds ( carrier l ) x y )
-
-% realGreatest :: Ord a => OrderedSet a -> Set.Set a -> a
-% realGreatest os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (y , x ) `Set.member` rel os) s ) s
-
-% realLeast :: Ord a => OrderedSet a -> Set.Set a -> a
-% realLeast os s = Set.elemAt 0 $ Set.filter (\ x -> all (\ y -> (x , y ) `Set.member` rel os ) s) s
-% \end{code}
-
-
-% Put this somewhere where its used 
-
-When we will test representation later, we will get lattices, whose elements are sets themselves. To prevent a blow-up in size (espcially, when dualizing twice), we introduce a function, which creates a new lattice out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster. With the new space, we also return a map, so we can still access the elements in a certain way by looking to which number a set gets mapped.
-
-\begin{code}        
-simplifyDL :: Ord a => Lattice a -> (Lattice Int, Map a Int)
-simplifyDL l = (makeLattice (OS s' r'), mapping) where
-    s = (set . carrier) l 
-    s' = Set.fromList $ take (Set.size s) [0..]
-    mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
-    r' = Set.fromList [(x,y) | 
-        x <- Set.toList s', 
-        y <- Set.toList s', 
-        (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
-
-
-
-
-simplifyDL1 :: Ord a => Lattice a -> Lattice Int
-simplifyDL1 l = (makeLattice (OS s' r')) where
-    s = (set . carrier) l 
-    s' = Set.fromList $ take (Set.size s) [0..]
-    r' = Set.fromList [(x,y) | 
-        x <- Set.toList s', 
-        y <- Set.toList s', 
-        (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
 \end{code}
