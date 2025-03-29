@@ -25,10 +25,12 @@ In the definition of the types, we keep it as close as possible to their mathema
 In particular it is required that $X,\emptyset$ are elements of $\tau$, and $\tau$ is closed under finitary intersections and arbitrary unions. \newline 
 Notice that, since we are working with finite cases, finitary and arbitrary unions (and intersections) coincide.
 \item a Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set. Moreover, it satisfies the following Priestley Separation Axiom: \newline
-For any $x\not \leq y$, there is a clopen Upset $C$, such that $x \in C$ and $y \notin C$. \newline
-Intuitively, for any $x,\,y$ that are not related by $\leq$, there exists a upwards-closed set in the topology that separates them. Moreover, the complement of such set should also be in the topology. Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
+$$x \not \leq y \rightarrow \exists C (C \in \tau \land X\setminus C \in \tau \land C = \uparrow C \land x\in C \land y\notin C)$$
+Intuitively, for any $x,\,y$ such that  $x \not \leq y$, there exists a upwards-closed (w.r.t. $\leq$) set in the topology that contains $x$ but not $y$. Moreover, the complement of such set should also be in the topology. Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
 implies $y\in S$.
-Elements of $\tau$ such that their complement in $X$ also is in the topology are called "Clopen Sets".
+Elements of $\tau$ such that their complement in $X$ also is in the topology are called "Clopen Sets". \newline 
+
+We also add custom Show instances to print nicely our objects from the executable (beside their graphViz representation).
 \end{enumerate}
 
 \begin{code}
@@ -39,14 +41,10 @@ data TopoSpace a = TS {
     topologyTS :: Topology a
 }
     deriving (Eq, Ord)
-
-
 instance Show a => Show (TopoSpace a) where
     show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
                         
-                        ++ "Top:" ++ show (Set.toList t) ++ "}" 
-
-
+                        ++ "Top:" ++ show (map Set.toList (Set.toList t)) ++ "}" 
 
 data PriestleySpace a = PS {
     setPS :: Set.Set a,
@@ -54,13 +52,10 @@ data PriestleySpace a = PS {
     relationPS :: Relation a
 }
     deriving (Eq, Ord)
-
-
 instance Show a => Show (PriestleySpace a) where
     show (PS s t r ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
-                        ++ "Top: " ++ show (Set.toList t) ++ ";\n"
+                        ++ "Top: " ++ show (map Set.toList (Set.toList t)) ++ ";\n"
                         ++ "Rel: " ++ show (Set.toList r) ++ "}" 
-
 
 
 \end{code}
@@ -112,7 +107,7 @@ fixTopology (TS space2 t) = TS space2 fixedTop  where
     fixedTop  = Set.fromList [space2, Set.empty] `Set.union` unionClosure (intersectionClosure t)
 \end{code}
 
-The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order.
+The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is usefule when it comes to printing via graphViz, since it allows to have one uniform instance for orderedSet which applies easily to Lattices and Priestley spaces.
 
 \begin{code}
 getTopoSpace :: PriestleySpace a -> TopoSpace a
@@ -130,8 +125,7 @@ We make use of some secondary helper functions:
 \item the implementation for "implies" is routine,
 
 \item the "clopUpset" function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
-Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
- implies $y\in S$.  \newline
+
  This function makes use of the "upClosure" function, which computes the upwards-closure of any given set with respect to the given order.
 \end{enumerate} 
 
@@ -144,8 +138,8 @@ checkPriestley p = checkTopology (getTopoSpace p) && checkPoset (getOrderedSet p
 
 checkPSA :: (Eq a, Ord a) => PriestleySpace a -> Bool
 checkPSA (PS space3 t order) = all (\ pair -> 
- implies (pair `notElem` order) (any (\ open -> elem (fst pair) open 
-   && notElem (snd pair) open) (clopUp (PS space3 t order)) )) $ Set.cartesianProduct space3 space3 
+ implies (pair `notElem` order) (any (\ clopupset -> elem (fst pair) clopupset 
+   && notElem (snd pair) clopupset) (clopUp (PS space3 t order)) )) $ Set.cartesianProduct space3 space3 
 
 clopUp :: Ord a => PriestleySpace a -> Topology a
 clopUp (PS space4 t ord) = Set.intersection (clopens t) (upsets t) where 
@@ -246,7 +240,8 @@ instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
             return $ fixPS $ PS s t' r'
 \end{code}
 
-After generating a space, which might not fulfill all requirements yet, we have to make it into a Priestley space using helper functions. Since we already have the machinary to make a set of subsets into a topology, we just have to make sure that the Priestley Seperation axiom is satisfied. By adding all missing upsets, we make sure that it is definetely satisfied. 
+After generating a space, which might not fulfill all requirements yet, we have to make it into a Priestley space using helper functions. Since we already have the machinery to make a set of subsets into a topology, we just have to make sure that the Priestley Seperation axiom is satisfied. By adding all missing upsets, we make sure that it is definetely satisfied. \newline 
+To recover the missing clopen up-sets, since we are in the finite case, it suffices to add to the topology the point-generated upset from a given element of the poset. Unfortunately, there is no standard way to calculate a clopen upset given a collection of elements without first knowing the full topology over the space. This means both that this function is one of the few that (even in principle) would not be correct to use when dealing with infinite spaces, and also that finding a computationally feasible method to fill the missing clopen upset in the infinite case could be rather tricky.
 
 \begin{code}
 fixPS :: Ord a => PriestleySpace a -> PriestleySpace a
