@@ -74,6 +74,40 @@ getApprovedOS = do
           putStr "The input is not a poset (breaks antisymmetry), please try again. \n"
           getApprovedOS
 
+userDualizeDL :: (Lattice a) -> IO ()
+userDualizeDL lattice = do
+  putStr "Would you like to translate this lattice to its dual Priestley Space? y/n: "  
+    answer <- getLine
+    case answer of
+      "y" -> do 
+        showPriestley $ simplifyPS1 $ priesMap lattice
+        putStr "Now that we're at it, want to translate back to a lattice? y/n: "
+        answer <- getLine
+        case answer of
+          "y" -> do 
+              showLattice $ simplifyDL1 $ clopMap $ priesMap lattice
+              putStrLn "Like expected, it's the same lattice we started with!"
+              putStrLn "Enough duality for today!"
+          _  -> putStrLn "No problem! Glad we could help you :)"
+      _  -> putStrLn "No problem! Glad we could help you :)"
+
+userDualizeDL :: (PriestleySpace a) -> IO ()
+userDualizeDL space = do
+  putStr "Would you like to translate this Priestley to its dual lattice? y/n: "
+    answer <- getLine
+    case answer of
+      "y" -> do 
+        showLattice $ simplifyDL1 $ clopMap space
+        putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
+        answer <- getLine
+        case answer of
+          "y" -> do
+              showPriestley $ simplifyPS1 $ priesMap $ clopMap space
+              putStrLn "Like expected, it's the same space we started with!"
+              putStrLn "Enough duality for today!"
+          _  -> putStrLn "No problem! Glad we could help you :) \n"
+      _  -> putStrLn "No problem! Glad we could help you :)"
+
 main :: IO ()
 main = do
   putStrLn "Welcome to our MSL program! \n\
@@ -111,40 +145,12 @@ main = do
     3 -> do
       lattice <- generate (arbitrary :: Gen (Lattice Int))
       showLattice lattice
-
-      putStr "Would you like to translate this lattice to its dual Priestley Space? y/n: "
-      answer <- getLine
-      case answer of
-        "y" -> showPriestley $ simplifyPS1 $ priesMap lattice
-        _  -> putStrLn "No problem! Glad we could help you :)"
-
-      putStr "Now that we're at it, want to translate back to a lattice? y/n: "
-      answer <- getLine
-      case answer of
-        "y" -> do 
-            showLattice $ simplifyDL1 $ clopMap $ priesMap lattice
-            putStrLn "Like expected, it's the same lattice we started with!"
-            putStrLn "Enough duality for today!"
-        _  -> putStrLn "No problem! Glad we could help you :)"
+      userDualizeDL lattice
 
     4 -> do
       space <- generate (arbitrary :: Gen (PriestleySpace Int))
       showPriestley space
-
-      putStr "Would you like to translate this Priestley to its dual lattice? y/n: "
-      answer <- getLine
-      case answer of
-        "y" -> showLattice $ simplifyDL1 $ clopMap space
-        _  -> putStrLn "No problem! Glad we could help you :)"
-        
-      putStr "Now that we're at it, want to translate back to a Priestley space? y/n: "
-      answer <- getLine
-      case answer of
-        "y" -> do
-            showPriestley $ simplifyPS1 $ priesMap $ clopMap space
-            putStrLn "Like expected, it's the same space we started with!"
-            putStrLn "Enough duality for today!"
-        _  -> putStrLn "No problem! Glad we could help you :) \n"
+      userDualizePS space
         
     5 -> do 
       lattice <- getApprovedDL
