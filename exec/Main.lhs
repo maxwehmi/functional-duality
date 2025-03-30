@@ -1,7 +1,6 @@
 \section{Wrapping it up in an executable}\label{sec:Main}
 
-We will now use the library form Section \ref{sec:Basics} in a program.
-
+\begin{comment}
 \begin{code}
 module Main where
 
@@ -14,21 +13,18 @@ import Text.Parsec (parse)
 import Text.Read (readMaybe)
 import Data.Set as Set
 import Test.QuickCheck (arbitrary, generate, Gen)
-
 \end{code}
-When excecuting the program, we want to give the user 6 options. The first two check whether some input
-is a distributive and Priestley space respectively. The second two will generate arbitrary instances,
-furthermore, the user will be prompted to get the dual and the dual of the dual. In the last two options,
-the user can directly choose to translate a lattice or space, and then again will be given the option to 
-get the dual, and the dual of the dual.
-\\
-\\
-When using the program, the lattices will pop up in a window using 
-\textit{graphviz} and \textit{libx11}, and the mathematical aspects will be printed in the terminal. \\
-Especially option number (4) gives interesting spaces and dual lattices, as the size and complexity of the lattice 
-can become much greater than the space.
-\begin{code}
+\end{comment}
 
+When excecuting the program, we want to give the user 6 options. The first two check whether some input is a distributive and Priestley space respectively. The second two will generate arbitrary instances,
+furthermore, the user will be prompted to get the dual and the dual of the dual. In the last two options, the user can directly choose to translate a lattice or space, and then again will be given the option to 
+get the dual, and the dual of the dual.
+
+When using the program, the lattices will pop up in a window using 
+\textit{graphviz} and \textit{libx11}, and the mathematical aspects will be printed in the terminal.
+%Especially option number (4) gives interesting spaces and dual lattices, as the size and complexity of the lattice can become much greater than the space.
+
+\begin{code}
 main :: IO ()
 main = do
   putStrLn "Welcome to our MSL program! \n\
@@ -44,7 +40,10 @@ main = do
     \(4) Generate arbitrary Priestley Space \n\
     \(5) Translate from algebra to topology. \n\
     \(6) Translate from topology to algebra \n"
+\end{code}
 
+\begin{comment}
+\begin{code}
   userInput <- getUserInput
   putStrLn $ "\nYou selected option " ++ show userInput ++ "\n"
   case userInput of 
@@ -108,7 +107,6 @@ main = do
 
     _ -> putStrLn "error, run again"
 
-
 getUserInput :: IO Int
 getUserInput = do
   number <- getLine
@@ -120,20 +118,17 @@ getUserInput = do
       if ((n < 7) && (n > 0)) then return n else do
       putStrLn "Sorry, that is not a valid input. Please give a number from 1 to 7."
       getUserInput
-
 \end{code}
+\end{comment}
 
-The functions below, \texttt{getDL}and \texttt{getOS} will ask for a set and an order and take the transitive and 
-reflexive closure. A parser is used to help parsing the user input. 
+The functions below, \texttt{getDL}and \texttt{getOS} will ask for a set and an order and take the transitive and reflexive closure. A parser is used to help parsing the user input. 
 
-Furthermore, the functions \texttt{getApprovedDL} and \texttt{getApprovedOS} will prompt the user to give an input
-untill that input is a correct distributive lattice or ordered set respectively. 
+Furthermore, the functions \texttt{getApprovedDL} and \texttt{getApprovedOS} will prompt the user to give an input untill that input is a correct distributive lattice or ordered set respectively. 
 
 Lastly, the functions \texttt{userDualizeDL} and \texttt{userDualizePS} will take in a lattice or spacce and prompt
 the user to take the dual and the dual of the dual. 
 
 \begin{code}
-
 getDL :: IO (Lattice String)
 getDL = do
   putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... (the elements should be letters) \n\
@@ -221,6 +216,7 @@ userDualizePS space = do
     _  -> putStrLn "No problem! Glad we could help you :)"
 \end{code}
 
+To run the executable, with a terminal on the project's folder:
 \begin{verbatim}
 stack build
 stack exec myprogram

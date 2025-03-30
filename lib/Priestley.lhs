@@ -1,4 +1,5 @@
 \section{Priestley Spaces}
+\label{sec:Priestley}
 
 \begin{comment}
 We introduce usual imports for printings.
@@ -68,7 +69,7 @@ instance Show a => Show (PriestleySpace a) where
 \end{code}
 
 
-\subsection{Set-theoretic preliminaries}
+\paragraph{Set-theoretic preliminaries}
 In order to deal effectively with topological spaces, we first define some Set-theoretic preliminary notions. In addition to the standard functions drawn from \texttt{Data.Set} library,
 we define new functions to compute the closure of a given set under arbitrary unions and intersections. \newline 
 In both cases, we first define functions to perform a one-step intersection (resp. union) of a set with itself, and then iterate the function until the resulting set 
@@ -151,7 +152,9 @@ upClosure set1 relation = Set.map snd (Set.filter (\ x -> fst x `elem` set1 ) re
 \end{code}
 
 
-When, at later stages, we will construct Priestley spaces from distributive lattices, we will get structures whose elements are sets themselves. Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
+When, at later stages, we will construct Priestley spaces from distributive lattices, we will get structures whose elements are sets themselves. 
+
+\begin{comment}Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
 
 The use of the functions is analogous to their distributive lattice counterparts.
 
@@ -171,8 +174,7 @@ simplifyPS1 (PS s t r) = PS s' t' r' where
     t' = mapTop mapping t 
     r' = mapRel mapping r
 \end{code}
-
-
+\end{comment}
 
 \subsection{Isomorphisms}
 
@@ -187,6 +189,8 @@ open and continuous, resepctively, it maps opens to opens and the preimages of o
 \item $f$ is an order isomorphism on the relations: for any $x, y$, $x \leq y$ iff $f(x) \leq f(y)$
 \end{itemize}
 
+For homeomorphism we can check that applying the map to an open set in the topology of the domain should yield an element of the topology of the codomain, so applying it to the set of opens of the domain (its topology) should yield a subset of the opens of the codomain (its topology). And similarly that the preimage of the topology of the codomain is a subset of the topology of the domain.
+
 
 \begin{code}
 checkIso :: (Ord a, Ord b) => PriestleySpace a -> PriestleySpace b -> Map a b -> Bool
@@ -194,11 +198,7 @@ checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping
     && checkBijective sb mapping 
     && checkHomeomorphism ta tb mapping
     && checkOrderIso ra rb mapping
-\end{code}
 
-Assuming bijectivity (by laziness of \&\&), to check that the given map is a Homeomorphism, we have to check that it is an open and continuous map, i.e. it maps opens to opens and the preimages of opens are also open. This means that applying the map to an open set in the topology of the domain should yield an element of the topology of the codomain, so applying it to the set of opens of the domain (its topology) should yield a subset of the opens of the codomain (its topology). Similarly, we check that the preimage of the topology of the codomain is a subset of the topology of the domain.
-
-\begin{code}
 checkHomeomorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
 checkHomeomorphism ta tb mapping = 
     all (\x -> Set.map (getImage mapping) x `elem` tb) ta 
@@ -267,7 +267,7 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
     firsts = Set.map fst $ Set.cartesianProduct s s `Set.difference` r
 \end{code}
 
-\subsection{Printing machinery}
+\paragraph{Printing machinery}
 
 
 Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space. 

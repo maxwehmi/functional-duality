@@ -2,7 +2,7 @@
 \label{sec:representation}
 
 The Representation Theorem refers to the fact that the dual of the dual of a Priestley Space is isomorphic to the space itself. Similarly, the dual of the dual of a distributive lattice is isomorphic to the lattice itself. With our implementations, we aim to confirm this fact for finite Priestley spaces and distributive lattices. In this module, we implement and use the necessary machinery to test this. 
-
+\begin{comment}
 \begin{code}
 module Representation where
 import Data.Maybe
@@ -12,6 +12,7 @@ import Poset
 import DL
 import Priestley
 \end{code}
+\end{comment}
 
 \subsection{Filters of Lattices the dual space of a lattice}
 

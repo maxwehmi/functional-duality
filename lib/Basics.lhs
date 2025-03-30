@@ -8,6 +8,7 @@ Firstly, we import the \texttt{Data.Set} package. This will allow us to very clo
 module Basics where
 
 import qualified Data.Set as Set 
+import Test.QuickCheck (label)
 \end{code}
 
 %\subsection{Mappings}

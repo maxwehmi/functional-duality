@@ -1,5 +1,6 @@
 
 \section{Parsing for user interface}
+\label{sec:parsing}
 \begin{code}
 module ParsingStuff where 
 import qualified Data.Set as Set

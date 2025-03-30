@@ -340,7 +340,7 @@ functionMorphism l1  l2 f
 
 
 
-\subsection{Printing machinery} \label{sec:dlprinting}
+\paragraph{Printing machinery} \label{sec:dlprinting}
 
 
 % \begin{code}
