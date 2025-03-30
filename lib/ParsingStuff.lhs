@@ -6,6 +6,7 @@
 module ParsingStuff where 
 import Text.Parsec( letter, spaces, string, between, eof, many1, sepBy, parse, try )
 import Text.Parsec.String (Parser)
+import Text.Parsec.Char
 import Control.Monad (void)
 import System.IO
 \end{code}
