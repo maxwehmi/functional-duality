@@ -138,7 +138,7 @@ the user to take the dual and the dual of the dual.
 
 getDL :: IO (Lattice String)
 getDL = do
-  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... (the elements should be letters) \n\
+  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ...  \n\
   \You may give the minimal relation, and we shall close take the minimal poset containing your input.\n"
   inputOS <- getLine
   case parse parseOrderedSet "" inputOS of
@@ -150,7 +150,7 @@ getDL = do
 
 getOS :: IO (OrderedSet String)
 getOS = do
-  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... (the elements should be letters) \n\
+  putStrLn "The intended input is Set: x, y, z, k ... Order: (x,y), (k,z), ... \n\
   \You may give the minimal relation, and we shall take the minimal poset for your input.\n\
   \We are assuming the discrete topology as we are working with finite Priestley spaces.\n"
   inputOS <- getLine
@@ -195,7 +195,7 @@ userDualizeDL lattice = do
             let dualdualDL = simplifyDL1 $ clopMap $ priesMap lattice
             putStrLn $ "Dual algebra: \n" ++ show dualdualDL ++ "\n" 
             showLattice dualdualDL
-            putStrLn "Like expected, it's the same lattice we started with!"
+            putStrLn "Like expected, it's the same lattice we started with! (Proof by picture!)"
             putStrLn "Enough duality for today!"
         _  -> putStrLn "No problem! Glad we could help you :)"
     _  -> putStrLn "No problem! Glad we could help you :)"
@@ -217,7 +217,7 @@ userDualizePS space = do
             let dualdualPS = simplifyPS1 $ priesMap $ clopMap space
             putStrLn $ "Dual space: \n" ++ show dualdualPS ++ "\n"
             showPriestley dualdualPS
-            putStrLn "Like expected, it's the same space we started with!"
+            putStrLn "Like expected, it's the same space we started with! (Proof by picture!)"
             putStrLn "Enough duality for today!"
         _  -> putStrLn "No problem! Glad we could help you :) \n"
     _  -> putStrLn "No problem! Glad we could help you :)"
