@@ -1,37 +1,45 @@
 \section{Priestley Spaces}
-
-We introduce the main data types of this section.
+We introduce the usual imports for printings.
 
 \begin{code}
-
 module Priestley where
-
 
 import Data.GraphViz.Commands
 import Data.GraphViz.Printing
+\end{code}
+
+And the main data types of this section.
+
+\begin{code}
 import qualified Data.Set as Set 
 import Data.Bifunctor (bimap)
 import Test.QuickCheck
 import Poset
 import Basics
-
-
 \end{code}
 
-In the definition of the types, we keep it as close as possible to their mathematical counterparts: 
+A Topological Space $(X,\tau)$ is a set $X$ endowed with a collection of its subsets $\tau \subseteq \wp(X)$. Such that:
+\begin{itemize}
+    \item $\emptyset,X \in \tau$
+    
+    \item $\tau$ is closed under \emph{arbitrary} unions: If $\{U_i\}_{i \in I} \subseteq \tau$, then $\bigcup\limits_{i \in I} U_i \in \tau$
+    
+    \item $\tau$ is closed under \emph{finite} intersections: If $\{U_0,\dots,U_n\} \subseteq \tau $, then $U_0 \cap \dots \cap U_n \in \tau$
+\end{itemize}
 
-\begin{enumerate}
-\item a Topological Space is a set $X$ endowed with a collection $\tau$ of subsets of $X$. \newline 
-In particular it is required that $X,\emptyset$ are elements of $\tau$, and $\tau$ is closed under finitary intersections and arbitrary unions. \newline 
 Notice that, since we are working with finite cases, finitary and arbitrary unions (and intersections) coincide.
-\item a Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set. Moreover, it satisfies the following Priestley Separation Axiom: \newline
+
+Then, a  Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set; such that or any $x,y$, if $x\not\leq y$, then there exists a upwards-closed set $\uparrow \!\!C$ such that $\uparrow \!\!C$ is clopen and $x \in \uparrow \!\!C$ and $y \notin \uparrow \!\!C$. Intuitively, we say $\uparrow \!\!C$ is separates $x$ and $y$.
+\newline
+Formally, this would be the following Priestly Separation axiom:
+
 $$x \not \leq y \rightarrow \exists C (C \in \tau \land X\setminus C \in \tau \land C = \uparrow C \land x\in C \land y\notin C)$$
-Intuitively, for any $x,\,y$ such that  $x \not \leq y$, there exists a upwards-closed (w.r.t. $\leq$) set in the topology that contains $x$ but not $y$. Moreover, the complement of such set should also be in the topology. Recall that a subset $S$ of an ordered set is upward-closed if and only if whenever $x\in S$ and $x\leq y$
-implies $y\in S$.
-Elements of $\tau$ such that their complement in $X$ also is in the topology are called "Clopen Sets". \newline 
+
+
+In the definition of the types, we keep it as close as possible to their mathematical counterparts:
 
 We also add custom Show instances to print nicely our objects from the executable (beside their graphViz representation).
-\end{enumerate}
+
 
 \begin{code}
 type Topology a = Set.Set (Set.Set a)
@@ -44,8 +52,7 @@ data TopoSpace a = TS {
 instance Show a => Show (TopoSpace a) where
     show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
                         
-
-                        ++ "Top;" ++ show (Set.toList t) ++ "}" 
+                        ++ "Top:" ++ show (map Set.toList (Set.toList t)) ++ "}" 
 
 data PriestleySpace a = PS {
     setPS :: Set.Set a,
@@ -55,10 +62,8 @@ data PriestleySpace a = PS {
     deriving (Eq, Ord)
 instance Show a => Show (PriestleySpace a) where
     show (PS s t r ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
-
-                        ++ "Top " ++ show (Set.toList t) ++ ";\n"
-                        ++ "Rel " ++ show (Set.toList r) ++ "}" 
-
+                        ++ "Top: " ++ show (map Set.toList (Set.toList t)) ++ ";\n"
+                        ++ "Rel: " ++ show (Set.toList r) ++ "}"
 \end{code}
 
 
@@ -108,7 +113,7 @@ fixTopology (TS space2 t) = TS space2 fixedTop  where
     fixedTop  = Set.fromList [space2, Set.empty] `Set.union` unionClosure (intersectionClosure t)
 \end{code}
 
-The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is usefule when it comes to printing via graphViz, since it allows to have one uniform instance for orderedSet which applies easily to Lattices and Priestley spaces.
+The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is usefule when it comes to printing via graphViz, since it allows to have one uniform instance for \texttt{OrderedSet} which applies easily to Lattices and Priestley spaces.
 
 \begin{code}
 getTopoSpace :: PriestleySpace a -> TopoSpace a
@@ -118,20 +123,13 @@ getOrderedSet :: PriestleySpace a -> OrderedSet a
 getOrderedSet p = OS (setPS p) (relationPS p)
 \end{code}
 
-Next, we define a function to check whether a given Space really is a Priestley space. \newline 
+Next, we define a function to check whether a given Space really is a Priestley space. 
 
-We make use of some secondary helper functions:
+We make use of some secondary helper functions: The \texttt{clopUpset} function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.
 
-\begin{enumerate}
-\item the implementation for "implies" is routine,
+This function makes use of the \texttt{upClosure} function, which computes the upwards-closure of any given set with respect to the given order.
 
-\item the "clopUpset" function extracts all the elements from the topology which are both upward-closed and clopen by checking that their complement with respect to the space also is in the topology, and by checking that their are identical to their upwards-closure.\newline 
-
- This function makes use of the "upClosure" function, which computes the upwards-closure of any given set with respect to the given order.
-\end{enumerate} 
-
-
-The output of those is then fed to the "checkPSA" function, which then ensures the validity of the Priestley separation axiom for all points in $X$ not related by $\leq$.
+The output of is then fed to the \texttt{checkPSA} function, which then ensures the validity of the Priestley separation axiom for all points in $X$ not related by $\leq$.
 
 \begin{code}
 checkPriestley :: (Eq a, Ord a) => PriestleySpace a -> Bool
@@ -177,8 +175,17 @@ simplifyPS1 (PS s t r) = PS s' t' r' where
 
 \subsection{Isomorphisms}
 
-When working with Priestley Space, we want to be able to check if two given ones are "similar enough", i.e. isomorphic. This will become important when we want to confirm that a Priestley Space is isomorphic to the dual of its dual. \\
-To check isomorphism, we have to be given two Priestley Spaces and a map between them. The map is an isomorphism, if it is actually a map, bijective, a Homeomorphism on the topological spaces and an order isomorphism on the relations. If the map is an isomorphism, the spaces are isomorphic. 
+When working with Priestley Space, we want to be able to check if two given ones are "similar enough", i.e. isomorphic. This will become important when we want to confirm that a Priestley Space is isomorphic to the dual of its dual.
+
+Two Priestley Spaces are isomorphic, if there is a map $f$ between them such that: 
+
+\begin{itemize}
+\item $f$ is bijective
+\item $f$ is a Homeomorphism on the topologies: $f$ is
+open and continuous, resepctively, it maps opens to opens and the preimages of opens are also open
+\item $f$ is an order isomorphism on the relations: for any $x, y$, $x \leq y$ iff $f(x) \leq f(y)$
+\end{itemize}
+
 
 \begin{code}
 checkIso :: (Ord a, Ord b) => PriestleySpace a -> PriestleySpace b -> Map a b -> Bool
@@ -207,14 +214,14 @@ premapTop :: (Ord a, Ord b) => Map a b -> Topology b -> Topology a
 premapTop mapping = Set.map (Set.map (getPreimage mapping))
 \end{code}
 
-Lastly, it remains the check that the map is an order isomorphism, which means that two elements $x,y$ of the domain satisfy $x\leq y$ in the domain iff $f(x)\leq f(y)$ in the codomain (here $f$ is the map). This means that applying the map component wise to every pair of the relation in the domain should yield the relation of the codomain and vice versa. 
+Lastly, it remains the check that the map is an order isomorphism. For this we can check that applying the map component wise to every pair of the relation in the domain should yield the relation of the codomain and vice versa. 
 
 \begin{code}
 checkOrderIso :: (Ord a, Ord b) => Relation a -> Relation b -> Map a b -> Bool
 checkOrderIso ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
 \end{code}
 
-Similar to above, we have to nest \verb:Set.map: with \verb:Data.Bifunctor.bimap: to apply the map to both components of all pairs in the relation.
+Similar to above, we have to nest \texttt{Set.map} with \texttt{Data.Bifunctor.bimap} to apply the map to both components of all pairs in the relation.
 
 \begin{code}
 mapRel :: (Ord a, Ord b) => Map a b -> Relation a -> Relation b
@@ -241,8 +248,11 @@ instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
             return $ fixPS $ PS s t' r'
 \end{code}
 
-After generating a space, which might not fulfill all requirements yet, we have to make it into a Priestley space using helper functions. Since we already have the machinery to make a set of subsets into a topology, we just have to make sure that the Priestley Seperation axiom is satisfied. By adding all missing upsets, we make sure that it is definetely satisfied. \newline 
-To recover the missing clopen up-sets, since we are in the finite case, it suffices to add to the topology the point-generated upset from a given element of the poset. Unfortunately, there is no standard way to calculate a clopen upset given a collection of elements without first knowing the full topology over the space. This means both that this function is one of the few that (even in principle) would not be correct to use when dealing with infinite spaces, and also that finding a computationally feasible method to fill the missing clopen upset in the infinite case could be rather tricky.
+After generating a space, which might not fulfill all requirements yet, we have to make it into a Priestley space using helper functions. Since we already have the machinery to make a set of subsets into a topology, we just have to make sure that the Priestley Seperation axiom is satisfied. By adding all missing upsets, we make sure that it is definetely satisfied.
+\newline
+To recover the missing clopen up-sets, since we are in the finite case, it suffices to add to the topology the point-generated upset from a given element of the poset. 
+
+Unfortunately, there is no standard way to calculate a clopen upset given a collection of elements without first knowing the full topology over the space. This means both that this function is one of the few that (even in principle) would not be correct to use when dealing with infinite spaces, and also that finding a computationally feasible method to fill the missing clopen upset in the infinite case could be rather tricky.
 
 \begin{code}
 fixPS :: Ord a => PriestleySpace a -> PriestleySpace a
@@ -264,7 +274,6 @@ Analogously to its Poset and Lattice counterparts, this function actually prints
 \begin{code}
 
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
-
 showPriestley p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans $ getOrderedSet p) Xlib 
 
 
