@@ -18,13 +18,7 @@ import Test.QuickCheck
 
 \subsection{Definitions}
 
-This section is devoted to the construction of posets. A poset $(P,\leq)$ set $P$ with a relation $\leq$, such that $\leq$ is:
-
-\begin{itemize}
-\item reflexive
-\item transitive
-\item antisymmetric
-\end{itemize}
+This section is devoted to the construction of posets. A poset $(P,\leq)$ set $P$ with a relation $\leq$, such that $\leq$ is: reflexive, transitive and antisymmetric.
 
 For our implementation, we define a relation as a set of tuples, as is standard. Then, an \texttt{OrderedSet} is our notion of a set equipped with a relation (of any kind).
 
@@ -137,7 +131,7 @@ Here there are caveats. Note that it is not possible to just "close" a relation 
 %But there's two ways to do so. 
 So an anti-symmetric reduction is not unique.
 
-Two ways, among others, stand out as elegant in "forcing" anti-symmetry. The first consists in eliminating all symmetric pairs from the relation $R$, the second is to quotient of $P$ based on the clusters of symmetric pairs of $R$. We implement both as each has their advatages and disadvantages. But for space concerns, only look at the latter. 
+Two ways, among others, stand out as elegant in "forcing" anti-symmetry. The first consists in eliminating all symmetric pairs from the relation $R$, the second is to quotient of $P$ based on the clusters of symmetric pairs of $R$. We implement both as each has their advatages and disadvantages. But for space concerns, we only look at the latter. 
 
 \begin{comment}
 \subsubsection{Removing Edges}
@@ -175,8 +169,7 @@ The advantage of this approach, is that it preserve logical properties\footnote{
 % Since our topic at hand involves excatly defining logic over mathematical structures, this is certainly a nice feature.
 
 A downside, this changes the carrier set: from $P$ we go to $P/s$. This is a bit agains the "spirit" of a "closure".
-%\footnote{Note, due to Haskell's implementation, argue "it is the same set anyways, it's is just a matter of names referring to the same object". In set theory, syntactically specifying $\{a,b \}$ may well be the same set as $\{a\}$, if $b$ happens to semantically be the same name for $a$ (i.e. if $a=b$). But in Haskell's \texttt{Data.Set}, named elements are the objects. This is evident from the fact that \texttt{Set.size} returns a value without us needing to specify what equalities hold between the objects.}
-
+%\footnote{Note, due to Haskell's implementation, argue "it is the same set anyways, it's is just a matter of names referring to the same object". In set theory, syntactically specifying $\{a,b \}$ may well be the same set as $\{a\}$, if $b$ happens to semantically be the same name for $a$ (i.e. if $a=b$). But in Haskell's \texttt{Data.Set}, named elements are the objects. This is evident from the fact that \texttt{Set.size} returns a value without us needing to specify what equalities hold between the objects.}  
 Furthermore, closing under transitivity and then anti-symmterically may shrink significatly the size of the \emph{carrier set}, in particular every cycle will collapse to a single point.
 
 

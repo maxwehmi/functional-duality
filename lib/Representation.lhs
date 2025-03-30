@@ -1,4 +1,4 @@
-\section{Representation}
+\section{Representation Theorem}
 \label{sec:representation}
 
 The Representation Theorem refers to the fact that the dual of the dual of a Priestley Space is isomorphic to the space itself. Similarly, the dual of the dual of a distributive lattice is isomorphic to the lattice itself. With our implementations, we aim to confirm this fact for finite Priestley spaces and distributive lattices. In this module, we implement and use the necessary machinery to test this. 
@@ -19,12 +19,10 @@ import Priestley
 In order to compute the dual space of our lattices, we first need to be able to isolate filters within them. 
 Intuitively, a filter is a collection of elements of an ordered set such that it is closed upwards and closed under finite meets. In our case the only relevant filters 
 are going to be \textit{Prime filters}, which are just filters that do not contain the bottom element of the lattice, and that never contain a join of two elements without 
-also containing at least one of the two. \newline 
+also containing at least one of the two. 
 
 First, we make a type-shorthand for filters (those are just sets of elements), 
-and we implement helper functions to compute them.
-
-The functions below shall then be used to find the prime filters. 
+and we implement helper functions to compute them. The functions below shall then be used to find the prime filters. 
 
 
 \begin{code}
@@ -72,7 +70,6 @@ To obtain the full topology, we need to take for every $a$ $\varphi(a),\, X\setm
 Next, we use these functions to calculate the dual space of a given lattice:
 
 \begin{code}   
-
 phi :: (Eq a, Ord a) => Lattice a -> a -> Set.Set (Filter a)
 phi lattice x = Set.filter (Set.member x) $ findPrimeFilters lattice 
 
@@ -98,7 +95,7 @@ We present some functions to check basic properties of topological spaces.
 In particular, we want to be able to decide whether two spaces are isomorphic. this is going to come in handy when exploring the duality with algebras. \newline 
 We also present the first step towards implementing the algebra duality: keeping things brief, the set of Clopen Upset of a Priestley space 
 is going to form a distributive lattice under the order induced by set-theoretic inclusion. \newline 
-To this extent, we implement a function to extract an order based on set-theoretic inclusion between sets, which we can later apply to the Clopen Upsets of our topology.\newline 
+To this end, we implement a function to extract an order based on set-theoretic inclusion between sets, which we can later apply to the Clopen Upsets of our topology.\newline 
 Next, we construct a lattice using the Clopen Upsets of our topological space and endowing this set with the desired inclusion-order. We make use of functions from the "DL" section to both construct the lattice and check it is distributive.
 
 \begin{code}

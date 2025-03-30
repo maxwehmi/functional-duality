@@ -25,7 +25,7 @@ getPreimages f y = Set.map fst $ Set.filter (\ (_,z) -> z == y) f
 \end{code}
 
 Using these functions, we can check if a given set of pairs is actually a map, i.e. every element in its domain has exactly one image. Similarly, we can check bijectivity by confirming that the preimage of every element in the range is a singleton. 
-
+\newline
 After confirming that the set of pairs is actually a map and bijective, we can evaluate it for a given point or calculate the preimage. To avoid errors, these functions should only be used after checking well-definedness and bijectivity. We can read \texttt{getImage f x} as a usual $f(x)$.
 
 \begin{code}

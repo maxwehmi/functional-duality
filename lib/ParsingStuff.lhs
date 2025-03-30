@@ -23,18 +23,21 @@ The Intended syntax is really simple, so we opted for writing the whole thing us
 All the parsers here function similarily, as they look for specific symbols signaling the beginning and the end of the intended input and for strings/pairs of strings/lists of strings separated by a comma. Further, every parser is 
 composed of different subordinate parsers which function in a similar way, but look only for specific elements within the input (e.g. for pairs rather than lists).
 
-For lattices, the intended syntax is \texttt{Set: <elements of the set, separated by a comma> \,\,Order: <ordered pairs, separated by a comma>}
+For lattices, the intended syntax is: \texttt{Set: <elements of the set, separated by a comma> \,\,
+Order: <ordered pairs, separated by a comma>}
 
-E.g. \texttt{Set: x, y, z, k ... Order: (x,y), (k,z), ...} is a valid input instance.  
+For example: \texttt{Set: x, y, z, k ... Order: (x,y), (k,z), ...}  is a valid input instance.  
 
-For Priestley spaces, the intended syntax is 
+For Priestley spaces, the intended syntax is: 
+\texttt{Space: <elements of the set, separated by a comma> \,\, 
+Topology: <lists of elements, separated by a comma>\,\,
+Order:<ordered pairs, separated by a comma>}
 
-\texttt{Space: <elements of the set, separated by a comma> \,\, Topology: <lists of elements, separated by a comma>\,\,Order:<ordered pairs, separated by a comma>}
+For example: \texttt{-- encoding for Topological (Priestley) spaces should be Space:
+x, y, z... Topology: [a, b, ...],  [d, b. ...],...
+Order: (a,b), (c,d), ...} is a valid input instance.
 
-E.g. \texttt{-- encoding for Topological (Priestley) spaces should be Space: x, y, z... Topology: [a, b, ...],  [d, b. ...],... Order: (a,b), (c,d), ...} is a valid input instance.
-
-
-The input should be given in one line, if, for logging or other purposes, multiple lines are preferred, adding "\texttt{\\n}" between the various items will record a line break in the input. 
+The input should be given in one line, if, for logging or other purposes, multiple lines are preferred, adding "\verb:\n:" between the various items will record a line break in the input. 
 
 
 \begin{code}
