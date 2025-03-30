@@ -1,5 +1,5 @@
 \section{Priestley Spaces}
-We introduce the usual imports for printings.
+We introduce usual imports for printings.
 
 \begin{code}
 module Priestley where
@@ -35,11 +35,9 @@ Formally, this would be the following Priestly Separation axiom:
 
 $$x \not \leq y \rightarrow \exists C (C \in \tau \land X\setminus C \in \tau \land C = \uparrow C \land x\in C \land y\notin C)$$
 
-
 In the definition of the types, we keep it as close as possible to their mathematical counterparts:
 
 We also add custom Show instances to print nicely our objects from the executable (beside their graphViz representation).
-
 
 \begin{code}
 type Topology a = Set.Set (Set.Set a)
@@ -68,7 +66,7 @@ instance Show a => Show (PriestleySpace a) where
 
 
 \subsection{Set-theoretic preliminaries}
-In order to deal effectively with topological spaces, we first define some Set-theoretic preliminary notions. In addition to the standard functions drawn from \verb:Data.Set: library,
+In order to deal effectively with topological spaces, we first define some Set-theoretic preliminary notions. In addition to the standard functions drawn from \texttt{Data.Set} library,
 we define new functions to compute the closure of a given set under arbitrary unions and intersections. \newline 
 In both cases, we first define functions to perform a one-step intersection (resp. union) of a set with itself, and then iterate the function until the resulting set 
 is identical to its own one-step intersection (resp. union) closure. 
@@ -96,7 +94,7 @@ intersectionClosure z = do
 \end{code}
 
 \subsection{Topology basics}
-We now introduce some machinery to work on topological spaces, and in particular, to ensure our spaces respect the Priestley separation axiom.\newline 
+We now introduce some machinery to work on topological spaces, and in particular, to ensure our spaces respect the Priestley separation axiom.
 
 The following function check whether a Topological space given as input respects the requirements spelled above.\newline 
 It is assumed that the input is finite. In case the input does not respect the conditions, the second function adjusts the space so that it meets the requirements.
@@ -113,7 +111,7 @@ fixTopology (TS space2 t) = TS space2 fixedTop  where
     fixedTop  = Set.fromList [space2, Set.empty] `Set.union` unionClosure (intersectionClosure t)
 \end{code}
 
-The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is usefule when it comes to printing via graphViz, since it allows to have one uniform instance for \texttt{OrderedSet} which applies easily to Lattices and Priestley spaces.
+The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is usefull when it comes to printing via graphViz, since it allows to have one uniform instance for \texttt{OrderedSet} which applies easily to Lattices and Priestley spaces.
 
 \begin{code}
 getTopoSpace :: PriestleySpace a -> TopoSpace a

@@ -33,8 +33,6 @@ On top of this, a distributive lattice is a lattice whose meet and join satisfiy
  \item $\forall a,b,c \in L,    a \wedge (b \vee c) =  (a \wedge b) \vee (a \wedge c)$ 
 
  \item $\forall a,b,c \in L,    a \vee (b \wedge c) = (a \vee b) \wedge (a \vee c)$
-
-
 \end{enumerate}
 
 We define the data type of lattices in the following manner:
@@ -50,17 +48,20 @@ data Lattice a = L {
 
 instance (Ord a, Show a) => Show (Lattice a) where
     show l = "(" ++ show (carrier l) ++ ";\n Meet: " ++ show ( [(x,y, meet l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))])  ++ ";\n Join: " ++ show ([(x,y, join l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))]) ++ ")" 
-
 \end{code}
 
-But note that not every object \texttt{l} of type \texttt{Lattice a} is an actual lattice in the mathematical sense. In partiuclar, we must check that the functions \texttt{meet} and \texttt{join} actually behave as they should mathematiclaly, and that objects \texttt{meet l}  \texttt{join l} always exist, respecting the definition.
+But note that not every object \texttt{l} of type \texttt{Lattice a} is an actual lattice in the mathematical sense. In partiuclar, we must check that the functions \texttt{meet} and \texttt{join} actually behave as they should mathematiclaly, and that objects \texttt{meet l}, \texttt{join l} always exist, respecting the definition.
 
-Furthemore, we'll be working with in finite cases. Thus our lattice should be \emph{bounded}, meaning it has a minimal ($\top$ called top) and a maximal ($\bot$ called bottom) element. Since we are working with finite structures, each lattice is a bounded lattice by taking the meet or join of all the elements. 
+Furthemore, we'll be working with in finite cases. Thus our lattice should be \emph{bounded}, meaning it has a minimal ($\top$ called top) and a maximal ($\bot$ called bottom) element. 
+
+Since we are working with finite structures, each lattice is a bounded lattice by taking the meet or join of all the elements. 
 
 
 \subsection{Checking Lattices}
 The aim of the following functions is to ensure that any object of type \texttt{Lattice a} behave as desired.
 
+
+\begin{comment}
 \paragraph{Boundedness}
 The \texttt{top} and \texttt{bottom} functions will give the top and bottom elements of a lattice, and \texttt{isTop} and \texttt{isBottom}checks whether some element in the lattice is actually the 
 top or bottom element. Then, the \texttt{checkBoundedness} function will check the existence of a top and bottom element in a lattice by just checking if \texttt{top} and \texttt{bot} return a value. 
@@ -88,15 +89,14 @@ checkBoundedness :: Ord a => Lattice a -> Bool
 checkBoundedness l = M.isJust (top l) && M.isJust (bot l)
 
 \end{code}
+\end{comment}
 
-\paragraph{Meets and Joins}
+\subsubsection{Meets and Joins}
 
-Now, as mentioned above a lattice $L$ should be closed under meets and joins for any two objects in the lattice. 
-The function \texttt{checkClosedMeetJoin} checks precisely this using the \texttt{meet} and \texttt{join} function part of the lattice
+Now, as mentioned above a lattice $L$ should be closed under meets and joins for any two objects in the lattice. The function \texttt{checkClosedMeetJoin} checks precisely this using the \texttt{meet} and \texttt{join} function part of the lattice
 datatype. 
 
 \begin{code}
-
 checkClosedMeetJoin :: Ord a => Lattice a -> Bool
 checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair in l
                         &&
@@ -106,33 +106,27 @@ checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair 
         j = Set.cartesianProduct lSet lSet -- sets of pairs
         pairMeet = uncurry (meet l) 
         pairJoin = uncurry (join l)
-
 \end{code}
 
 Furthermore, we desire a function that checks whether some lattice is well-defined,
 meaning that the function \texttt{meet} and \texttt{join} that come with our lattice correspond with the 
-actual meet and join in the ordered set underlying the lattice. That is what the function
-
-
-\texttt{checkMeetJoinMakeSensedoes}
+actual meet and join in the ordered set underlying the lattice.
 
 \begin{code}
-
 checkMeetJoinMakeSense :: Ord a => Lattice a -> Bool
 checkMeetJoinMakeSense l = and [Just (meet l x y) == findMeet l x y
                                 && Just (join l x y) == findJoin l x y
                                 |x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))]
-
 \end{code}
 
 Besides the functions in the data type, we want functions that will find the actual meet and join in the lattice by looking at the poset underlying the lattice. These functions are called \texttt{findMeet} and \texttt{findJoin}, used in \texttt{checkMeetJoinMakeSense}.
 
-For these, we'll need to find  greatest lower bound and least upper bound. So we need helper functions \texttt{upperBounds} and \texttt{lowerBounds}. Then, the functions \texttt{findGreatest} and \texttt{findLeast} will find the greatest or least element of a subset of some lattice $L$ with respect to the ordering inside $L$.
+For these, we'll need to find  greatest lower bound and least upper bound. So we need helper functions \texttt{upperBounds} and \texttt{lowerBounds}. Then, the functions \texttt{findGreatest} and \texttt{findLeast} will find the greatest or least element.
+%of a subset of some lattice $L$ with respect to the ordering inside $L$.
 
 Since we might not be in front of a lattice when we call the function, we must return a \texttt{Maybe} value.
 
 \begin{code}
-
 findMeet :: Ord a => Lattice a -> a -> a -> Maybe a
 findJoin :: Ord a => Lattice a -> a -> a -> Maybe a
 
@@ -153,11 +147,10 @@ upperBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (a1, c) `Set.
 lowerBounds :: Ord a => OrderedSet a -> a -> a -> Set.Set a
 lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.member` rel os && 
                                                            (c, a2) `Set.member` rel os]
-
 \end{code}
 
 
-\paragraph{Distributivity}
+\subsubsection{Distributivity}
 We want to work with distributive lattices. As mentioned above, a lattice $L$ is distributive if for any 
 $a,b,c \in L$ the distributivity laws hold.
 
@@ -171,7 +164,7 @@ checkDistributivity (L (OS s _) m v) = and
                         | a <- Set.toList s, b <- Set.toList s, c <- Set.toList s]
 \end{code}
 
-\paragraph{Bringing it together}
+\subsubsection{Bringing it together}
 
 Then we can check whether a lattice object \texttt{l} is actually a lattice in the mathematical
 sense.
@@ -183,11 +176,9 @@ checkLattice l = checkMeetJoinMakeSense l && checkClosedMeetJoin l
 
 And lastly, we can then check wether \texttt{l} is a distributive lattice.
 
-
-Note that as we are working in the finite case, checking boundedness is unnecessary as the bounds already exists for finite lattices. However, we have included this for the completeness of implementation.
+% Note that as we are working in the finite case, checking boundedness is unnecessary as the bounds already exists for finite lattices. However, we have included this for the completeness of implementation.
 
 \begin{code}
-
 checkDL :: Ord a => Lattice a -> Bool
 checkDL l =        checkLattice l 
                     &&
@@ -195,6 +186,7 @@ checkDL l =        checkLattice l
                     &&
                    checkDistributivity l
 \end{code}
+
 
 \subsection{Generating a lattice from a poset}
 
@@ -208,11 +200,11 @@ makeLattice os = L os (\x y -> M.fromJust $ findMeet preLattice x y) (\x y -> M.
                 where preLattice = L os const const -- give it two mock functions
 \end{code}
 
-When, at later stages, we will construct distributive lattices from Priestely spaces, we will get structures whose elements are sets themselves. To prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new lattice out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
+When, at later stages, we will construct distributive lattices from Priestely spaces, we will get structures whose elements are sets themselves. To prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new lattice out of a given one. This new one is isomorphic to the original one, but its elements are of type \texttt{Int}. This can make computation faster.
 
 The first returns, with the new space, also a map, and is meant to be used when we care about the old elements (the map allows to reconstruct them, for example we can check that the orignal and the simplifief lattices are indeed isomorphic). The second does not return a map and it is meant to be used when we do not care about the old elements, it is in particular useful for printing purposes, as we will see in due time.
 
-\begin{code}        
+\begin{code}
 simplifyDL :: Ord a => Lattice a -> (Lattice Int, Map a Int)
 simplifyDL l = (makeLattice (OS s' r'), mapping) where
     s = (set . carrier) l 
@@ -222,9 +214,6 @@ simplifyDL l = (makeLattice (OS s' r'), mapping) where
         x <- Set.toList s', 
         y <- Set.toList s', 
         (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
-
-
-
 
 simplifyDL1 :: Ord a => Lattice a -> Lattice Int
 simplifyDL1 l = (makeLattice (OS s' r')) where
@@ -323,9 +312,7 @@ cleanUp (OS s r) = OS s (Set.filter (\ (x,y) -> x `elem` s && y `elem` s) r)
 \subsection{Morphisms} 
 
 We want to check wether two Lattices are isomorphic. Two lattices $L,L'$ are isomrophic if there is an function $f: L \to L'$ such that:
-
 \begin{itemize}
-
 \item $f$ is a bijection
 \item Top and bottme are preserved: $f(\top) = \top'$ and $f(\bot')= \bot'$
 \item Meets are preserved: $f(x \wedge y) = f(x) \wedge f(y)$
@@ -333,7 +320,7 @@ We want to check wether two Lattices are isomorphic. Two lattices $L,L'$ are iso
 
 \end{itemize}
 
-The code for this mirrors the definition straighforwardly, if with some clutter.
+The code for this mirrors the definition straighforwardly, if with some clutter to get values as we need them.
 
 \begin{code}
 functionMorphism:: (Ord a, Ord b) => Lattice a -> Lattice b -> Map a b -> Bool
@@ -341,22 +328,20 @@ functionMorphism l1  l2 f
     | not(checkLattice l1 && checkLattice l2) = error "The provided structures are not lattices."
     | not (checkMapping s1 f) = error "The provided map is not a mapping."
     | otherwise = 
-                checkBijective s2 f 
-                &&
-                f `getImage` M.fromJust (top l1) == M.fromJust (top l2)
-                &&
-                f `getImage` M.fromJust  (bot l1) == M.fromJust (bot l2)
-                && 
-                all 
-                (\(x,y) -> M.fromJust (findJoin l2 (f `getImage` x) (f `getImage` y)) == f `getImage` M.fromJust (findJoin l1 x y))
-                (s1 `Set.cartesianProduct` s1)
-                &&
-                all
-                (\(x,y) -> M.fromJust (findMeet l2 (f `getImage` x) (f `getImage` y)) == f `getImage` M.fromJust (findMeet l1 x y))
-                (s1 `Set.cartesianProduct` s1)
-                where
-                    s1 = set $ carrier l1
-                    s2 = set $ carrier l2                         
+        checkBijective s2 f 
+        && f `getImage` M.fromJust (top l1) == M.fromJust (top l2)
+        && f `getImage` M.fromJust  (bot l1) == M.fromJust (bot l2)
+        
+        &&  all 
+        (\(x,y) -> M.fromJust (findJoin l2 (f `getImage` x) (f `getImage` y)) == f `getImage` M.fromJust (findJoin l1 x y))
+            (s1 `Set.cartesianProduct` s1)
+        
+        &&  all
+        (\(x,y) -> M.fromJust (findMeet l2 (f `getImage` x) (f `getImage` y)) == f `getImage` M.fromJust (findMeet l1 x y))
+            (s1 `Set.cartesianProduct` s1)
+        where
+            s1 = set $ carrier l1
+            s2 = set $ carrier l2                         
 \end{code}
 
 
@@ -376,11 +361,9 @@ functionMorphism l1  l2 f
 
 % \subsection{Printing machinery}
 
-Analogously to its Poset-counterpart, this function actually prints the Lattice.
+Analogously to its Poset-counterpart, this function actually prints the Lattice. \footnote{for more detail, see the \hyperref[sec:posetprinting]{entry of chapter 3}}
 
 \begin{code}
-
 showLattice ::(Ord a, PrintDot a) => Lattice a -> IO ()
 showLattice l = runGraphvizCanvas' (toGraphOrd (fromReflTrans $ carrier l)) Xlib
-
 \end{code}

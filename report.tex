@@ -12,15 +12,12 @@
 
 \maketitle
 
-
+\pagenumbering{roman}
 \begin{abstract}
 
 The aim of this project is to provide a Haskell implementation for the Duality-theoretic translations between Distributive lattices and Priestley spaces.
 
-In order to do so in Section 2 we define relevant mappings. In section 3 we encode partially ordered sets in Haskell, making use of the Data.set library. In section 4 we offer an implementation for Distributive lattices based on the on partially ordered set construction. In section 5 we define Priestley spaces in Haskell. In section 6 we effectively implement translations between Priestley spaces and Distributive lattices.
-
-
-
+In order to do so in Section 2 we define relevant mappings. In section 3 we encode partially ordered sets in Haskell, making use of the Data.set library. In section 4 we offer an implementation for Distributive lattices based on the on partially ordered set construction. In section 5 we define Priestley spaces in Haskell. In section 6 we effectively implement translations between Priestley spaces and Distributive lattices. For using the executable, refer to section 7.
 
 % We give a toy example of a report in \emph{literate programming} style.
 %The main advantage of this is that source code and documentation can
@@ -31,7 +28,7 @@ The repository of the project can be found at https://github.com/maxwehmi/functi
 \end{abstract}
 
 %\vfill
-
+\setcounter{tocdepth}{2} 
 \tableofcontents
 
 \clearpage
@@ -39,6 +36,8 @@ The repository of the project can be found at https://github.com/maxwehmi/functi
 % We include one file for each section. The ones containing code should
 % be called something.lhs and also mentioned in the .cabal file.
 
+
+\pagenumbering{arabic}
 \input{intro-conclusion/introduction.tex}
 
 \input{lib/Basics.lhs}

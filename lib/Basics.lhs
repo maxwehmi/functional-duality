@@ -1,4 +1,4 @@
-\section{Basics}\label{sec:Basics}
+\section{Basics} \label{sec:Basics}
 
 In this section, we introduce the basics for our project. For the most part, this is concerned with maps between spaces and some other helper functions. These will be imported in all other modules.
 
@@ -52,6 +52,8 @@ getPreimage mapping y | Set.size (getPreimages mapping y) == 1 = Set.elemAt 0 (g
 
 Then, these allow us to read \texttt{getImages f x} as a usual $f(x)$ for a given mapping.
 
+
+\begin{comment}
 \subsection{Other Helpful functions}
 
 Some known functions are nice to have as abbreviations. Here we implement boolean implication:
@@ -60,3 +62,4 @@ Some known functions are nice to have as abbreviations. Here we implement boolea
 implies :: Bool -> Bool -> Bool
 implies x y = not x || y
 \end{code}
+\end{comment}
