@@ -9,6 +9,7 @@ import DL
 import Priestley
 import Representation
 import ParsingStuff
+
 import Text.Parsec (parse)
 import Text.Read (readMaybe)
 import Data.Set as Set

@@ -103,9 +103,7 @@ inclusionOrder :: Ord a => Topology a -> Relation (Set.Set a)
 inclusionOrder x = Set.fromList [ (z ,y) |  z <- Set.toList x, y <- Set.toList x, Set.isSubsetOf z y ]
 
 clopMap :: Ord a => PriestleySpace a -> Lattice (Set.Set a)
-clopMap  ps = do 
-              let result = makeLattice $  OS (clopUp ps) (inclusionOrder (clopUp ps)) 
-              if checkDL result then result else error "104!"
+clopMap  ps = makeLattice $  OS (clopUp ps) (inclusionOrder (clopUp ps))
 
 fastClopMap :: Ord a => PriestleySpace a -> (Lattice (Set.Set a), Lattice Int, Map (Set.Set a) Int)
 fastClopMap p = (l, fst sl, snd sl) where

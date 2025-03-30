@@ -65,7 +65,7 @@ symbol :: String -> Parser String
 symbol s = try (spaces *> string s <* spaces)
 
 identifier :: Parser String
-identifier = many1 letter <* spaces
+identifier = many1 alphaNum <* spaces
 
 pair :: Parser (String, String)
 pair = between (symbol "(") (symbol ")") $ do
@@ -135,3 +135,4 @@ threeexample = do
     Right os -> showOrdSet os
 \end{code}
 \end{comment}
+
