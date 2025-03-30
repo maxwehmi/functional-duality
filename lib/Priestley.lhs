@@ -35,12 +35,10 @@ Notice that, since we are working with finite cases, finitary and arbitrary unio
 Then, a  Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set; such that or any $x,y$, if $x\not\leq y$, then there exists a upwards-closed set $\uparrow \!\!C$ such that $\uparrow \!\!C$ is clopen and $x \in \uparrow \!\!C$ and $y \notin \uparrow \!\!C$. Intuitively, we say $\uparrow \!\!C$ is separates $x$ and $y$.
 \newline
 Formally, this would be the following Priestly Separation axiom:
-
 $$x \not \leq y \rightarrow \exists C (C \in \tau \land X\setminus C \in \tau \land C = \uparrow C \land x\in C \land y\notin C)$$
+% In the definition of the types, we keep it as close as possible to their mathematical counterparts:
 
-In the definition of the types, we keep it as close as possible to their mathematical counterparts:
-
-We also add custom Show instances to print nicely our objects from the executable (beside their graphViz representation).
+Then our types are thus:\footnote{We omit it, but also defined a \texttt{Show} instances to print nicely our objects from the terminal (beside their graphViz representation).}
 
 \begin{code}
 type Topology a = Set.Set (Set.Set a)
@@ -50,10 +48,6 @@ data TopoSpace a = TS {
     topologyTS :: Topology a
 }
     deriving (Eq, Ord)
-instance Show a => Show (TopoSpace a) where
-    show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
-                        
-                        ++ "Top:" ++ show (map Set.toList (Set.toList t)) ++ "}" 
 
 data PriestleySpace a = PS {
     setPS :: Set.Set a,
@@ -61,11 +55,22 @@ data PriestleySpace a = PS {
     relationPS :: Relation a
 }
     deriving (Eq, Ord)
+\end{code}
+
+\begin{comment}
+\begin{code}
+instance Show a => Show (TopoSpace a) where
+    show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
+                        
+                        ++ "Top:" ++ show (map Set.toList (Set.toList t)) ++ "}" 
+
+
 instance Show a => Show (PriestleySpace a) where
     show (PS s t r ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
                         ++ "Top: " ++ show (map Set.toList (Set.toList t)) ++ ";\n"
                         ++ "Rel: " ++ show (Set.toList r) ++ "}"
 \end{code}
+\end{comment}
 
 
 \paragraph{Set-theoretic preliminaries}
@@ -265,7 +270,7 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 \end{code}
 
 \paragraph{Printing machinery}
-Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space. \footnote{for more detail, see the \hyperref[sec:posetprinting]{entry of chapter 3}}
+Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space.\footnote{for more detail, see the \hyperref[sec:posetprinting]{subsection 3.4}}
 
 \begin{code}
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()

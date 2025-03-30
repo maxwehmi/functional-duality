@@ -1,7 +1,7 @@
 \section{Partially ordered sets}
 \label{posets}
 \begin{comment}
-This first import some necessary packets for pretty printing. For details, see \hyperref[sec:posetprinting]{subsection 3.4}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
+This first import some necessary packets for pretty printing. For details, see \hyperref[sec:posetprinting]{4}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
 
 \begin{code}
 module Poset where
@@ -282,7 +282,7 @@ This section\footnote{A similar section will be present at the end of each secti
 
 Our primary concern is for the picture to be clear and readable. Thus we omit all transitive and reflexive edges. 
 
-We stuck with the mathematical convention of having unlabeled nodes, since we are in any case interested in classes of posets "up to isomorphism".\footnote{If the user wishes to label their node, this can easily be done modifying the GraphAttributes (those wrapped in square brackets) in "toGraphOrd".}
+We stuck with the mathematical convention of having unlabeled nodes, since we are in any case interested in classes of posets "up to isomorphism".\footnote{If the user wishes to label their node, this can easily be done modifying the GraphAttributes (those wrapped in square brackets) in \texttt{toGraphOrd}.}
 
 In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. If the reader wishes to visualize the graph, they should both install \textit{graphViz} and \textit{Xlib} on their machines.
 If running Ubuntu, one may simply run \texttt{sudo apt-get install libx11-dev graphviz} on bash.

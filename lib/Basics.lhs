@@ -12,15 +12,11 @@ import qualified Data.Set as Set
 
 %\subsection{Mappings}
 
-We will use maps (and more specifically isomorphisms) between spaces a lot. Like usual in mathematics, we implement them as a set of pairs.
+We will use maps (and more specifically isomorphisms) between spaces a lot. Like usual in mathematics, we implement them as a set of pairs. Then we want to evalutate maps and get preimages. For images, we are given a map and an element $x$ in the domain. Firstly, we calculate the set of second elements, such that the first element in the mapping is $x$ and similarly for preimages.
 
 \begin{code}
 type Map a b = Set.Set (a,b)
-\end{code}
 
-Of course, we also want to evalutate maps and get preimages. For images, we are given a map and an element $x$ in the domain. Firstly, we calculate the set of second elements, such that the first element in the mapping is $x$ and similarly for preimages.
-
-\begin{code}
 getImages :: (Ord a, Ord b) => Map a b -> a -> Set.Set b
 getImages f x = Set.map snd $ Set.filter (\ (y,_) -> x == y) f
 
@@ -30,17 +26,15 @@ getPreimages f y = Set.map fst $ Set.filter (\ (_,z) -> z == y) f
 
 Using these functions, we can check if a given set of pairs is actually a map, i.e. every element in its domain has exactly one image. Similarly, we can check bijectivity by confirming that the preimage of every element in the range is a singleton. 
 
+After confirming that the set of pairs is actually a map and bijective, we can evaluate it for a given point or calculate the preimage. To avoid errors, these functions should only be used after checking well-definedness and bijectivity. We can read \texttt{getImage f x} as a usual $f(x)$.
+
 \begin{code}
 checkMapping :: (Ord a, Ord b) => Set.Set a -> Map a b -> Bool
 checkMapping sa mapping = all (\ x -> Set.size (getImages mapping x) == 1) sa
 
 checkBijective :: (Ord a, Ord b) => Set.Set b -> Map a b -> Bool
 checkBijective sb mapping = all (\ y -> Set.size (getPreimages mapping y) == 1) sb
-\end{code}
 
-After confirming that the set of pairs is actually a map and bijective, we can evaluate it for a given point or calculate the preimage. To avoid errors, these functions should only be used after checking well-definedness and bijectivity.
-
-\begin{code}
 getImage :: (Ord a, Ord b) => Map a b -> a -> b
 getImage mapping x | Set.size (getImages mapping x) == 1 = Set.elemAt 0 (getImages mapping x)
                    | otherwise = error "Given Relation is not a mapping" 
@@ -50,7 +44,6 @@ getPreimage mapping y | Set.size (getPreimages mapping y) == 1 = Set.elemAt 0 (g
                       | otherwise = error "Either no or too many preimages"
 \end{code}
 
-Then, these allow us to read \texttt{getImage f x} as a usual $f(x)$ for a given mapping.
 
 
 \begin{comment}

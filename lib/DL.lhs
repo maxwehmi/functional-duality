@@ -108,13 +108,10 @@ checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair 
         pairJoin = uncurry (join l)
 \end{code}
 
-Furthermore, we need a function that checks whether some lattice is well-defined, meaning that the function \texttt{meet} and \texttt{join} that come with our lattice correspond with the actual meet and join of the ordered set.
+Furthermore, we need a function that checks whether some lattice is well-defined, meaning that the function \texttt{meet} and \texttt{join} that come with our data type correspond with the actual meet and join of the ordered set. For this, we want functions that will find the actual meet and join in the lattice. These are \texttt{findMeet} and \texttt{findJoin}.
 
-For this, we want functions that will find the actual meet and join in the lattice. These are \texttt{findMeet} and \texttt{findJoin}.
-
-We'll need to find  greatest lower bound and least upper bound. So we need helper functions \texttt{upperBounds} and \texttt{lowerBounds}. Then, the functions \texttt{findGreatest} and \texttt{findLeast} will find the greatest or least element. These funtcions are straighforward, so we omitt them.
-%of a subset of some lattice $L$ with respect to the ordering inside $L$.
-
+We'll need to find  greatest lower bound and least upper bound. So we have  helper functions \texttt{upperBounds} and \texttt{lowerBounds}. Then, the functions \texttt{findGreatest} and \texttt{findLeast} will find the greatest or least element. These funtcions are straighforward, so we omitt them.
+\newline
 Since we might not be in front of a lattice when we call the function, we must return a \texttt{Maybe} value.
 
 \begin{code}
@@ -149,10 +146,7 @@ lowerBounds os a1 a2 = Set.fromList [c | c <- Set.toList $ set os, (c, a1) `Set.
 \end{comment}
 
 \paragraph{Distributivity}
-We want to work with distributive lattices. As mentioned above, a lattice $L$ is distributive if for any 
-$a,b,c \in L$ the distributivity laws hold.
-
-The function \texttt{checkDistributivity} checks whether a lattice is distributive. Note the laws are inter-derivable. So it suffices to check just one.
+We want to work with distributive lattices. As mentioned above, a lattice $L$ is distributive if for any $a,b,c \in L$ the distributivity laws hold. Note the laws are inter-derivable. So it suffices to check just one.
 
 \begin{code}
 checkDistributivity :: Eq a => Lattice a -> Bool
@@ -162,9 +156,7 @@ checkDistributivity (L (OS s _) m v) = and
 \end{code}
 
 \paragraph{Bringing it together}
-
 Then we can check whether a lattice object \texttt{l} is actually a lattice in the mathematical sense. Aswell as it being distributive
-
 
 % Note that as we are working in the finite case, checking boundedness is unnecessary as the bounds already exists for finite lattices. However, we have included this for the completeness of implementation.
 
@@ -182,7 +174,6 @@ checkDL l =        checkLattice l
 
 
 \subsection{Generating a Lattices}
-
 We also want to be able \emph{make} a lattice of type \texttt{Lattice}  from a given \texttt{OrderedSet}.
 
 For this, we use the constructor on the ordered set with "mock" functions to make it of the \texttt{Lattice} type. Then we forcing them to be the \texttt{findMeet} and \texttt{findJoin} insetad, we'll have something that is indeed a lattice.
@@ -314,7 +305,7 @@ We want to check wether two Lattices are isomorphic. Two lattices $L,L'$ are iso
 
 \end{itemize}
 
-The code for this mirrors the definition straighforwardly, if with some clutter to get values as we need them.
+The code for this mirrors the definition straighforwardly, if with some clutter to grab values. 
 
 \begin{code}
 functionMorphism:: (Ord a, Ord b) => Lattice a -> Lattice b -> Map a b -> Bool
@@ -342,8 +333,6 @@ functionMorphism l1  l2 f
 
 
 \paragraph{Printing machinery} \label{sec:dlprinting}
-
-
 % \begin{code}
 % showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
 % showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))) Xlib
@@ -355,7 +344,7 @@ functionMorphism l1  l2 f
 
 % \subsection{Printing machinery}
 
-Analogously to its Poset-counterpart, this function actually prints the Lattice. \footnote{for more detail, see the \hyperref[sec:posetprinting]{entry of chapter 3}}
+Analogously to its Poset-counterpart, this function actually prints the Lattice.\footnote{for more detail, see the \hyperref[sec:posetprinting]{subsection 3.4}}
 
 \begin{code}
 showLattice ::(Ord a, PrintDot a) => Lattice a -> IO ()
