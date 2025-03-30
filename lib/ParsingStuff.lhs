@@ -1,36 +1,46 @@
+
+\section{Parsing for user interface}
+\label{sec:parsing}
+
 \begin{code}
 module ParsingStuff where 
-import qualified Data.Set as Set
-import Text.Parsec( letter, spaces, string, between, eof, many1, sepBy, parse, try, alphaNum )
-import Poset
+import Text.Parsec( letter, spaces, string, between, eof, many1, sepBy, parse, try )
 import Text.Parsec.String (Parser)
 import Control.Monad (void)
-import Priestley (PriestleySpace (PS), showPriestley)
 import System.IO
-
 \end{code}
-\section{Parsing for user interface}
-In order to make the executable a (somewhat) practical tool, we wrote two simple parsers to allow our \verb{Main.exe} to take in direct input for the user. \newline 
+
+\begin{comment}
+\begin{code}
+import qualified Data.Set as Set
+import Poset
+import Priestley (PriestleySpace (PS), showPriestley)
+\end{code}
+\end{comment}
+
+In order to make the executable a (somewhat) practical tool, we wrote two simple parsers to allow our \texttt{Main.exe} to take in direct input for the user. \newline 
 The Intended syntax is really simple, so we opted for writing the whole thing using \textit{Parsec} rather then generating it with Happy and Alex. \newline 
 All the parsers here function similarily, as they look for specific symbols signaling the beginning and the end of the intended input and for strings/pairs of strings/lists of strings separated by a comma. Further, every parser is 
 composed of different subordinate parsers which function in a similar way, but look only for specific elements within the input (e.g. for pairs rather than lists).
-\subsection{Syntax}
-\begin{itemize}
 
-\item[Lattices:] For lattices, the intended syntax is $$Set: <elements of the set, separated by a comma> \,\,Order: <ordered pairs, separated by a comma>$$
-E.g. \textit{Set: x, y, z, k ... Order: (x,y), (k,z), ...} is a valid input instance.  
+For lattices, the intended syntax is: \texttt{Set: <elements of the set, separated by a comma> \,\,
+Order: <ordered pairs, separated by a comma>}
 
-\item[P. Spaces:]For Priestley spaces, the intended syntax is $$Space: <elements of the set, separated by a comma> \,\, Topology: <lists of elements, separated by a comma>\,\,Order:<ordered pairs, separated by a comma>$$
-E.g. \textit{-- encoding for Topological (Priestley) spaces should be Space: x, y, z... Topology: [a, b, ...],  [d, b. ...],... Order: (a,b), (c,d), ...} is a valid input instance.
+For example: \texttt{Set: x, y, z, k ... Order: (x,y), (k,z), ...}  is a valid input instance.  
 
+For Priestley spaces, the intended syntax is: 
+\texttt{Space: <elements of the set, separated by a comma> \,\, 
+Topology: <lists of elements, separated by a comma>\,\,
+Order:<ordered pairs, separated by a comma>}
 
-\end{itemize}
-The input should be given in one line, if, for logging or other purposes, multiple lines are preferred, adding "\n" between the various items will record a line break in the input. 
+For example: \texttt{-- encoding for Topological (Priestley) spaces should be Space:
+x, y, z... Topology: [a, b, ...],  [d, b. ...],...
+Order: (a,b), (c,d), ...} is a valid input instance.
+
+The input should be given in one line, if, for logging or other purposes, multiple lines are preferred, adding "\verb:\n:" between the various items will record a line break in the input. 
 
 
 \begin{code}
-
-
 parseOrderedSet :: Parser (OrderedSet String)
 parseOrderedSet = do
   elements <- parseSetLine
@@ -94,10 +104,11 @@ open = do
   elements <- between (symbol "[") (symbol "]") $
     identifier `sepBy` symbol ","
   return $ Set.fromList elements
-
 \end{code}
 
-Last, we have some rudimentary test cases, the last of which mimics parts of the intended behavior of the executable. 
+\begin{comment}
+Last, we have some rudimentary test cases, the last of which mimics parts of the intended behavior of the executable.
+
 \begin{code}
   -- (Lattice)
 oneexample :: IO ()
@@ -122,5 +133,6 @@ threeexample = do
   case parse parseOrderedSet "" input of
     Left err -> print err
     Right os -> showOrdSet os
-
 \end{code}
+\end{comment}
+

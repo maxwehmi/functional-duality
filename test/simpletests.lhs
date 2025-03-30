@@ -3,7 +3,7 @@
 \label{sec:simpletests}
 
 We now use the library QuickCheck to test our functions and finally check if representation holds.
-
+\begin{comment}
 \begin{code}
 module Main where
 
@@ -15,8 +15,9 @@ import Poset
 import Priestley
 import Representation
 \end{code}
+\end{comment}
 
-In our tests, we check if the arbitrary instances are generated correctly, i.e. that they have the properties we want them to have. Then we use the fast representation check to confirm that representation holds. We specified the type in all of our datastructures to be \verb:Int:, because hlint had a problem if we did not specify it. We only check these properties, because the tests already take very long even for very small instances. Further, our main goal was to confirm that representation holds.
+In our tests, we check if the arbitrary instances are generated correctly, i.e. that they have the properties we want them to have. Then we use the fast representation check to confirm that representation holds. We specified the type in all of our datastructures to be \verb:Int:, to resolve hlint errors. We only check these properties, because the tests take very long even for very small instances. Further, our main goal was to confirm that representation holds.
 
 \begin{code}
 main :: IO ()
@@ -34,4 +35,4 @@ main = hspec $ do
       property $ \ ps -> checkRepresentationPSfast (ps :: PriestleySpace Int)
 \end{code}
 
-To run the tests, use \verb|stack test|. On GitHub, the tests sometimes get cancelled and we could not figure out in time why that is the case. However, local tests confirm that everything is working as it should.
+To run the tests, use \texttt{stack test}. On GitHub, the tests sometimes get cancelled and we could not figure out in time why that is the case. However, local tests confirm that everything is working as it should.

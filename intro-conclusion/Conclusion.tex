@@ -1,20 +1,5 @@
 
 \section{Conclusion}\label{sec:Conclusion}
+We have reached the following main objectives: we created a library for lattices and topological spaces, encoding Distributive Lattices and Priestley Spaces along with their structural isomorphisms. We implemented a Haskell translation between these structures and constructed arbitrary instances to run \texttt{QuickCheck} tests. Additionally, implemented a the \texttt{main} executable as a command-line interface, complemented by a parser for improved accessibility. When running \texttt{main}, users can visualize input structures, retrieve their duals, and verify isomorphisms between a structure and its dual’s dual.
 
-We have reached the following main objectives:
-
-\begin{itemize}
-
-
-    \item we have created a library for lattices and topological spaces. In particular we have provided an enconding for Distributive lattices and Priestley Spaces and their structural and their respective isomorphisms.  
-    \item we have implemented in Haskell a translation between Distributive Lattices and Priestley Spaces. 
-    \item we have implemented a program to graphically visualise the structures we discussed.  
-    \item we have constructed arbitrary instances of these structures in order to run \texttt{QuickCheck} tests on them.
-    \item we have built the executable \texttt{main} to serve as a command line interface.  
-    \item we have constructed a parser to make the \texttt{main} program more accessible.   
-    \item when running the \texttt{main} executable file, among the other functionalities available, the user will be able to visualise the structures that he wishes to imput, he will be able to retreive the dual of such structures, and he will be able to check the isomorphism between a structure and its dual's dual. 
-\end{itemize}
-
-The span of the project is limited to finite structures, but the objects have been implemented in such a way that their Haskell types allow the expansion to infinite structures. This project can be seen as a foundational starting point for such an endeavour. 
-
-In conclusion we hope that the reader will find such an implementation of interest and, most importantly, that he will be able to take advantage of it to foster his studies in both the theory and applications of this area of mathematics. 
+The project focuses on finite structures, but our implementation can hopefully allow for future expansion to infinite cases. In conclusion, we hope this implementation proves useful and that readers can leverage it to deepen their understanding of both the theory and applications of this area of mathematics.

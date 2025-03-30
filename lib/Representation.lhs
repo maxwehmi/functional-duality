@@ -1,8 +1,8 @@
-\section{Representation}
+\section{Representation Theorem}
 \label{sec:representation}
 
 The Representation Theorem refers to the fact that the dual of the dual of a Priestley Space is isomorphic to the space itself. Similarly, the dual of the dual of a distributive lattice is isomorphic to the lattice itself. With our implementations, we aim to confirm this fact for finite Priestley spaces and distributive lattices. In this module, we implement and use the necessary machinery to test this. 
-
+\begin{comment}
 \begin{code}
 module Representation where
 import Data.Maybe
@@ -12,24 +12,22 @@ import Poset
 import DL
 import Priestley
 \end{code}
+\end{comment}
 
 \subsection{Filters of Lattices the dual space of a lattice}
 
-In order to compute the dual space of our lattices, we first need to be able to isolate filters within them. \newline 
+In order to compute the dual space of our lattices, we first need to be able to isolate filters within them. 
 Intuitively, a filter is a collection of elements of an ordered set such that it is closed upwards and closed under finite meets. In our case the only relevant filters 
 are going to be \textit{Prime filters}, which are just filters that do not contain the bottom element of the lattice, and that never contain a join of two elements without 
-also containing at least one of the two. \newline 
+also containing at least one of the two. 
 
 First, we make a type-shorthand for filters (those are just sets of elements), 
-and we implement helper functions to compute them.
+and we implement helper functions to compute them. The functions below shall then be used to find the prime filters. 
+
 
 \begin{code}
 type Filter a = Set.Set a 
-\end{code}
 
-The functions below shall be used to find the prime filters. 
-
-\begin{code}
 closeOnceUnderMeet :: Ord b => Lattice b -> Set.Set b -> Set.Set b
 closeOnceUnderMeet lattice1 set1 =  Set.map (uncurry (meet lattice1) ) (Set.cartesianProduct set1 set1 ) 
 
@@ -44,7 +42,7 @@ meetClosure lattice2 set2 = do
 Next, we want to extract from a given lattice the set of its prime filters. 
 We thus first implement a function to check primeness of a given filter, and then we pull the strings 
 together, making use of the "upClosure" function from above. \newline 
-Notice that the extra contextual information about the undelrying lattice si required, since the meet (resp.join) of two elements are only defined with respect to the underlying lattices structure (there is no "absolute" meet/join of elements).
+Notice that the extra contextual information about the undelrying lattice is required, since the meet (resp.join) of two elements are only defined with respect to the underlying lattices structure (there is no "absolute" meet/join of elements).
 
 \begin{code}
 isPrime :: (Eq a, Ord a) =>  Lattice a -> Filter a -> Bool 
@@ -54,7 +52,6 @@ isPrime lattice filter1 = (filter1 /= Set.empty) && and (Set.toList
                                 (Set.member (uncurry (join lattice) x) filter1) 
                                 (Set.member (fst x) filter1 || Set.member (snd x) filter1)) 
                         (Set.cartesianProduct  (set (carrier lattice)) (set (carrier lattice)))))
-
 
 findFilters :: (Eq a, Ord a) => Lattice a -> Set.Set (Filter a)
 findFilters lattice = let base = set (carrier lattice)
@@ -66,7 +63,6 @@ findFilters lattice = let base = set (carrier lattice)
 
 findPrimeFilters :: (Eq a, Ord a) => Lattice a -> Set.Set (Filter a)
 findPrimeFilters lattice = Set.filter (isPrime lattice) (findFilters lattice)
-
 \end{code}
 
 The function \verb:priestleyTopology: calculates the topology for the dual of a given lattice. This topology is generated (on a space $X$ ) by $\varphi(a)$ and $\varphi(a)^C$ for elements $a$ of the carrier of the lattice. The set $\varphi(a)$ contains all the prime filters containing $a$. \newline 
@@ -74,7 +70,6 @@ To obtain the full topology, we need to take for every $a$ $\varphi(a),\, X\setm
 Next, we use these functions to calculate the dual space of a given lattice:
 
 \begin{code}   
-
 phi :: (Eq a, Ord a) => Lattice a -> a -> Set.Set (Filter a)
 phi lattice x = Set.filter (Set.member x) $ findPrimeFilters lattice 
 
@@ -100,7 +95,7 @@ We present some functions to check basic properties of topological spaces.
 In particular, we want to be able to decide whether two spaces are isomorphic. this is going to come in handy when exploring the duality with algebras. \newline 
 We also present the first step towards implementing the algebra duality: keeping things brief, the set of Clopen Upset of a Priestley space 
 is going to form a distributive lattice under the order induced by set-theoretic inclusion. \newline 
-To this extent, we implement a function to extract an order based on set-theoretic inclusion between sets, which we can later apply to the Clopen Upsets of our topology.\newline 
+To this end, we implement a function to extract an order based on set-theoretic inclusion between sets, which we can later apply to the Clopen Upsets of our topology.\newline 
 Next, we construct a lattice using the Clopen Upsets of our topological space and endowing this set with the desired inclusion-order. We make use of functions from the "DL" section to both construct the lattice and check it is distributive.
 
 \begin{code}
@@ -150,6 +145,29 @@ calculateEpsilon ps = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps] wh
                 eps a = Set.fromList [ u | u <- (Set.toList . set . carrier . clopMap) ps, a `elem` u]
 \end{code}
 
+\begin{comment}
+\begin{code}
+myos1 :: OrderedSet Int
+myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
+
+myOS5:: OrderedSet Int
+myOS5 = OS (Set.fromList [0,1,2,3]) (Set.fromList [(0,1), (0,2), (1,3), (1,3), (2,3)])
+
+myPoset1:: OrderedSet Int
+myPoset1 = closurePoSet myOS5
+
+myLattice1:: Lattice Int 
+myLattice1 = makeLattice myPoset1
+
+snelliusOS :: OrderedSet Int 
+snelliusOS = OS (Set.fromList [0.. 10]) (Set.fromList [(0,1), (0,2),(1,3),(1,5),(2,4),(2,5),(3,6),(5,6),(5,7),(4,7),(6,8),(7,8),(8,9),(9,10)]) 
+
+
+snelliusDL :: Lattice Int 
+snelliusDL = makeLattice (forcePoSet snelliusOS)
+\end{code}
+\end{comment}
+
 We can use this again to check representation. Similar to above, we have implemented a "proper" version and a fast version:
 
 \begin{code}
@@ -164,29 +182,4 @@ checkRepresentationPSfast ps = checkIso ps ps' mapping where
         clopensOf b = Set.fromList [getImage m1 u | u <- (Set.toList . set . carrier) l, b `elem` u]
         mapping = Set.fromList [(x,eps x) | x <- (Set.toList . setPS) ps]
 
-\end{code}
-\subsection{Some tests}
-Here are some test cases to play with.
-\begin{code}
-myos1 :: OrderedSet Int
-myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
-
-
-
-myOS5:: OrderedSet Int
-myOS5 = OS (Set.fromList [0,1,2,3]) (Set.fromList [(0,1), (0,2), (1,3), (1,3), (2,3)])
-
-myPoset1:: OrderedSet Int
-myPoset1 = closurePoSet myOS5
-
-myLattice1:: Lattice Int 
-myLattice1 = makeLattice myPoset1
-
-
-snelliusOS :: OrderedSet Int 
-snelliusOS = OS (Set.fromList [0.. 10]) (Set.fromList [(0,1), (0,2),(1,3),(1,5),(2,4),(2,5),(3,6),(5,6),(5,7),(4,7),(6,8),(7,8),(8,9),(9,10)]) 
-
-
-snelliusDL :: Lattice Int 
-snelliusDL = makeLattice (forcePoSet snelliusOS)
 \end{code}

@@ -1,23 +1,26 @@
 \section{Priestley Spaces}
-We introduce the usual imports for printings.
+\label{sec:Priestley}
+\begin{comment}
+We introduce usual imports for printings.
 
 \begin{code}
 module Priestley where
-
+import qualified Data.Set as Set 
+import Test.QuickCheck
+import Poset
+import Basics
 import Data.GraphViz.Commands
 import Data.GraphViz.Printing
 \end{code}
 
 And the main data types of this section.
+\end{comment}
 
 \begin{code}
-import qualified Data.Set as Set 
 import Data.Bifunctor (bimap)
-import Test.QuickCheck
-import Poset
-import Basics
 \end{code}
 
+\subsection{Definitions}
 A Topological Space $(X,\tau)$ is a set $X$ endowed with a collection of its subsets $\tau \subseteq \wp(X)$. Such that:
 \begin{itemize}
     \item $\emptyset,X \in \tau$
@@ -32,14 +35,10 @@ Notice that, since we are working with finite cases, finitary and arbitrary unio
 Then, a  Priestley space is a Topological Space endowed with a partial order $\leq$ on its carrier set; such that or any $x,y$, if $x\not\leq y$, then there exists a upwards-closed set $\uparrow \!\!C$ such that $\uparrow \!\!C$ is clopen and $x \in \uparrow \!\!C$ and $y \notin \uparrow \!\!C$. Intuitively, we say $\uparrow \!\!C$ is separates $x$ and $y$.
 \newline
 Formally, this would be the following Priestly Separation axiom:
-
 $$x \not \leq y \rightarrow \exists C (C \in \tau \land X\setminus C \in \tau \land C = \uparrow C \land x\in C \land y\notin C)$$
+% In the definition of the types, we keep it as close as possible to their mathematical counterparts:
 
-
-In the definition of the types, we keep it as close as possible to their mathematical counterparts:
-
-We also add custom Show instances to print nicely our objects from the executable (beside their graphViz representation).
-
+Then our types are thus:\footnote{We omit it, but also defined a \texttt{Show} instances to print nicely our objects from the terminal (beside their graphViz representation).}
 
 \begin{code}
 type Topology a = Set.Set (Set.Set a)
@@ -49,10 +48,6 @@ data TopoSpace a = TS {
     topologyTS :: Topology a
 }
     deriving (Eq, Ord)
-instance Show a => Show (TopoSpace a) where
-    show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
-                        
-                        ++ "Top:" ++ show (map Set.toList (Set.toList t)) ++ "}" 
 
 data PriestleySpace a = PS {
     setPS :: Set.Set a,
@@ -60,15 +55,26 @@ data PriestleySpace a = PS {
     relationPS :: Relation a
 }
     deriving (Eq, Ord)
+\end{code}
+
+\begin{comment}
+\begin{code}
+instance Show a => Show (TopoSpace a) where
+    show (TS s t  ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
+                        
+                        ++ "Top:" ++ show (map Set.toList (Set.toList t)) ++ "}" 
+
+
 instance Show a => Show (PriestleySpace a) where
     show (PS s t r ) = "{Set: " ++ show (Set.toList s) ++ ";\n"
                         ++ "Top: " ++ show (map Set.toList (Set.toList t)) ++ ";\n"
                         ++ "Rel: " ++ show (Set.toList r) ++ "}"
 \end{code}
+\end{comment}
 
 
-\subsection{Set-theoretic preliminaries}
-In order to deal effectively with topological spaces, we first define some Set-theoretic preliminary notions. In addition to the standard functions drawn from \verb:Data.Set: library,
+\paragraph{Set-theoretic preliminaries}
+In order to deal effectively with topological spaces, we first define some Set-theoretic preliminary notions. In addition to the standard functions drawn from \texttt{Data.Set} library,
 we define new functions to compute the closure of a given set under arbitrary unions and intersections. \newline 
 In both cases, we first define functions to perform a one-step intersection (resp. union) of a set with itself, and then iterate the function until the resulting set 
 is identical to its own one-step intersection (resp. union) closure. 
@@ -95,8 +101,8 @@ intersectionClosure z = do
                 else intersectionStep cycle1 
 \end{code}
 
-\subsection{Topology basics}
-We now introduce some machinery to work on topological spaces, and in particular, to ensure our spaces respect the Priestley separation axiom.\newline 
+\subsection{Checking Topologies}
+We now introduce some machinery to work on topological spaces, and in particular, to ensure our spaces respect the Priestley separation axiom.
 
 The following function check whether a Topological space given as input respects the requirements spelled above.\newline 
 It is assumed that the input is finite. In case the input does not respect the conditions, the second function adjusts the space so that it meets the requirements.
@@ -113,7 +119,7 @@ fixTopology (TS space2 t) = TS space2 fixedTop  where
     fixedTop  = Set.fromList [space2, Set.empty] `Set.union` unionClosure (intersectionClosure t)
 \end{code}
 
-The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is usefule when it comes to printing via graphViz, since it allows to have one uniform instance for \texttt{OrderedSet} which applies easily to Lattices and Priestley spaces.
+The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is usefull when it comes to printing via graphViz, since it allows to have one uniform instance for \texttt{OrderedSet} which applies easily to Lattices and Priestley spaces.
 
 \begin{code}
 getTopoSpace :: PriestleySpace a -> TopoSpace a
@@ -150,7 +156,9 @@ upClosure set1 relation = Set.map snd (Set.filter (\ x -> fst x `elem` set1 ) re
 \end{code}
 
 
-When, at later stages, we will construct Priestley spaces from distributive lattices, we will get structures whose elements are sets themselves. Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
+When, at later stages, we will construct Priestley spaces from distributive lattices, we will get structures whose elements are sets themselves. 
+
+\begin{comment}Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
 
 The use of the functions is analogous to their distributive lattice counterparts.
 
@@ -170,8 +178,7 @@ simplifyPS1 (PS s t r) = PS s' t' r' where
     t' = mapTop mapping t 
     r' = mapRel mapping r
 \end{code}
-
-
+\end{comment}
 
 \subsection{Isomorphisms}
 
@@ -186,6 +193,8 @@ open and continuous, resepctively, it maps opens to opens and the preimages of o
 \item $f$ is an order isomorphism on the relations: for any $x, y$, $x \leq y$ iff $f(x) \leq f(y)$
 \end{itemize}
 
+For homeomorphism we can check that applying the map to an open set in the topology of the domain should yield an element of the topology of the codomain, so applying it to the set of opens of the domain (its topology) should yield a subset of the opens of the codomain (its topology). And similarly that the preimage of the topology of the codomain is a subset of the topology of the domain.
+
 
 \begin{code}
 checkIso :: (Ord a, Ord b) => PriestleySpace a -> PriestleySpace b -> Map a b -> Bool
@@ -193,11 +202,7 @@ checkIso (PS sa ta ra) (PS sb tb rb) mapping = checkMapping sa mapping
     && checkBijective sb mapping 
     && checkHomeomorphism ta tb mapping
     && checkOrderIso ra rb mapping
-\end{code}
 
-Assuming bijectivity (by laziness of \&\&), to check that the given map is a Homeomorphism, we have to check that it is an open and continuous map, i.e. it maps opens to opens and the preimages of opens are also open. This means that applying the map to an open set in the topology of the domain should yield an element of the topology of the codomain, so applying it to the set of opens of the domain (its topology) should yield a subset of the opens of the codomain (its topology). Similarly, we check that the preimage of the topology of the codomain is a subset of the topology of the domain.
-
-\begin{code}
 checkHomeomorphism :: (Ord a, Ord b) => Topology a -> Topology b -> Map a b -> Bool
 checkHomeomorphism ta tb mapping = 
     all (\x -> Set.map (getImage mapping) x `elem` tb) ta 
@@ -216,14 +221,12 @@ premapTop mapping = Set.map (Set.map (getPreimage mapping))
 
 Lastly, it remains the check that the map is an order isomorphism. For this we can check that applying the map component wise to every pair of the relation in the domain should yield the relation of the codomain and vice versa. 
 
-\begin{code}
-checkOrderIso :: (Ord a, Ord b) => Relation a -> Relation b -> Map a b -> Bool
-checkOrderIso ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
-\end{code}
-
 Similar to above, we have to nest \texttt{Set.map} with \texttt{Data.Bifunctor.bimap} to apply the map to both components of all pairs in the relation.
 
 \begin{code}
+checkOrderIso :: (Ord a, Ord b) => Relation a -> Relation b -> Map a b -> Bool
+checkOrderIso ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
+
 mapRel :: (Ord a, Ord b) => Map a b -> Relation a -> Relation b
 mapRel mapping = Set.map (Data.Bifunctor.bimap (getImage mapping) (getImage mapping))
 
@@ -266,19 +269,12 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
     firsts = Set.map fst $ Set.cartesianProduct s s `Set.difference` r
 \end{code}
 
-\subsection{Printing machinery}
-
-
-Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space.
+\paragraph{Printing machinery}
+Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space.\footnote{for more detail, see the \hyperref[sec:posetprinting]{subsection 3.4}}
 
 \begin{code}
-
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
-showPriestley p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans $ getOrderedSet p) Xlib 
-
-
-
-
+showPriestley p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans $ getOrderedSet p) Xlib
 \end{code}
 
 
