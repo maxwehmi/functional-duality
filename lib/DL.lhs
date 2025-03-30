@@ -337,8 +337,6 @@ functionMorphism l1  l2 f
 
 \subsection{Printing machinery} \label{sec:dlprinting}
 
-
-
 Analogously to its Poset-counterpart, this function actually prints the Lattice.\footnote{for more detail, see the \hyperref[sec:posetprinting]{subsection 3.4}}
 
 \begin{code}
