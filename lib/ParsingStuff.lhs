@@ -35,7 +35,7 @@ For Priestley spaces, the intended syntax is:
 Topology: <lists of elements, separated by a comma>\,\,
 Order:<ordered pairs, separated by a comma>}
 
-For example: \texttt{-- encoding for Topological (Priestley) spaces should be Space:
+For example: \texttt{
 x, y, z... Topology: [a, b, ...],  [d, b. ...],...
 Order: (a,b), (c,d), ...} is a valid input instance.
 

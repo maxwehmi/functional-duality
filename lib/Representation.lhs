@@ -65,8 +65,8 @@ findPrimeFilters :: (Eq a, Ord a) => Lattice a -> Set.Set (Filter a)
 findPrimeFilters lattice = Set.filter (isPrime lattice) (findFilters lattice)
 \end{code}
 
-The function \verb:priestleyTopology: calculates the topology for the dual of a given lattice. This topology is generated (on a space $X$ ) by $\varphi(a)$ and $\varphi(a)^C$ for elements $a$ of the carrier of the lattice. The set $\varphi(a)$ contains all the prime filters containing $a$. \newline 
-To obtain the full topology, we need to take for every $a$ $\varphi(a),\, X\setminus \varphi(a)$, and then closing the resulting family of sets first under finitary intersections and then under arbitrary unions.\newline 
+The function \verb:priestleyTopology: calculates the topology for the dual of a given lattice. This topology is generated (on a space $X$ ) by taking for every $a$ $\varphi(a),\, X\setminus \varphi(a)$, and then closing the resulting family of sets first under finitary intersections and then under arbitrary unions. The set $\varphi(a)$ contains all the prime filters containing $a$, for every $a$. 
+
 Next, we use these functions to calculate the dual space of a given lattice:
 
 \begin{code}   
@@ -87,7 +87,7 @@ fastPriesMap l = (p, fst sp, snd sp) where
         sp = simplifyPS p
 \end{code}
 
-The \verb:fastPriesMap: is supposed to be faster version of \verb:priesMap:. As mentioned earlier, when dealing with duals of duals, the elements themselves become quite big. This makes the computation time longer. We want to avoid this by simplifying the space using the aptly named function from earlier. We also include a map to be able to compute the dual isomorphism later. We lazily calculate the topology of \verb:p: as the power set of its carrier. While all finite Priestley spaces carry the discrete topology, we tried to avoid using this fact and stick to the mathematical definition as closely as possible. However, the computation time is very long as it is and this is supposed to be the faster, but lazier version. For "proper" checks, it would be more appropriate to use \verb:priesMap:.
+The \verb:fastPriesMap: is supposed to be faster version of \verb:priesMap:. Since when dealing with duals of duals, the elements themselves become quite big, making the computation time longer. We want to avoid this by simplifying the space using the aptly named function from earlier. We calculate the topology of \verb:p: as the power set of its carrier. Of course, all finite Priestley spaces carry the discrete topology, but we did not use this fact for  \verb:priesMap: (which is the one to use for "proper" checks), to be able to generalise it to infinite structures.
 
 
 \subsection{Dual maps and Isomorphisms for Priestley Spaces}

@@ -1,6 +1,6 @@
 \section{Basics} \label{sec:Basics}
 
-In this section, we introduce the basics for our project. For the most part, this is concerned with maps between spaces and some other helper functions. These will be imported in all other modules.
+In this section, we introduce the basics for our project.The helper functions defined here will be imported in all other modules.
 
 Firstly, we import the \texttt{Data.Set} package. This will allow us to very closely mirror ``everyday" mathematical language in our definitions.
 

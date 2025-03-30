@@ -53,7 +53,7 @@ instance (Ord a, Show a) => Show (Lattice a) where
     show l = "(" ++ show (carrier l) ++ ";\n Meet: " ++ show ( [(x,y, meet l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))])  ++ ";\n Join: " ++ show ([(x,y, join l x y) | x <- Set.toList (set (carrier l)), y <- Set.toList (set (carrier l))]) ++ ")" 
 \end{code}
 
-But note an object of this type is not necessarily an actual lattice mathematically. In partiuclar, we must check that the functions \texttt{meet} and \texttt{join} actually behave as they should mathematically, and that objects \texttt{meet l}, \texttt{join l} always exist, respecting the definition.
+But note an object of this type is not necessarily an actual lattice mathematically. In particular, we must check that the functions \texttt{meet} and \texttt{join} actually behave as they should mathematically, and that objects \texttt{meet l}, \texttt{join l} always exist, respecting the definition.
 
 Furthemore, we'll be working with in finite cases. Thus our lattice should be \emph{bounded}, meaning it has a minimal ($\top$ called top) and a maximal ($\bot$ called bottom) element. 
 \newline
@@ -98,12 +98,12 @@ datatype.
 
 \begin{code}
 checkClosedMeetJoin :: Ord a => Lattice a -> Bool
-checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j -- x is arb. pair in l
+checkClosedMeetJoin l = all (\x -> pairMeet x `elem` lSet ) j 
                         &&
                         all (\x -> pairJoin x `elem` lSet) j
     where 
         lSet = set $ carrier l
-        j = Set.cartesianProduct lSet lSet -- sets of pairs
+        j = Set.cartesianProduct lSet lSet 
         pairMeet = uncurry (meet l) 
         pairJoin = uncurry (join l)
 \end{code}
