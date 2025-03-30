@@ -49,7 +49,7 @@ Firstly we need to check given an object of type \texttt{OrderedSet a}, the rela
 %as the implementation of \texttt{OrderedSet} does accept cases which are not of this sort.
 % We shall call a relation $R$ "well-defined with respect to a set $P$" iff $R \subseteq P \times P$. We shall just say "well-defined" when the carrier set is clear form the context.
 \newline
-For this, we shall fisrt define the function \texttt{tuplesUnfold}, which ``unfolds" the in a relation.
+For this, we shall fisrt define the function \texttt{tuplesUnfold}, which ``unfolds" the relation into a set.
 \newline 
 Then, we can easily check for well-definedness. 
 
@@ -91,7 +91,7 @@ checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 \paragraph{Transitivity}
 The transitive closure requires a little more working:
 \newline
-Firstly, we define the helper function \texttt{transPair}, to check if, given any $x,z$, there is a $y$ such that $x R y \wedge y R z$.
+Firstly, we define the helper function \texttt{transPair}, to check if, given any $x,z$, there is a $y$ such that $x R y $ and  $ y R z$.
 \newline
 This allows us to know which "one-step" transitive chains are currently missing. So, we add to the relation any pair which satisfies \texttt{transPair}, so that we have "one-step" transitivity.
 
@@ -127,11 +127,11 @@ checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y
 
 \paragraph{Forcing Antisymmetry}
 
-Here there are caveats. Note that it is not possible to just "close" a relation under antisymmetry. Firstly, we need to remove, rather than add. Furthermore, note that there is no unique way to obtain an anti-symmetric "reduction"  analogously to a closure: we'd want a reduction of $R$ w.r.t a property $Q$ to be the greatest $R' \subseteq R$ for which $R'$ satisfies $Q$. But there is not such set for anti-symmetry! For a given symmetric pair $(x,y),(y,x) \in R$, the smallest can be removing one, or the other.
+Here there are caveats. Note that it is not possible to just "close" a relation under antisymmetry. Firstly, we need to remove, rather than add. Furthermore, note that there is no unique way to obtain an anti-symmetric "reduction"  analogously to a closure: we'd want a reduction of $R$ w.r.t. a property $Q$ to be the greatest $R' \subseteq R$ for which $R'$ satisfies $Q$. But there is not such set for anti-symmetry! For a given symmetric pair $(x,y),(y,x) \in R$, the smallest can be removing one, or the other.
 %But there's two ways to do so. 
 So an anti-symmetric reduction is not unique.
 
-Two ways, among others, stand out as elegant in "forcing" anti-symmetry. The first consists in eliminating all symmetric pairs from the relation $R$, the second is to quotient of $P$ based on the clusters of symmetric pairs of $R$. We implement both as each has their advatages and disadvantages. But for space concerns, we only look at the latter. 
+Two ways, among others, stand out as elegant in "forcing" anti-symmetry. The first consists in eliminating all symmetric pairs from the relation $R$, the second is to quotient $P$ based on the clusters of symmetric pairs of $R$. We implement both as each has its advantages and disadvantages. But for space concerns, we only look at the latter. 
 
 \begin{comment}
 \subsubsection{Removing Edges}
@@ -154,7 +154,7 @@ A worry, is that, closing under transitivity and then anti-symmtery could signif
 
 %\subsubsection{Quotienting}
 % to make Edo happy :)
-Given any $(P,R)$ of type \texttt{OrderedSet a}, we can quotient the set $P$ on the symmetric points, i.e. merge the \emph{vertex} that see each other into a cluster. That is, for any $x \in P$ we define the equivalence class $[x]_s$ as the set $\{y \in P| y \neq x \wedge x R y \wedge y R x \}$. We call the resulting set $P/s$.
+Given any $(P,R)$ of type \texttt{OrderedSet a}, we can quotient the set $P$ on the symmetric points, i.e. merge the \emph{vertex} that see each other into a cluster. That is, for any $x \in P$ we define the equivalence class $[x]_s$ as the set $\{y \in P\, | \, y \neq x \wedge x R y \wedge y R x \}$. We call the resulting set $P/s$.
 %\footnote{Note that we need a choice for a rappresentative to leave in the set. We can leverage having an \texttt{Ord} instance, and use \texttt{y < x} for this.}
 
 \begin{code}
@@ -236,7 +236,7 @@ makePoSet  = closureRefl .  closureTrans
 
 %In most cases however, we will need to engage with anti-symmetric forcing. Thus 
 
-%We have two poset forcing functions, using our two approaches \footnote{making sure to first take the transitive closure, and the the antisymmetric closure, which we proved preserves transitivity. We ommitted the proof for space concerns. Whereas note that the opposite wouldn't do; any (non-reflexive) cycle in the relation would break anti-symmetry after transitive closing.}.
+%We have two poset forcing functions, using our two approaches \footnote{making sure to first take the transitive closure, and the the antisymmetric closure, which we proved preserves transitivity. We omitted the proof for space concerns. Whereas note that the opposite wouldn't do; any (non-reflexive) cycle in the relation would break anti-symmetry after transitive closing.}.
 
 \begin{comment}
 \begin{code}
@@ -253,7 +253,7 @@ checkPoset :: Ord a => OrderedSet a -> Bool
 checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWellDef x
 \end{code}
 
-Lastly, to use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. We do this by generating an arbitrary \texttt{OrderedSet a}, then it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
+Lastly, to use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. We do this by generating an arbitrary \texttt{OrderedSet a}, (and closing it under reflexivity and transitivity and forcing anti-symmetry) using the above introduced functions:
 
 
 \begin{code}
@@ -271,7 +271,7 @@ instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
 \subsection{Printing machinery}
 \label{sec:posetprinting}
 
-This section\footnote{A similar section will be present at the end of each section introducing a new mathematical structure. The implementation are always be similar.} is dedicated to the visualization of the structures we have discussed, namely posets, via what are called in mathematics \textit{Hasse diagrams}.
+This section\footnote{A similar section will be present at the end of each section introducing a new mathematical structure. The implementation are always similar.} is dedicated to the visualization of the structures we have discussed, namely posets, via what are called in mathematics \textit{Hasse diagrams}.
 
 Our primary concern is for the picture to be clear and readable. Thus we omit all transitive and reflexive edges. 
 
@@ -280,7 +280,7 @@ We stuck with the mathematical convention of having unlabeled nodes, since we ar
 In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. If the reader wishes to visualize the graph, they should both install \textit{graphViz} and \textit{Xlib} on their machines.
 If running Ubuntu, one may simply run \texttt{sudo apt-get install libx11-dev graphviz} on bash.
 
-It should be noted that all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. This causes some difficulties when it comes to representation; but we ommit details for space concerns. Suffice it to say, we settled for the more economical solution of always taking an isomorphic copy on INT.
+It should be noted that all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. This causes some difficulties when it comes to representation; but we omit details for space concerns. Suffice it to say, we settled for the more economical solution of always taking an isomorphic copy on \texttt{Int}.
 
 %  since Data.Set
 % does not have an original instance of PrintDot (Set a) and, since the Set module is imported, all homebrew instances we defined (although working) were "orphan" instances, and thus triggered a Wall warning. \newline 
@@ -304,10 +304,10 @@ fromReflTrans  = fromTransitive.fromReflexive
 
 The following two functions are crucial to the visualization of the structures. They only rely on the types \texttt{Relation a} and \texttt{OrderedSet a} and therefore will be called also in the other sections.  
 
- \texttt{toGraphRel'} uses \texttt{mapM\_} to transform an object \texttt{r}of type \texttt{Relation a} into a  monadic action, in particular an instance of of the type \texttt{Dot a}. 
+ \texttt{toGraphRel} uses \texttt{mapM\_} to transform an object \texttt{r} of type \texttt{Relation a} into a  monadic action, in particular an instance of of the type \texttt{Dot a}. 
 
-\texttt{toGraphRel} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}. The carrier set will be the used to generate the points and the underlying relation of the object will be then used to generate the edges of the graph. 
-Notice that, although no Lattice has "isolated points", many Priestley space do which means that we could have nodes in the space which only have one reflexive arrow. 
+\texttt{toGraphOrd} uses \texttt{digraph'} to generate a directed graph out of an object of type \texttt{Dot a}. The carrier set will be the used to generate the points and the underlying relation of the object will be then used to generate the edges of the graph. 
+Notice that, although no Lattice has "isolated points", many Priestley space do, which means that we could have nodes in the space which only have one reflexive arrow. 
 % If we only ran the second part of the function, and just mapped "-->" over the relations, we would either lose those isolated points, or we would ahve to print every time all the reflexive arrows of the graph.
 Thus it is important that we both print nodes out of the elements of the carrier set, and then construct edges using the relations. 
 

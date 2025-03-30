@@ -38,7 +38,7 @@ Formally, this would be the following Priestly Separation axiom:
 $$x \not \leq y \rightarrow \exists C (C \in \tau \land X\setminus C \in \tau \land C = \uparrow C \land x\in C \land y\notin C)$$
 % In the definition of the types, we keep it as close as possible to their mathematical counterparts:
 
-Then our types are thus:\footnote{We omit it, but also defined a \texttt{Show} instances to print nicely our objects from the terminal (beside their graphViz representation).}
+Then our types are:\footnote{We omit it, but also defined a \texttt{Show} instances to print nicely our objects from the terminal (beside their graphViz representation).}
 
 \begin{code}
 type Topology a = Set.Set (Set.Set a)
@@ -119,7 +119,7 @@ fixTopology (TS space2 t) = TS space2 fixedTop  where
     fixedTop  = Set.fromList [space2, Set.empty] `Set.union` unionClosure (intersectionClosure t)
 \end{code}
 
-The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is usefull when it comes to printing via graphViz, since it allows to have one uniform instance for \texttt{OrderedSet} which applies easily to Lattices and Priestley spaces.
+The next functions allow us to extract from a given Priestley space its underlying set together with the topology, and its underlying carrier set together with its order. The second in particular is useful when it comes to printing via graphViz, since it allows to have one uniform instance for \texttt{OrderedSet} which applies easily to Lattices and Priestley spaces.
 
 \begin{code}
 getTopoSpace :: PriestleySpace a -> TopoSpace a
@@ -155,8 +155,6 @@ upClosure :: (Eq a, Ord a) => Set.Set a -> Relation a -> Set.Set a
 upClosure set1 relation = Set.map snd (Set.filter (\ x -> fst x `elem` set1 ) relation) `Set.union` set1 
 \end{code}
 
-
-When, at later stages, we will construct Priestley spaces from distributive lattices, we will get structures whose elements are sets themselves. 
 
 \begin{comment}Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
 
@@ -239,7 +237,7 @@ premapRel mapping = Set.map (bimap (getPreimage mapping) (getPreimage mapping))
 
 \subsection{Arbitrary PriestleySpace}
 
-To be able to use QuickCheck, we also have to write an Arbitrary instace for PriestleySpaces:
+To be able to use QuickCheck, we also have to write an Arbitrary instance for PriestleySpaces:
 
 \begin{code}
 instance (Arbitrary a, Ord a) => Arbitrary (PriestleySpace a) where
