@@ -8,7 +8,6 @@ Firstly, we import the \texttt{Data.Set} package. This will allow us to very clo
 module Basics where
 
 import qualified Data.Set as Set 
-import Test.QuickCheck (label)
 \end{code}
 
 %\subsection{Mappings}
@@ -51,7 +50,7 @@ getPreimage mapping y | Set.size (getPreimages mapping y) == 1 = Set.elemAt 0 (g
                       | otherwise = error "Either no or too many preimages"
 \end{code}
 
-Then, these allow us to read \texttt{getImages f x} as a usual $f(x)$ for a given mapping.
+Then, these allow us to read \texttt{getImage f x} as a usual $f(x)$ for a given mapping.
 
 
 \begin{comment}

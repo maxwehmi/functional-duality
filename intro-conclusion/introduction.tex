@@ -1,12 +1,12 @@
 \section{Introduction}
 \label{sec:introduction}
-This project was inspired by the ILLC course Mathematical Structures in Logic (5314MASL6Y) \footnote{Offered in the 2024-2025 academic year. See the \href{https://studiegids.uva.nl/xmlpages/page/2024-2025-en/search-course/course/118785}{course catalogue page} for details.}, which covered Duality Theory—a field studying how mathematical structures can be transformed and represented via alternative structures.
+This project was inspired by the ILLC course Mathematical Structures in Logic (5314MASL6Y)\footnote{Offered in the 2024-2025 academic year. See the \href{https://studiegids.uva.nl/xmlpages/page/2024-2025-en/search-course/course/118785}{course catalogue page} for details.}, which covered Duality Theory—a field studying how mathematical structures can be transformed and represented via alternative structures.
 
-At its core, Duality Theory establishes translations between structures of kind AA and their duals BB, ensuring that translating back from BB reconstructs AA (up to isomorphism). This approach allows problems in one mathematical domain (e.g., algebra) to be tackled in another (e.g., topology). For background, see \cite{burrisCourseUniversalAlgebra2012, daveyIntroductionLatticesOrder2010, johnstoneStoneSpaces1992, kelleyGeneralTopology2007, munkresTopology2000}.
+At its core, Duality Theory establishes translations between structures of kind $A$ and their duals $B$, ensuring that translating back from $B$ reconstructs $A$ (up to isomorphism). This approach allows problems in one mathematical domain (e.g., algebra) to be tackled in another (e.g., topology).\footnote{For the interested reader, see \cite{burrisCourseUniversalAlgebra2012, daveyIntroductionLatticesOrder2010, johnstoneStoneSpaces1992, kelleyGeneralTopology2007, munkresTopology2000}.}
 
-This project focuses on encoding an effective translation between Distributive Lattices and Priestley Spaces. The report is structured to introduce relevant mathematical objects progressively, alongside their Haskell implementation. Section 1 deals with function encoding; Section 2 introduces posets as foundational structures. Sections 3 and 4 implement distributive lattices and Priestley spaces, respectively. Section 6 integrates these components, defining dualities and transformations. Section 8 provides user guidance, and Section 9 presents tests and examples.
+This project focuses on encoding an effective translation between Distributive Lattices and Priestley Spaces.\footnote{For this project, \cite{quinnalvarezTopomodels2025} proved to be a valuable source of inspiration. A thanks is owed to David for some of his help.} The report is structured to introduce relevant mathematical objects progressively, alongside their Haskell implementation.
 
-By the end, we will have a program with a library for working with various mathematical structures—posets, lattices, distributive lattices, topological spaces, and Priestley spaces—supporting property analysis, \texttt{QuickCheck} tests, and visualizations of duals
+We will then have a program with a library for working with various mathematical structures—posets, lattices, distributive lattices, topological spaces, and Priestley spaces—supporting property analysis, \texttt{QuickCheck} tests, and visualizations of duals
 
 
 

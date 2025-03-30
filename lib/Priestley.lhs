@@ -268,9 +268,7 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 \end{code}
 
 \paragraph{Printing machinery}
-
-
-Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space. 
+Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space. \footnote{for more detail, see the \hyperref[sec:posetprinting]{entry of chapter 3}}
 
 \begin{code}
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
