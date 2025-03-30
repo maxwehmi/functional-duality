@@ -25,7 +25,7 @@ get the dual, and the dual of the dual.
 \\
 \\
 When using the program, the lattices will pop up in a window using 
-\textit{graphviz} and \textit{libx11}, and the mathematical aspects will be printed in the terminal. \\
+\textit{graphviz} and \textit{libx11}, and the mathematical description will be printed in the terminal. \\
 Especially option number (4) gives interesting spaces and dual lattices, as the size and complexity of the lattice 
 can become much greater than the space.
 \begin{code}
