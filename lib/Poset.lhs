@@ -1,7 +1,7 @@
 \section{Partially ordered sets}
 \label{posets}
 
-This first import some necessary packets for pretty printing. We'll see more about it in the dedicated \hyperref[sec:posetprinting]{subsection}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
+This first import some necessary packets for pretty printing. For details, see it's \hyperref[sec:posetprinting]{dedicated subsection}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
 
 \begin{code}
 module Poset where
@@ -132,7 +132,7 @@ checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y
 
 \paragraph{Forcing Antisymmetry}
 
-Here begin some caveats. Note that it is not possible to just "close" a relation under antisymmetry. Firstly, we need to remove, rather than add. Furthermore, note that there is no unique way to obtain a "reduction" as we'd desire. Analogously to a closure, we'd want a reduction of $R$ w.r.t a property $Q$ to be the greatest $R' \subseteq R$ for which $R'$ satisfies $Q$. But there is not such set for anti-symmetry! For a given symmetric pair $(x,y),(y,x) \in R$, the smallest change is removing either one. 
+Here there are caveats. Note that it is not possible to just "close" a relation under antisymmetry. Firstly, we need to remove, rather than add. Furthermore, note that there is no unique way to obtain an anti-symmetric "reduction"  analogously to a closure: we'd want a reduction of $R$ w.r.t a property $Q$ to be the greatest $R' \subseteq R$ for which $R'$ satisfies $Q$. But there is not such set for anti-symmetry! For a given symmetric pair $(x,y),(y,x) \in R$, the smallest can be removing one, or the other.
 %But there's two ways to do so. 
 So an anti-symmetric reduction is not unique.
 
@@ -161,7 +161,6 @@ A worry, is that, closing under transitivity and then anti-symmtery could signif
 % to make Edo happy :)
 Given any $(P,R)$ of type \texttt{OrderedSet a}, we can quotient the set $P$ on the symmetric points, i.e. merge the \emph{vertex} that see each other into a cluster. That is, for any $x \in P$ we define the equivalence class $[x]_s$ as the set $\{y \in P| y \neq x \wedge x R y \wedge y R x \}$. \footnote{Note that we need a choice for a rappresentative to leave in the set. We can leverage having an \texttt{Ord} instance, and use \texttt{y < x} for this.}
 
-
 \begin{code}
 quotientAntiSym :: Ord a => Set.Set a -> Relation a -> Set.Set a
 quotientAntiSym s r = s `Set.difference` Set.fromList [x| (x,y) <- Set.toList r, (y,x) `Set.member` r, x /= y, y < x] 
@@ -173,7 +172,7 @@ forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
 The advantage of this approach, is that it preserve logical properties\footnote{For the knowing reader: we are guaranteed a p-morphism between the structures.}. 
 % Since our topic at hand involves excatly defining logic over mathematical structures, this is certainly a nice feature.
 
-On the other hand, this changes the carrier set: from $P$ we go to $P/s$, the quotient of $P$ under the equivalence relation based on symmetry \footnote{Note, due to Haskell's implementation, we cannot deem this as "the same set anyways", arguing it is just a matter of names referring to the same object. While in set theory, the set, $\{a,b \}$ as syntactically specified, may well be the same set as $\{a\}$, simply by virtue of $b$ semantically reffering to the same name as $a$ (i.e. $a=b$), in Haskell's \texttt{Data.Set}, named elements are the objects. This is evident from the fact that \texttt{Set.size} returns a value without us needing to specify what equalities hold between the objects.}. This is a bit agains the "spirit" of a "closure".
+A downside, this changes the carrier set: from $P$ we go to $P/s$, the quotient of $P$ under the equivalence relation based on symmetry. This is a bit agains the "spirit" of a "closure".\footnote{Note, due to Haskell's implementation, argue "it is the same set anyways, it's is just a matter of names referring to the same object". In set theory, syntactically specifying $\{a,b \}$ may well be the same set as $\{a\}$, if $b$ happens to semantically be the same name for $a$ (i.e. if $a=b$). But in Haskell's \texttt{Data.Set}, named elements are the objects. This is evident from the fact that \texttt{Set.size} returns a value without us needing to specify what equalities hold between the objects.}
 
 Furthermore, closing under transitivity and then anti-symmterically may shrink significatly the size of the \emph{carrier set}, in particular every cycle will collapse to a single point.
 

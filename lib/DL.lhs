@@ -14,8 +14,8 @@ import Data.GraphViz.Printing
 \end{code}
 \end{comment}
 
-We import \texttt{Data.Maybe} to deal with certain functions not being assured to have a value, and otherwise simply carryover our previous work.
-
+% We import \texttt{Data.Maybe} to deal with certain functions not being assured to have a value, and otherwise simply carryover our previous work.
+\begin{comment}
 \begin{code}
 import qualified Data.Set as Set 
 import qualified Data.Maybe as M
@@ -23,6 +23,7 @@ import Test.QuickCheck
 import Poset
 import Basics
 \end{code}
+\end{comment}
 
 \subsection{Definition}
 This section is dedicated to Distributive Lattices. A lattice is a poset $P$ such that for every $a,b \in P$ 
@@ -56,7 +57,7 @@ But note an object of this type is not necessarily an actual lattice mathematica
 
 Furthemore, we'll be working with in finite cases. Thus our lattice should be \emph{bounded}, meaning it has a minimal ($\top$ called top) and a maximal ($\bot$ called bottom) element. 
 \newline
-However, since we are working with finite structures, each lattice is a bounded lattice by taking the meet or join of all the elements, so we omit this check.
+However, since we are working with finite structures, each lattice is a bounded lattice by taking the meet or join of all the elements. We implemented checks regardless, but omit them here for space concerns.
 
 
 \subsection{Checking Lattices}
