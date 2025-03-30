@@ -14,6 +14,8 @@ import DL
 import Poset
 import Priestley
 import Representation
+
+
 \end{code}
 
 In our tests, we check if the arbitrary instances are generated correctly, i.e. that they have the properties we want them to have. Then we use the fast representation check to confirm that representation holds. We specified the type in all of our datastructures to be \verb:Int:, because hlint had a problem if we did not specify it. We only check these properties, because the tests already take very long even for very small instances. Further, our main goal was to confirm that representation holds.
@@ -28,6 +30,10 @@ main = hspec $ do
       property $ \ l -> checkDL (l :: Lattice Int)
     it "All arbitrary Priestley Spaces should be Priestley Spaces" $
       property $ \ ps -> checkPriestley (ps :: PriestleySpace Int)
+    it "All arbitrary Priestley spaces should be isomorphic to their simplified counterpart" $
+     property $ \ ps -> simplificationPScheck (ps :: PriestleySpace String)
+    it "All arbitrary lattices should be isomorphic to their simplified counterpart" $
+     property $ \ l -> simplificationDLcheck (l :: Lattice String)
     it "The dual of the dual of a distributive lattice should be isomorphic to the original lattice" $
       property $ \ l -> checkRepresentationDLfast (l :: Lattice Int)
     it "The dual of the dual of a Priestley Space should be isomorphic to the original space" $

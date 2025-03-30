@@ -211,7 +211,7 @@ makeLattice os = L os (\x y -> M.fromJust $ findMeet preLattice x y) (\x y -> M.
 When, at later stages, we will construct distributive lattices from Priestely spaces, we will get structures whose elements are sets themselves. To prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new lattice out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
 
 The first returns, with the new space, also a map, and is meant to be used when we care about the old elements (the map allows to reconstruct them, for example we can check that the orignal and the simplifief lattices are indeed isomorphic). The second does not return a map and it is meant to be used when we do not care about the old elements, it is in particular useful for printing purposes, as we will see in due time.
-
+The last function we add in order to check that the simplified version of a Lattice is really isomorphic to the original one.
 \begin{code}        
 simplifyDL :: Ord a => Lattice a -> (Lattice Int, Map a Int)
 simplifyDL l = (makeLattice (OS s' r'), mapping) where
@@ -234,6 +234,9 @@ simplifyDL1 l = (makeLattice (OS s' r')) where
         x <- Set.toList s', 
         y <- Set.toList s', 
         (Set.elemAt x s, Set.elemAt y s) `elem` (rel . carrier) l]
+
+simplificationDLcheck :: Ord a => Lattice a -> Bool
+simplificationDLcheck x = uncurry (functionMorphism x) (simplifyDL x)
 \end{code}
 
 
@@ -364,17 +367,6 @@ functionMorphism l1  l2 f
 
 \subsection{Printing machinery} \label{sec:dlprinting}
 
-
-% \begin{code}
-% showLattice ::(Ord a, Data.GraphViz.Printing.PrintDot a) => Lattice a -> IO ()
-% showLattice l = runGraphvizCanvas' (toGraphRel (rel (fromReflTrans $ carrier l))) Xlib
-
-% myos1 :: OrderedSet Int
-% myos1 = Poset.closurePoSet $ OS (Set.fromList [1,2,3,4, 5]) (Set.fromList [(1,2), (2,4), (1,3),(3,4),(4,5)])
-% \end{code}
-
-
-% \subsection{Printing machinery}
 
 Analogously to its Poset-counterpart, this function actually prints the Lattice.
 
