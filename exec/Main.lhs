@@ -1,4 +1,4 @@
-\section{Wrapping it up in an exectuable}\label{sec:Main}
+%\section{Wrapping it up in an exectuable}\label{sec:Main}
 
 We will now use the library form Section \ref{sec:Basics} in a program.
 
@@ -10,11 +10,10 @@ import Poset
 import DL
 import Priestley
 import Representation
-
+import ParsingStuff
 main :: IO ()
-main = do
-  putStrLn "Hello!"
-  putStrLn "GoodBye"
+main = threeexample
+
 \end{code}
 
 We can run this program with the commands:
