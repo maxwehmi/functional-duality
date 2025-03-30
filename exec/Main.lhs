@@ -1,4 +1,4 @@
-\section{Wrapping it up in an exectuable}\label{sec:Main}
+%\section{Wrapping it up in an exectuable}\label{sec:Main}
 
 We will now use the library form Section \ref{sec:Basics} in a program.
 
@@ -10,6 +10,7 @@ import DL
 import Priestley
 import Representation
 import ParsingStuff
+
 import Text.Parsec (parse)
 import Text.Read (readMaybe)
 import Data.Set as Set
@@ -120,6 +121,7 @@ getUserInput = do
       if ((n < 7) && (n > 0)) then return n else do
       putStrLn "Sorry, that is not a valid input. Please give a number from 1 to 7."
       getUserInput
+
 
 \end{code}
 

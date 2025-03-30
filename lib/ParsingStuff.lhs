@@ -1,7 +1,7 @@
 \begin{code}
 module ParsingStuff where 
 import qualified Data.Set as Set
-import Text.Parsec( letter, spaces, string, between, eof, many1, sepBy, parse, try )
+import Text.Parsec( letter, spaces, string, between, eof, many1, sepBy, parse, try, alphaNum )
 import Poset
 import Text.Parsec.String (Parser)
 import Control.Monad (void)
@@ -55,7 +55,7 @@ symbol :: String -> Parser String
 symbol s = try (spaces *> string s <* spaces)
 
 identifier :: Parser String
-identifier = many1 letter <* spaces
+identifier = many1 alphaNum <* spaces
 
 pair :: Parser (String, String)
 pair = between (symbol "(") (symbol ")") $ do
@@ -122,4 +122,5 @@ threeexample = do
   case parse parseOrderedSet "" input of
     Left err -> print err
     Right os -> showOrdSet os
+
 \end{code}
