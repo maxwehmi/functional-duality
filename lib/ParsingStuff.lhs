@@ -1,17 +1,22 @@
 
 \section{Parsing for user interface}
 \label{sec:parsing}
+
 \begin{code}
 module ParsingStuff where 
-import qualified Data.Set as Set
 import Text.Parsec( letter, spaces, string, between, eof, many1, sepBy, parse, try )
-import Poset
 import Text.Parsec.String (Parser)
 import Control.Monad (void)
-import Priestley (PriestleySpace (PS), showPriestley)
 import System.IO
-
 \end{code}
+
+\begin{comment}
+\begin{code}
+import qualified Data.Set as Set
+import Poset
+import Priestley (PriestleySpace (PS), showPriestley)
+\end{code}
+\end{comment}
 
 In order to make the executable a (somewhat) practical tool, we wrote two simple parsers to allow our \texttt{Main.exe} to take in direct input for the user. \newline 
 The Intended syntax is really simple, so we opted for writing the whole thing using \textit{Parsec} rather then generating it with Happy and Alex. \newline 

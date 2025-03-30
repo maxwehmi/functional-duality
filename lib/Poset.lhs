@@ -1,7 +1,7 @@
 \section{Partially ordered sets}
 \label{posets}
-
-This first import some necessary packets for pretty printing. For details, see it's \hyperref[sec:posetprinting]{dedicated subsection}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
+\begin{comment}
+This first import some necessary packets for pretty printing. For details, see \hyperref[sec:posetprinting]{subsection 3.4}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
 
 \begin{code}
 module Poset where
@@ -14,6 +14,7 @@ import Data.GraphViz.Printing
 
 import Test.QuickCheck
 \end{code}
+\end{comment}
 
 \subsection{Definitions}
 
@@ -54,8 +55,8 @@ Firstly we need to check given an object of type \texttt{OrderedSet a}, the rela
 %as the implementation of \texttt{OrderedSet} does accept cases which are not of this sort.
 % We shall call a relation $R$ "well-defined with respect to a set $P$" iff $R \subseteq P \times P$. We shall just say "well-defined" when the carrier set is clear form the context.
 \newline
-In order to check well-definedness of a relation in this sense, we shall fisrt define the function \texttt{tuplesUnfold}, which ``unfolds" the in a relation. For this, we get the list of the first elements in all the tuples aswell as the seconds \texttt{snd}. Then we join them and have our set.
-
+For this, we shall fisrt define the function \texttt{tuplesUnfold}, which ``unfolds" the in a relation.
+\newline 
 Then, we can easily check for well-definedness. 
 
 \begin{code}
@@ -83,7 +84,7 @@ forceRelation (OS s r)
 \subsection{Checks and Closures}
 \paragraph{Reflexivity} 
 
-Both closures and checks are straightforwards, and well readable from the code implementation. We simply need add, or check the existance of, reflexive tuples.
+Both closure and checks are straightforwards, and well readable from the code implementation. We simply need add, or check the existance of, reflexive tuples.
 
 \begin{code}
 closureRefl :: Ord a => OrderedSet a -> OrderedSet a
@@ -98,7 +99,7 @@ The transitive closure requires a little more working:
 \newline
 Firstly, we define the helper function \texttt{transPair}, to check if, given any $x,z$, there is a $y$ such that $x R y \wedge y R z$.
 \newline
-This allows us to know which ``one-step" transitive chains are currently missing. So, we add to the relation any pair which satisfies \texttt{transPair}, so that we have ``one-step" transitivity.
+This allows us to know which "one-step" transitive chains are currently missing. So, we add to the relation any pair which satisfies \texttt{transPair}, so that we have "one-step" transitivity.
 
 \begin{code}
 transPair ::  Ord a => a -> a -> OrderedSet a -> Bool
@@ -159,7 +160,8 @@ A worry, is that, closing under transitivity and then anti-symmtery could signif
 
 %\subsubsection{Quotienting}
 % to make Edo happy :)
-Given any $(P,R)$ of type \texttt{OrderedSet a}, we can quotient the set $P$ on the symmetric points, i.e. merge the \emph{vertex} that see each other into a cluster. That is, for any $x \in P$ we define the equivalence class $[x]_s$ as the set $\{y \in P| y \neq x \wedge x R y \wedge y R x \}$. \footnote{Note that we need a choice for a rappresentative to leave in the set. We can leverage having an \texttt{Ord} instance, and use \texttt{y < x} for this.}
+Given any $(P,R)$ of type \texttt{OrderedSet a}, we can quotient the set $P$ on the symmetric points, i.e. merge the \emph{vertex} that see each other into a cluster. That is, for any $x \in P$ we define the equivalence class $[x]_s$ as the set $\{y \in P| y \neq x \wedge x R y \wedge y R x \}$. We call the resulting set $P/s$.
+%\footnote{Note that we need a choice for a rappresentative to leave in the set. We can leverage having an \texttt{Ord} instance, and use \texttt{y < x} for this.}
 
 \begin{code}
 quotientAntiSym :: Ord a => Set.Set a -> Relation a -> Set.Set a
@@ -172,7 +174,8 @@ forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
 The advantage of this approach, is that it preserve logical properties\footnote{For the knowing reader: we are guaranteed a p-morphism between the structures.}. 
 % Since our topic at hand involves excatly defining logic over mathematical structures, this is certainly a nice feature.
 
-A downside, this changes the carrier set: from $P$ we go to $P/s$, the quotient of $P$ under the equivalence relation based on symmetry. This is a bit agains the "spirit" of a "closure".\footnote{Note, due to Haskell's implementation, argue "it is the same set anyways, it's is just a matter of names referring to the same object". In set theory, syntactically specifying $\{a,b \}$ may well be the same set as $\{a\}$, if $b$ happens to semantically be the same name for $a$ (i.e. if $a=b$). But in Haskell's \texttt{Data.Set}, named elements are the objects. This is evident from the fact that \texttt{Set.size} returns a value without us needing to specify what equalities hold between the objects.}
+A downside, this changes the carrier set: from $P$ we go to $P/s$. This is a bit agains the "spirit" of a "closure".
+%\footnote{Note, due to Haskell's implementation, argue "it is the same set anyways, it's is just a matter of names referring to the same object". In set theory, syntactically specifying $\{a,b \}$ may well be the same set as $\{a\}$, if $b$ happens to semantically be the same name for $a$ (i.e. if $a=b$). But in Haskell's \texttt{Data.Set}, named elements are the objects. This is evident from the fact that \texttt{Set.size} returns a value without us needing to specify what equalities hold between the objects.}
 
 Furthermore, closing under transitivity and then anti-symmterically may shrink significatly the size of the \emph{carrier set}, in particular every cycle will collapse to a single point.
 
@@ -209,7 +212,7 @@ Let that $R \subseteq P \times P$ be any transitive  relation on some fixed but 
 Now since our implementation of \texttt{forceAntiSym} corresponds to our definition of $R^\dagger$, we can be sure that, given an ordered set \texttt{(OS s r)}, the result of \texttt{forceAntiSym  transClosure (OS s r)}, say \texttt{(OS s r')}, \texttt{r'} is transitive. 
 \end{comment}
 
-Lastly, we define the following function in order to check that the relation on an ordered set is antisymmetric.
+Once again, checking is much simpler than closing.
 
 \begin{code}
 checkAntiSym :: Ord a => OrderedSet a -> Bool
@@ -220,9 +223,7 @@ checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 
 \subsection{From ordered sets to posets}
 
-Finally, 
-%given all the passages we have gone through in this section, 
-we are able to define functions that given any object of type \texttt{OrderedSet a}, will transform it into a poset and check whether it is indeed a poset.
+Finally, we are able to define functions that given any object of type \texttt{OrderedSet a}, will transform it into a poset and a checker for whether it is indeed a poset.
 
 \begin{comment}
 For the first task we take two approaches: in case everything "is behaving well", we can take the less controversial reflexive transitive closures, and obtain a poset closure without anti-symmetry caveats. The code is self explanatory here
@@ -242,26 +243,22 @@ makePoSet  = closureRefl .  closureTrans
 
 %In most cases however, we will need to engage with anti-symmetric forcing. Thus 
 
-We have two poset forcing functions, using our two approaches \footnote{making sure to first take the transitive closure, and the the antisymmetric closure, which we proved preserves transitivity. We ommitted the proof for space concerns. Whereas note that the opposite wouldn't do; any (non-reflexive) cycle in the relation would break anti-symmetry after transitive closing.}.
+%We have two poset forcing functions, using our two approaches \footnote{making sure to first take the transitive closure, and the the antisymmetric closure, which we proved preserves transitivity. We ommitted the proof for space concerns. Whereas note that the opposite wouldn't do; any (non-reflexive) cycle in the relation would break anti-symmetry after transitive closing.}.
 
+\begin{comment}
 \begin{code}
 forcePoSet :: Ord a => OrderedSet a -> OrderedSet a
 forcePoSet  = closureRefl .  forceAntiSym .  closureTrans . forceRelation
-
--- forceRleation is reduntant here since it is inside forceAntiSymAlt
-forcePosetAlt :: Ord a => OrderedSet a -> OrderedSet a
-forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
 \end{code}
-
-
-In order to check if an object of type \texttt{OrderedSet a} is indeed a poset, we define the following function:
+\end{comment}
 
 \begin{code}
+forcePosetAlt :: Ord a => OrderedSet a -> OrderedSet a
+forcePosetAlt = closureRefl .  forceAntiSymAlt .  closureTrans
+
 checkPoset :: Ord a => OrderedSet a -> Bool
 checkPoset x = checkRefl x && checkTrans x && checkAntiSym x && checkRelationWellDef x
 \end{code}
-
-
 
 Lastly, to use QuickTest to test our Implementations, we need also an arbitrary instance for Posets. We do this by generating an arbitrary \texttt{OrderedSet a}, then it generates posets, but closing it under reflexivity and transitivity and forcing anti-symmetry using the above introcued functions:
 
@@ -278,27 +275,24 @@ instance (Arbitrary a, Ord a) => Arbitrary (OrderedSet a) where
 
 
 
-\subsection{Printing machinery}\label{sec:posetprinting}
+\subsection{Printing machinery}
+\label{sec:posetprinting}
 
+This section\footnote{A similar section will be present at the end of each section introducing a new mathematical structure. The implementation are always be similar.} is dedicated to the visualization of the structures we have discussed, namely posets, via what are called in mathematics \textit{Hasse diagrams}.
 
- 
+Our primary concern is for the picture to be clear and readable. Thus we omit all transitive and reflexive edges. 
 
-This section is dedicated to the visualization of the structures we have discussed, namely posets, via what are called in mathematics \textit{Hasse diagrams} (a similar section will be present at the end of each section introducing a new mathematical structure the implementation will be similar in every case, but the function are displaced according to the module-dependencies).
+We stuck with the mathematical convention of having unlabeled nodes, since we are in any case interested in classes of posets "up to isomorphism".\footnote{If the user wishes to label their node, this can easily be done modifying the GraphAttributes (those wrapped in square brackets) in "toGraphOrd".}
 
 In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. If the reader wishes to visualize the graph, they should both install \textit{graphViz} and \textit{Xlib} on their machines.
-If running Ubuntu, one may simply run \textit{sudo apt-get install libx11-dev graphviz} on bash.
+If running Ubuntu, one may simply run \texttt{sudo apt-get install libx11-dev graphviz} on bash.
 
+It should be noted that all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. This causes some difficulties when it comes to representation; but we ommit details for space concerns. Suffice it to say, we settled for the more economical solution of always taking an isomorphic copy on INT.
 
-
-It should be noted that all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. This causes some difficulties when it comes to representation; but we ommit details for space concerns. 
 %  since Data.Set
 % does not have an original instance of PrintDot (Set a) and, since the Set module is imported, all homebrew instances we defined (although working) were "orphan" instances, and thus triggered a Wall warning. \newline 
 % In our specific case, the orphan instance would not be a problem per se, but to avoid the warning we decided to always run the isomorphism defned above (simplifyDL1, simplifyPS1) to obtain an isomorphic copy of our poset defined on the type INT. Other solution would have required rewriting every instance of "Set" as a Newtype, or rewriting the Set module in one of our own module and add the instance there. Both solutions seemed a bit excessive and thus
-Suffice it to say, we settled for the more economical solution of always taking an isomorphic copy on INT.
 
-As far as the style of the diagrams go, we stuck with the mathematical convention of having unlabeled nodes, since we are in any case interested in classes of posets "up to isomorphism". If the user wishes to label their node, this can easily be done modifying the GraphAttributes (those wrapped in square brackets) in "toGraphOrd". \newline 
-
-Our primary concern is for the picture to be clear and readable. Thus we omit all transitive and reflexive edges. 
 % Since posets are part of the underlying structure of both lattices and priestley spaces,and its type is used to construct the types of the latter two, we define these helper function in this section.
 
 \begin{code}
@@ -342,7 +336,7 @@ toGraphOrd r = digraph' $ do
 \end{code}
 
 
-The following function actually outputs the picture of the ordered set. 
+The following function then actually outputs the picture of the ordered set. 
 
 \begin{code}
 showOrdSet ::(Ord a, Data.GraphViz.Printing.PrintDot a) => OrderedSet a -> IO ()

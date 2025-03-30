@@ -1,27 +1,26 @@
 \section{Priestley Spaces}
 \label{sec:Priestley}
-
 \begin{comment}
 We introduce usual imports for printings.
 
 \begin{code}
 module Priestley where
-
-import Data.GraphViz.Commands
-import Data.GraphViz.Printing
-\end{code}
-\end{comment}
-
-And the main data types of this section.
-
-\begin{code}
 import qualified Data.Set as Set 
-import Data.Bifunctor (bimap)
 import Test.QuickCheck
 import Poset
 import Basics
+import Data.GraphViz.Commands
+import Data.GraphViz.Printing
 \end{code}
 
+And the main data types of this section.
+\end{comment}
+
+\begin{code}
+import Data.Bifunctor (bimap)
+\end{code}
+
+\subsection{Definitions}
 A Topological Space $(X,\tau)$ is a set $X$ endowed with a collection of its subsets $\tau \subseteq \wp(X)$. Such that:
 \begin{itemize}
     \item $\emptyset,X \in \tau$
@@ -97,7 +96,7 @@ intersectionClosure z = do
                 else intersectionStep cycle1 
 \end{code}
 
-\subsection{Topology basics}
+\subsection{Checking Topologies}
 We now introduce some machinery to work on topological spaces, and in particular, to ensure our spaces respect the Priestley separation axiom.
 
 The following function check whether a Topological space given as input respects the requirements spelled above.\newline 
@@ -217,14 +216,12 @@ premapTop mapping = Set.map (Set.map (getPreimage mapping))
 
 Lastly, it remains the check that the map is an order isomorphism. For this we can check that applying the map component wise to every pair of the relation in the domain should yield the relation of the codomain and vice versa. 
 
-\begin{code}
-checkOrderIso :: (Ord a, Ord b) => Relation a -> Relation b -> Map a b -> Bool
-checkOrderIso ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
-\end{code}
-
 Similar to above, we have to nest \texttt{Set.map} with \texttt{Data.Bifunctor.bimap} to apply the map to both components of all pairs in the relation.
 
 \begin{code}
+checkOrderIso :: (Ord a, Ord b) => Relation a -> Relation b -> Map a b -> Bool
+checkOrderIso ra rb mapping = mapRel mapping ra == rb && premapRel mapping rb == ra
+
 mapRel :: (Ord a, Ord b) => Map a b -> Relation a -> Relation b
 mapRel mapping = Set.map (Data.Bifunctor.bimap (getImage mapping) (getImage mapping))
 
