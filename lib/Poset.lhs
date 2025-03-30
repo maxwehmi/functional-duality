@@ -1,9 +1,7 @@
 \section{Partially ordered sets}
 \label{posets}
 
-This first ugly block of import is unfortunatelly necessary for some pretty printing. We'll see more about it in the dedicated \hyperref[sec:posetprinting]{subsection}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
-
-
+This first import some necessary packets for pretty printing. We'll see more about it in the dedicated \hyperref[sec:posetprinting]{subsection}. We likewise import \texttt{quickCheck} as needed to run some tesets, see \hyperref[sec:simpletests]{Section 8} for that.
 
 \begin{code}
 module Poset where
@@ -36,28 +34,29 @@ type Relation a = Set.Set (a,a)
 
 data OrderedSet a = OS {set :: Set.Set a, 
                         rel :: Relation a} 
+    
+\end{code}
+\begin{comment}
+\begin{code}
     deriving (Eq, Ord)
-
 instance Show a => Show (OrderedSet a) where
     show (OS s r) = "{Set: " ++ show (Set.toList s) ++ ",\n "
                         ++ "Rel: " ++ show (Set.toList r) ++ "}" 
 \end{code}
+\end{comment}
 
-An object of type \texttt {OrderedSet a}, is not necessarily a partially ordered set, therefore we need some helper functions in order to transform it into one.
-
+An object of this type is not necessarily a partially ordered set, therefore we need some helper functions in order to transform it into one.
 
 %5BB3-C9E6 %what is this?
 
-\subsection{Well-definedness}
-
-
-Firstly we need to check given an object of type \texttt{OrderedSet a}, the relation is indeed a subset of the cartesian product of the carrier set, as the implementation of \texttt{OrderedSet} does accept cases which are not of this sort.
-
+\paragraph{Well-definedness}
+Firstly we need to check given an object of type \texttt{OrderedSet a}, the relation is indeed a subset of the cartesian product of the carrier set.
+%as the implementation of \texttt{OrderedSet} does accept cases which are not of this sort.
 % We shall call a relation $R$ "well-defined with respect to a set $P$" iff $R \subseteq P \times P$. We shall just say "well-defined" when the carrier set is clear form the context.
-
+\newline
 In order to check well-definedness of a relation in this sense, we shall fisrt define the function \texttt{tuplesUnfold}, which ``unfolds" the in a relation. For this, we get the list of the first elements in all the tuples aswell as the seconds \texttt{snd}. Then we join them and have our set.
 
-Using this, we can easily check for well-definedness. 
+Then, we can easily check for well-definedness. 
 
 \begin{code}
 tuplesUnfold :: Ord a => Relation a -> Set.Set a
@@ -67,7 +66,8 @@ checkRelationWellDef :: Ord a => OrderedSet a -> Bool
 checkRelationWellDef (OS s r) = tuplesUnfold r `Set.isSubsetOf` s
 \end{code}
 
-Moreover if the relation is not well-defined relation, we might want to force it to be. The following function takes care of this by removing from a relation, set of elements in it, but not in the the carrier set.
+Moreover if the relation is not well-defined relation, we might want to force it to be. 
+%The following function takes care of this by removing from a relation, set of elements in it, but not in the the carrier set.
 
 \begin{code}
 forceRelation :: Ord a => OrderedSet a -> OrderedSet a
@@ -76,19 +76,14 @@ forceRelation (OS s r)
  | otherwise = OS s ( r `Set.difference` Set.fromList (
     [(x,y) | (x,y) <- Set.toList r, x `Set.member` (tuplesUnfold r `Set.difference` s)] 
     ++ 
-    [(x,y) | (x,y) <- Set.toList r, y  `Set.member` (tuplesUnfold r `Set.difference` s)]
-                                                       )
-                    )
+    [(x,y) | (x,y) <- Set.toList r, y  `Set.member` (tuplesUnfold r `Set.difference` s)]))
 \end{code}
 
 
 \subsection{Checks and Closures}
-
-
-\subsubsection{Reflexivity} 
+\paragraph{Reflexivity} 
 
 Both closures and checks are straightforwards, and well readable from the code implementation. We simply need add, or check the existance of, reflexive tuples.
-
 
 \begin{code}
 closureRefl :: Ord a => OrderedSet a -> OrderedSet a
@@ -98,13 +93,11 @@ checkRefl :: Ord a =>  OrderedSet a -> Bool
 checkRefl (OS s r) = all (\x ->  (x, x) `Set.member` r) s
 \end{code}
 
-
-
-\subsubsection{Transitivity}
-The transitive closure requires a little more working: let $(P,R)$ be an object of type \texttt{OrderedSet a }. 
-
+\paragraph{Transitivity}
+The transitive closure requires a little more working:
+\newline
 Firstly, we define the helper function \texttt{transPair}, to check if, given any $x,z$, there is a $y$ such that $x R y \wedge y R z$.
-
+\newline
 This allows us to know which ``one-step" transitive chains are currently missing. So, we add to the relation any pair which satisfies \texttt{transPair}, so that we have ``one-step" transitivity.
 
 \begin{code}
@@ -115,8 +108,9 @@ transStep :: Ord a => OrderedSet a -> OrderedSet a
 transStep (OS s r) = OS s (r `Set.union` Set.fromList [(x,z) | x <- Set.toList s, z <- Set.toList s, transPair x z (OS s r)])
 \end{code}
 
-Of course this won't suffice. Now that we have enlarged our relation, new pairs which satisfy \texttt{transPair} might arise. Therefore in order to close for any transitive chain, we need to recursively apply the \texttt{transStep} function to our object, until it reaces a fixed point, i.e. until \texttt{transStep os == os}.
-
+Of course this won't suffice. 
+%Now that we have enlarged our relation, new pairs which satisfy \texttt{transPair} might arise. Therefore 
+In order to close for any transitive chain, we need to recursively apply the \texttt{transStep} function to our object, until it reaces a fixed point, i.e. until \texttt{transStep os == os}.
 
 \begin{code}
 closureTrans :: Ord a => OrderedSet a -> OrderedSet a
@@ -128,21 +122,21 @@ closureTrans  currentSet =
 \end{code}
 
 
-Checking is again fairly straightforward. For any triple $(x,y,z)$, wherein $xRy$, $y'Rz$ and $y=y'$ (this is an implementation quirk, of course we're just checking $xRyRz$), we make sure that that also $xRz$.
+Checking is again fairly straightforward. 
+%For any triple $(x,y,z)$, wherein $xRy$, $y'Rz$ and $y=y'$ (this is an implementation quirk, of course we're just checking $xRyRz$), we make sure that that also $xRz$.
 
 \begin{code}
 checkTrans :: Ord a => OrderedSet a -> Bool
 checkTrans (OS _ r) = all (\(x, _, z) -> Set.member (x, z) r) [(x, y, z) | (x, y) <- Set.toList r, (y', z) <- Set.toList r, y == y']
 \end{code}
 
-\subsubsection{Forcing Antisymmetry}
+\paragraph{Forcing Antisymmetry}
 
-Here begin some caveats. Note that it is not possible to just "close" a relation under antisymmetry. Firstly, we need to remove, rather than add. Furthermore, note that there is no unique way to obtain a "reduction" as we'd desire. Dually to a closure, we'd want a reduction of $R$ w.r.t a property $Q$ to be the greatest $R' \subseteq R$ for which $R'$ satisfies $Q$. But there is not such set! For a given symmetric pair $(x,y),(y,x) \in R$, the smallest change is removing one. But there's two ways to do so. So an anti-symmetric reduction is not unique.
+Here begin some caveats. Note that it is not possible to just "close" a relation under antisymmetry. Firstly, we need to remove, rather than add. Furthermore, note that there is no unique way to obtain a "reduction" as we'd desire. Analogously to a closure, we'd want a reduction of $R$ w.r.t a property $Q$ to be the greatest $R' \subseteq R$ for which $R'$ satisfies $Q$. But there is not such set for anti-symmetry! For a given symmetric pair $(x,y),(y,x) \in R$, the smallest change is removing either one. 
+%But there's two ways to do so. 
+So an anti-symmetric reduction is not unique.
 
 Two ways, among others, stand out as elegant in "forcing" anti-symmetry. The first consists in eliminating all symmetric pairs from the relation $R$, the second is to quotient of $P$ based on the clusters of symmetric pairs of $R$. We implement both as each has their advatages and disadvantages. But for space concerns, only look at the latter. 
-
-Lastly, we shall again also define some functions that checks whether the relation is antisymmetric.
-
 
 \begin{comment}
 \subsubsection{Removing Edges}
@@ -176,16 +170,16 @@ forceAntiSymAlt :: Ord a => OrderedSet a -> OrderedSet a
 forceAntiSymAlt (OS s r) = forceRelation $  OS (quotientAntiSym s r) r
 \end{code}
 
-The advantage of this approach, is that it preserve logical properties\footnote{For the knowing reader: we are guaranteed a p-morphism between the structures.}. Since our topic at hand involves excatly defining logic over mathematical structures, this is certainly a nice feature.
+The advantage of this approach, is that it preserve logical properties\footnote{For the knowing reader: we are guaranteed a p-morphism between the structures.}. 
+% Since our topic at hand involves excatly defining logic over mathematical structures, this is certainly a nice feature.
 
-On the other hand, this changes the carrier set: from $P$ we go to $P/s$, the quotient of $P$ under the equivalence relation based on symmetry \footnote{Note, due to Haskell's implementation, we cannot deem this as "the same set anyways", arguing it is just a matter of names referring to the same object. While in set theory, the set, $\{a,b \}$ as syntactically specified, may well be the same set as $\{a\}$, simply by virtue of $b$ semantically reffering to the same name as $a$ (i.e. $a=b$), in Haskell's \texttt{Data.Set}, named elements are the objects. This is evident from the fact that \texttt{Set.size} returns a value without us needing to specify what equalities hold between the objects.}
-
+On the other hand, this changes the carrier set: from $P$ we go to $P/s$, the quotient of $P$ under the equivalence relation based on symmetry \footnote{Note, due to Haskell's implementation, we cannot deem this as "the same set anyways", arguing it is just a matter of names referring to the same object. While in set theory, the set, $\{a,b \}$ as syntactically specified, may well be the same set as $\{a\}$, simply by virtue of $b$ semantically reffering to the same name as $a$ (i.e. $a=b$), in Haskell's \texttt{Data.Set}, named elements are the objects. This is evident from the fact that \texttt{Set.size} returns a value without us needing to specify what equalities hold between the objects.}. This is a bit agains the "spirit" of a "closure".
 
 Furthermore, closing under transitivity and then anti-symmterically may shrink significatly the size of the \emph{carrier set}, in particular every cycle will collapse to a single point.
 
 
 \begin{comment}
-\subsubsection{Preservation of properties}
+\paragraph{Preservation of properties}
 
 Since we'll want transtive, reflexive closures together with the anti-symmetric forcing, we need to make sure that our two implementation does not make us loose these properties in a relation. This is fairly obvius for the second implementation. But we want do need a small argument for the first implementation:
 
@@ -227,8 +221,11 @@ checkAntiSym  (OS _ r) = not (any (\(x,y) -> x /= y && (y, x) `Set.member` r) r)
 
 \subsection{From ordered sets to posets}
 
-Finally, given all the passages we have gone through in this section, we are able to define functions that given any object of type \texttt{OrderedSet a}, will transform it into a poset and check whether it is indeed a poset.
+Finally, 
+%given all the passages we have gone through in this section, 
+we are able to define functions that given any object of type \texttt{OrderedSet a}, will transform it into a poset and check whether it is indeed a poset.
 
+\begin{comment}
 For the first task we take two approaches: in case everything "is behaving well", we can take the less controversial reflexive transitive closures, and obtain a poset closure without anti-symmetry caveats. The code is self explanatory here
 
 \begin{code}
@@ -238,15 +235,17 @@ closurePoSet os
  | not (checkAntiSym os)  = error "relation isn't anti-symmetric"
  | not (checkAntiSym $ closureTrans os) = error "relation looses anti-symmetry when transitively closed"
  | otherwise = closureTrans $ closureRefl os
-\end{code}
 
-In most cases however, we will need to engage with anti-symmetric forcing. Thus we have two poset forcing functions, using our two approaches \footnote{making sure to first take the transitive closure, and the the antisymmetric closure. We proved this preserve transitivity, whereas note that the opposite wouldn't do: considering for example $1 < 2 < 3 < 1$, this releation is already anti-symmteric, so our forcing function would leave it as is. But taking it's transitive closure clearly leaves us with symmetric couples. In general any cycle will result in such a problem.}
-
-
-\begin{code}
 makePoSet :: Ord a => OrderedSet a -> OrderedSet a
 makePoSet  = closureRefl .  closureTrans 
+\end{code}
+\end{comment}
 
+%In most cases however, we will need to engage with anti-symmetric forcing. Thus 
+
+We have two poset forcing functions, using our two approaches \footnote{making sure to first take the transitive closure, and the the antisymmetric closure, which we proved preserves transitivity. We ommitted the proof for space concerns. Whereas note that the opposite wouldn't do; any (non-reflexive) cycle in the relation would break anti-symmetry after transitive closing.}.
+
+\begin{code}
 forcePoSet :: Ord a => OrderedSet a -> OrderedSet a
 forcePoSet  = closureRefl .  forceAntiSym .  closureTrans . forceRelation
 

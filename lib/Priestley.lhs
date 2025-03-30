@@ -1,4 +1,6 @@
 \section{Priestley Spaces}
+
+\begin{comment}
 We introduce usual imports for printings.
 
 \begin{code}
@@ -7,6 +9,7 @@ module Priestley where
 import Data.GraphViz.Commands
 import Data.GraphViz.Printing
 \end{code}
+\end{comment}
 
 And the main data types of this section.
 
@@ -267,16 +270,11 @@ getMissingUpsets s r = Set.map (\ x -> upClosure (Set.singleton x) r) firsts `Se
 \subsection{Printing machinery}
 
 
-Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space.
+Analogously to its Poset and Lattice counterparts, this function actually prints thePriestely Space. 
 
 \begin{code}
-
 showPriestley ::(Ord a, Data.GraphViz.Printing.PrintDot a) => PriestleySpace a -> IO ()
-showPriestley p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans $ getOrderedSet p) Xlib 
-
-
-
-
+showPriestley p = runGraphvizCanvas' (toGraphOrd $ fromReflTrans $ getOrderedSet p) Xlib
 \end{code}
 
 

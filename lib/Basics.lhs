@@ -10,7 +10,7 @@ module Basics where
 import qualified Data.Set as Set 
 \end{code}
 
-\subsection{Mappings}
+%\subsection{Mappings}
 
 We will use maps (and more specifically isomorphisms) between spaces a lot. Like usual in mathematics, we implement them as a set of pairs.
 
