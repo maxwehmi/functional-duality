@@ -4,9 +4,6 @@
 
 \begin{code}
 module ParsingStuff where 
-import qualified Data.Set as Set
-import Text.Parsec(spaces, string, between, eof, many1, sepBy, parse, try, alphaNum )
-import Poset
 import Text.Parsec( letter, spaces, string, between, eof, many1, sepBy, parse, try )
 import Text.Parsec.String (Parser)
 import Text.Parsec.Char
