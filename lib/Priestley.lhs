@@ -160,7 +160,7 @@ When, at later stages, we will construct Priestley spaces from distributive latt
 
 \begin{comment}Analogously to what we said in the distributive Lattice section, to prevent a blow-up in size (especially, when dualizing twice), we introduce two functions, which creates a new Priestley space out of a given one. This new one is isomorphic to the original one, but its elements are of type \verb:Int:. This can make computation faster.
 
-The use of the functions is analogous to their distributive lattice counterparts.
+The use of the functions is analogous to their distributive lattice counterparts. Last, for the purpose of testing, we write a function checking that the original and the reduced space are isomorphic.
 
 \begin{code}
 simplifyPS :: Ord a => PriestleySpace a -> (PriestleySpace Int, Map a Int)
@@ -177,6 +177,9 @@ simplifyPS1 (PS s t r) = PS s' t' r' where
     mapping = Set.fromList [(Set.elemAt n s, n) | n <- Set.toList s']
     t' = mapTop mapping t 
     r' = mapRel mapping r
+
+simplificationPScheck :: Ord a => PriestleySpace a -> Bool
+simplificationPScheck x = uncurry (checkIso x) (simplifyPS x)
 \end{code}
 \end{comment}
 
