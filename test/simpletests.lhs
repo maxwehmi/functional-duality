@@ -20,7 +20,7 @@ import Representation
 \end{comment}
 
 In our tests, we check if the arbitrary instances are generated correctly, i.e. that they have the properties we want them to have. Then we use the fast representation check to confirm that representation holds. We specified the type in all of our datastructures to be \verb:Int:, to resolve hlint errors. We only check these properties, because the tests take very long even for very small instances. Further, our main goal was to confirm that representation holds.
-Last, we also check that whenever we simplify either a Space or a Lattice, we actually get an isomorphic copy of it of type \verb{INT}. To be as general as possible, we have set the original type to be \verb{STRING} rahter than \verb{INT} in this case.
+Last, we also check that whenever we simplify either a Space or a Lattice, we actually get an isomorphic copy of it of type \verb:INT:. To be as general as possible, we have set the original type to be \verb:STRING: rahter than \verb:INT: in this case.
 \begin{code}
 main :: IO ()
 main = hspec $ do
