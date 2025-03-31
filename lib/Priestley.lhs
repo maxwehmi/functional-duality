@@ -18,6 +18,7 @@ And the main data types of this section.
 
 \begin{code}
 import Data.Bifunctor (bimap)
+import Control.Lens.Internal.Deque (fromList)
 \end{code}
 
 \subsection{Definitions}
@@ -99,6 +100,8 @@ intersectionClosure z = do
                 if z == cycle1 
                 then z
                 else intersectionStep cycle1 
+
+
 \end{code}
 
 \subsection{Checking Topologies}

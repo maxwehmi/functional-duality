@@ -44,7 +44,7 @@ main = do
     \(2) Check Priestley space \n\
     \(3) Generate arbitrary distributive lattice \n\
     \(4) Generate arbitrary Priestley Space \n\
-    \(5) Translate from algebra to topology. \n\
+    \(5) Translate from algebra to topology \n\
     \(6) Translate from topology to algebra \n"
 \end{code}
 
