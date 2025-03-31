@@ -20,24 +20,14 @@ import Text.Parsec
 \end{code}
 \end{comment}
 
-In order to make the executable a (somewhat) practical tool, we wrote two simple parsers to allow our \texttt{Main.exe} to take in direct input for the user. \newline 
-The Intended syntax is really simple, so we opted for writing the whole thing using \textit{Parsec} rather then generating it with Happy and Alex. \newline 
-All the parsers here function similarily, as they look for specific symbols signaling the beginning and the end of the intended input and for strings/pairs of strings/lists of strings separated by a comma. Further, every parser is 
-composed of different subordinate parsers which function in a similar way, but look only for specific elements within the input (e.g. for pairs rather than lists).
+In order to make the executable a (somewhat) practical tool, we a simple parser to allow our \texttt{Main.exe} to take in direct input for the user. \newline 
+The intended syntax is really simple, so we opted for writing the whole thing using \textit{Parsec} rather then generating it with Happy and Alex. \newline 
+The parser  looks for specific symbols signaling the beginning and the end of the intended input and for strings/pairs of strings/lists of strings separated by a comma.Further, every parser is composed of different subordinate parsers which function in a similar way, but look only for specific elements within the input (e.g. for pairs rather than lists).
 
-For lattices, the intended syntax is: \texttt{Set: <elements of the set, separated by a comma> \,\,
+The intended syntax is: \texttt{Set: <elements of the set, separated by a comma> \,\,
 Order: <ordered pairs, separated by a comma>}
 
 For example: \texttt{Set: x, y, z, k ... Order: (x,y), (k,z), ...}  is a valid input instance.  
-
-For Priestley spaces, the intended syntax is: 
-\texttt{Space: <elements of the set, separated by a comma> \,\, 
-Topology: <lists of elements, separated by a comma>\,\,
-Order:<ordered pairs, separated by a comma>}
-
-For example: \texttt{
-x, y, z... Topology: [a, b, ...],  [d, b. ...],...
-Order: (a,b), (c,d), ...} is a valid input instance.
 
 The input should be given in one line, if, for logging or other purposes, multiple lines are preferred, adding "\verb:\n:" between the various items will record a line break in the input. 
 
@@ -76,6 +66,22 @@ pair = between (symbol "(") (symbol ")") $ do
   b <- identifier
   return (a, b)
 
+\end{code}
+
+
+\begin{comment}
+
+The following piece of code meant to complement the one actually used in the \verb:Main: executable file. We leave it here to serve for further expantions.
+
+\begin{code}
+
+
+parseOrder :: Parser [(String, String)]
+parseOrder = do
+  void $ string "Space Order:" <* spaces
+  pair `sepBy` symbol ","
+
+
 parsePSSpace :: Parser (PriestleySpace String)
 parsePSSpace = do
   base <- parseBase
@@ -86,16 +92,11 @@ parsePSSpace = do
   eof
   return $ PS (Set.fromList base) (Set.fromList topology) (Set.fromList order)
 
+
 parseBase :: Parser [String]
 parseBase = do
   void $ string "Space:" <* spaces
   identifier `sepBy` symbol ","
-
-parseOrder :: Parser [(String, String)]
-parseOrder = do
-  void $ string "Order:" <* spaces
-  pair `sepBy` symbol ","
-
 parseTopology :: Parser [Set.Set String]
 parseTopology = do
   void $ string "Topology:" <* spaces
@@ -108,6 +109,7 @@ open = do
   return $ Set.fromList elements
 \end{code}
 
+\end{comment}
 \begin{comment}
 Last, we have some rudimentary test cases, the last of which mimics parts of the intended behavior of the executable.
 

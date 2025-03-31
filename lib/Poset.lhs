@@ -280,7 +280,10 @@ We stuck with the mathematical convention of having unlabeled nodes, since we ar
 In order to print all these structures, we import the \texttt{graphViz} library, with all its dependencies. If the reader wishes to visualize the graph, they should both install \textit{graphViz} and \textit{Xlib} on their machines.
 If running Ubuntu, one may simply run \texttt{sudo apt-get install libx11-dev graphviz} on bash.
 
-It should be noted that all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. This causes some difficulties when it comes to representation; but we omit details for space concerns. Suffice it to say, we settled for the more economical solution of always taking an isomorphic copy on \texttt{Int}.
+It should be noted that all the types we are working with will have to be an instance of the class \texttt{PrintDot} which comes with \texttt{graphViz}. This causes some difficulties when it comes to printing sets; therefore in the \verb:Main: executable file, we settled for taking a copy of the lattice/space via simplifyDL1 and simplifyPS1 (to be respectively found in \verb:DL.lhs: and \verb:Priestley.lhs:) before printing. These functions create an isomorphic copy of type \verb:Int: of the imput structure (the isomorphisms is checked in \verb:simpletests.lhs:).   
+
+Note that if the user wishes to call the \verb:showLattice: and \verb:showPriestley: functions (to be found resp. in \verb:DL.lhs: and \verb:Priestley.lhs: ) outside the executable, then they should manually call \verb:simplifyDL1: (resp. \verb:simplifyPS1:), if they need to print sets.
+
 
 %  since Data.Set
 % does not have an original instance of PrintDot (Set a) and, since the Set module is imported, all homebrew instances we defined (although working) were "orphan" instances, and thus triggered a Wall warning. \newline 
